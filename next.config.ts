@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Optimize Three.js bundle size
+  transpilePackages: ["three"],
+
+  // Image optimization
+  images: {
+    formats: ["image/webp", "image/avif"],
+  },
 };
 
 export default nextConfig;

@@ -3,19 +3,14 @@
 import { useControls, button } from "leva";
 import {
   useMasses,
-  useWarpStrength,
   useAddMass,
   useUpdateMassValue,
   useRemoveMass,
-  useSetWarpStrength,
   useReset,
 } from "@/store/store";
 import { useMemo, useCallback } from "react";
 import {
   DRAG_BOUNDS_SAFE,
-  WARP_STRENGTH_MIN,
-  WARP_STRENGTH_MAX,
-  WARP_STRENGTH_STEP,
   MASS_MIN_VALUE,
   MASS_MAX_VALUE,
   MASS_STEP,
@@ -23,11 +18,9 @@ import {
 
 export function Controls() {
   const masses = useMasses();
-  const warpStrength = useWarpStrength();
   const addMass = useAddMass();
   const updateMassValue = useUpdateMassValue();
   const removeMass = useRemoveMass();
-  const setWarpStrength = useSetWarpStrength();
   const reset = useReset();
 
   // Memoized handlers to prevent unnecessary re-renders
@@ -38,28 +31,14 @@ export function Controls() {
     addMass([x, y]);
   }, [addMass]);
 
-  const handleWarpStrengthChange = useCallback(
-    (value: number) => {
-      setWarpStrength(value);
-    },
-    [setWarpStrength],
-  );
-
   // Global controls
   useControls(
     "Global",
     {
       "Add Mass": button(handleAddMass),
-      "Warp Strength": {
-        value: warpStrength,
-        min: WARP_STRENGTH_MIN,
-        max: WARP_STRENGTH_MAX,
-        step: WARP_STRENGTH_STEP,
-        onChange: handleWarpStrengthChange,
-      },
       "Reset Scene": button(reset),
     },
-    [warpStrength],
+    [],
   );
 
   // Simplified mass controls - only recreate when masses array changes structure
@@ -67,7 +46,7 @@ export function Controls() {
     return masses.reduce(
       (controls, mass, index) => {
         const massKey = `Mass ${index + 1}`;
-        controls[`${massKey} Value`] = {
+        controls[`${massKey} (solar masses)`] = {
           value: mass.mass,
           min: MASS_MIN_VALUE,
           max: MASS_MAX_VALUE,

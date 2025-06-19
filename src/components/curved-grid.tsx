@@ -7,10 +7,10 @@ import { CurvedGridProps } from "@/types";
 import {
   GRID_SIZE,
   GRID_RESOLUTION,
-  WARP_STRENGTH_DEFAULT,
   MAX_MASSES_DEFAULT,
-  WARP_EPSILON,
   GRID_RESOLUTION_BY_MASS_COUNT,
+  G,
+  C,
 } from "@/constants";
 
 // Generate optimized vertex shader based on mass count
@@ -18,7 +18,6 @@ const generateVertexShader = (maxMasses: number) => `
   uniform vec3 masses[${maxMasses}];
   uniform float massValues[${maxMasses}];
   uniform int massCount;
-  uniform float warpStrength;
   
   varying vec3 vPosition;
   varying float vHeight;
@@ -35,10 +34,13 @@ const generateVertexShader = (maxMasses: number) => `
       
       vec2 diff = pos - massPos;
       float r = length(diff);
-      float epsilon = ${WARP_EPSILON};
       
-      // Pseudo-Newtonian: h(r) ≈ k·m / (r² + ε)
-      totalWarp += (warpStrength * mass) / (r * r + epsilon);
+      // Avoid singularity at r=0 with small cutoff
+      r = max(r, 0.1);
+      
+      // True Schwarzschild formula: h = rs/r where rs = 2GM/c²
+      float schwarzschildRadius = 2.0 * ${G.toFixed(1)} * mass / (${C.toFixed(1)} * ${C.toFixed(1)});
+      totalWarp += schwarzschildRadius / r;
     }
     
     return -totalWarp;
@@ -85,7 +87,6 @@ export function CurvedGrid({
   masses = [],
   gridSize = GRID_SIZE,
   gridResolution = GRID_RESOLUTION,
-  warpStrength = WARP_STRENGTH_DEFAULT,
 }: CurvedGridProps) {
   const meshRef = useRef<Mesh>(null);
   // Use fixed max masses to prevent material recreation
@@ -108,10 +109,8 @@ export function CurvedGrid({
       },
       massValues: { value: new Array(maxMasses).fill(0) },
       massCount: { value: 0 },
-      warpStrength: { value: warpStrength },
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [maxMasses], // warpStrength is updated separately via useEffect for performance
+    [maxMasses],
   );
 
   const shaderMaterial = useMemo(() => {
@@ -122,11 +121,6 @@ export function CurvedGrid({
       wireframe: false,
     });
   }, [uniforms, maxMasses]);
-
-  // Update warp strength when it changes
-  useEffect(() => {
-    uniforms.warpStrength.value = warpStrength;
-  }, [warpStrength, uniforms]);
 
   // Create a change detection hash for better performance - enhanced for multiple masses
   const massesHash = useMemo(() => {

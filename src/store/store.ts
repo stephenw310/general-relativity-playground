@@ -1,14 +1,13 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { StoreState } from "@/types";
-import { MASS_DEFAULT_VALUE, WARP_STRENGTH_DEFAULT } from "@/constants";
+import { MASS_DEFAULT_VALUE } from "@/constants";
 
 const initialState = {
   masses: [
     { id: "1", position: [0, 0] as [number, number], mass: MASS_DEFAULT_VALUE },
   ],
   selectedMassId: null,
-  warpStrength: WARP_STRENGTH_DEFAULT,
   isDragging: false,
 };
 
@@ -56,8 +55,6 @@ export const useStore = create<StoreState>()(
 
     selectMass: (id) => set({ selectedMassId: id }),
 
-    setWarpStrength: (strength) => set({ warpStrength: strength }),
-
     setIsDragging: (dragging) => set({ isDragging: dragging }),
 
     reset: () => set(initialState),
@@ -70,7 +67,6 @@ export const useStore = create<StoreState>()(
 
 // Core state selectors
 export const useMasses = () => useStore((state) => state.masses);
-export const useWarpStrength = () => useStore((state) => state.warpStrength);
 export const useSelectedMassId = () =>
   useStore((state) => state.selectedMassId);
 export const useIsDragging = () => useStore((state) => state.isDragging);
@@ -83,7 +79,5 @@ export const useUpdateMassPosition = () =>
 export const useUpdateMassValue = () =>
   useStore((state) => state.updateMassValue);
 export const useSelectMass = () => useStore((state) => state.selectMass);
-export const useSetWarpStrength = () =>
-  useStore((state) => state.setWarpStrength);
 export const useSetIsDragging = () => useStore((state) => state.setIsDragging);
 export const useReset = () => useStore((state) => state.reset);

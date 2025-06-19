@@ -6,7 +6,7 @@ import { Leva } from "leva";
 import { CurvedGrid } from "@/components/curved-grid";
 import { MassHandles } from "@/components/mass-handles";
 import { Controls } from "@/components/controls";
-import { useMasses, useWarpStrength, useIsDragging } from "@/store/store";
+import { useMasses, useIsDragging } from "@/store/store";
 import {
   GRID_SIZE,
   GRID_RESOLUTION,
@@ -82,7 +82,6 @@ function BoundedOrbitControls({ isDragging }: { isDragging: boolean }) {
 
 export default function Home() {
   const masses = useMasses();
-  const warpStrength = useWarpStrength();
   const isDragging = useIsDragging();
 
   return (
@@ -95,7 +94,7 @@ export default function Home() {
         <h1 className="mb-2 text-2xl font-bold">Relativity Playground</h1>
         <div className="space-y-1 text-sm text-gray-300">
           <p>• Drag colored spheres to move them</p>
-          <p>• Change warp strength to see how it affects the grid</p>
+          <p>• Masses are measured in solar masses (0.5-10 M☉)</p>
           <p>• Click &ldquo;Add Mass&rdquo; button to add masses</p>
         </div>
 
@@ -121,7 +120,6 @@ export default function Home() {
 
         <CurvedGrid
           masses={masses}
-          warpStrength={warpStrength}
           gridSize={GRID_SIZE}
           gridResolution={GRID_RESOLUTION}
         />

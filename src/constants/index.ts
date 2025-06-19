@@ -3,11 +3,11 @@ export const GRID_SIZE = 20;
 export const GRID_RESOLUTION = 128;
 export const GRID_MAX_BOUNDS = 9.5;
 
-// Mass configuration
-export const MASS_DEFAULT_VALUE = 1.0;
-export const MASS_MIN_VALUE = 0.1;
-export const MASS_MAX_VALUE = 5.0;
-export const MASS_STEP = 0.1;
+// Mass configuration (in solar masses)
+export const MASS_DEFAULT_VALUE = 1.0; // 1 solar mass
+export const MASS_MIN_VALUE = 0.5; // 0.5 solar masses (minimum for realistic curvature)
+export const MASS_MAX_VALUE = 10.0; // 10 solar masses (stellar black hole)
+export const MASS_STEP = 0.5;
 export const MASS_SPHERE_RADIUS = 1;
 export const MASS_SPHERE_SEGMENTS = 16;
 export const MASS_Z_POSITION = 0;
@@ -16,12 +16,9 @@ export const MASS_Z_POSITION = 0;
 export const MASS_COLLISION_BUFFER = 0.3; // Buffer space between mass visual boundaries
 export const COLLISION_RESOLUTION_ITERATIONS = 3; // Max iterations for resolving complex collisions
 
-// Warp configuration
-export const WARP_STRENGTH_DEFAULT = 2.0;
-export const WARP_STRENGTH_MIN = 0.1;
-export const WARP_STRENGTH_MAX = 5.0;
-export const WARP_STRENGTH_STEP = 0.1;
-export const WARP_EPSILON = 0.9;
+// Physics constants (scaled for visualization)
+export const G = 1.0; // Gravitational constant (scaled for visual effect)
+export const C = 1.0; // Speed of light (scaled for visual effect)
 
 // Shader configuration
 export const MAX_MASSES_DEFAULT = 16;

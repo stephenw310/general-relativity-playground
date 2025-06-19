@@ -7,7 +7,6 @@ export interface Mass {
 export interface StoreState {
   masses: Mass[];
   selectedMassId: string | null;
-  warpStrength: number;
   isDragging: boolean;
 
   // Actions
@@ -17,7 +16,6 @@ export interface StoreState {
   updateMassValue: (id: string, mass: number) => void;
   selectMass: (id: string | null) => void;
 
-  setWarpStrength: (strength: number) => void;
   setIsDragging: (dragging: boolean) => void;
 
   reset: () => void;
@@ -31,7 +29,6 @@ export interface CurvedGridProps {
   masses: Mass[];
   gridSize?: number;
   gridResolution?: number;
-  warpStrength?: number;
 }
 
 export interface MassHandleProps {

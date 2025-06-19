@@ -153,7 +153,8 @@ export function CurvedGrid({
 
     masses.forEach((mass, index) => {
       if (index < maxMasses) {
-        massPositions[index].set(mass.position[0], mass.position[1], 0);
+        // Local plane Y axis maps to -world Z after the -90° X rotation, so flip sign
+        massPositions[index].set(mass.position[0], -mass.position[1], 0);
         massValues[index] = mass.mass;
       }
     });

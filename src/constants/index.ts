@@ -8,9 +8,9 @@ export const MASS_DEFAULT_VALUE = 1.0;
 export const MASS_MIN_VALUE = 0.1;
 export const MASS_MAX_VALUE = 5.0;
 export const MASS_STEP = 0.1;
-export const MASS_SPHERE_RADIUS = 0.3;
+export const MASS_SPHERE_RADIUS = 1;
 export const MASS_SPHERE_SEGMENTS = 16;
-export const MASS_Z_POSITION = 0.5;
+export const MASS_Z_POSITION = 0;
 
 // Warp configuration
 export const WARP_STRENGTH_DEFAULT = 2.0;
@@ -36,8 +36,12 @@ export const CAMERA_MAX_POLAR_ANGLE = Math.PI / 2.2;
 
 // UI scaling
 export const MASS_SCALE_DEFAULT = 1.0;
-export const MASS_SCALE_HOVERED = 1.1;
-export const MASS_SCALE_SELECTED = 1.2;
+export const MASS_SCALE_HOVERED = 1.0;
+export const MASS_SCALE_SELECTED = 1.0;
+
+// Mass-proportional scaling
+export const MASS_SCALE_MIN = 0.5; // Visual scale for minimum mass (0.1)
+export const MASS_SCALE_MAX = 2.0; // Visual scale for maximum mass (5.0)
 
 // Colors
 export const MASS_COLOR_DEFAULT = "#4ecdc4";

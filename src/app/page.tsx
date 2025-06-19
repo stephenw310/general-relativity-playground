@@ -30,9 +30,9 @@ export default function Home() {
       <div className="absolute top-4 left-4 z-10 text-white">
         <h1 className="mb-2 text-2xl font-bold">Relativity Playground</h1>
         <div className="space-y-1 text-sm text-gray-300">
-          <p>• Use &ldquo;Add Mass&rdquo; button to add masses</p>
           <p>• Drag colored spheres to move them</p>
-          <p>• Selected mass turns red</p>
+          <p>• Change warp strength to see how it affects the grid</p>
+          <p>• Click &ldquo;Add Mass&rdquo; button to add masses</p>
         </div>
 
         <div className="mt-4 space-y-1 text-xs text-gray-400">
@@ -40,7 +40,6 @@ export default function Home() {
           <p>• Left click + drag: Rotate camera</p>
           <p>• Right click + drag: Pan camera</p>
           <p>• Scroll wheel: Zoom in/out</p>
-          <p>• Mouse wheel click + drag: Pan camera</p>
         </div>
       </div>
 

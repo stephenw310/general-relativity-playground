@@ -18,6 +18,10 @@ import {
   MASS_SCALE_DEFAULT,
   MASS_SCALE_HOVERED,
   MASS_SCALE_SELECTED,
+  MASS_SCALE_MIN,
+  MASS_SCALE_MAX,
+  MASS_MIN_VALUE,
+  MASS_MAX_VALUE,
   MASS_COLOR_DEFAULT,
   MASS_COLOR_SELECTED,
   MASS_COLOR_HOVERED,
@@ -25,8 +29,17 @@ import {
 } from "@/constants";
 
 // Create reusable objects outside component to avoid memory allocation
-const dragPlane = new Plane(new Vector3(0, 0, 1), 0);
+const dragPlane = new Plane(new Vector3(0, 1, 0), 0);
 const intersection = new Vector3();
+
+// Calculate mass-proportional base scale
+function getMassProportionalScale(massValue: number): number {
+  // Normalize mass value from [MASS_MIN_VALUE, MASS_MAX_VALUE] to [0, 1]
+  const normalizedMass =
+    (massValue - MASS_MIN_VALUE) / (MASS_MAX_VALUE - MASS_MIN_VALUE);
+  // Map to scale range [MASS_SCALE_MIN, MASS_SCALE_MAX]
+  return MASS_SCALE_MIN + normalizedMass * (MASS_SCALE_MAX - MASS_SCALE_MIN);
+}
 
 function MassHandle({ mass }: MassHandleProps) {
   const meshRef = useRef<Mesh>(null);
@@ -53,6 +66,9 @@ function MassHandle({ mass }: MassHandleProps) {
       selectMass(mass.id);
       gl.domElement.style.cursor = "grabbing";
 
+      // Align drag plane with the sphere height (Y) to keep motion strictly in-plane
+      dragPlane.constant = -MASS_Z_POSITION;
+
       // Cache rect on drag start to avoid expensive recalculations
       cachedRect.current = gl.domElement.getBoundingClientRect();
       dragPosition.current = [...mass.position];
@@ -78,7 +94,7 @@ function MassHandle({ mass }: MassHandleProps) {
         // Define boundaries that match the grid size
         const newPosition: [number, number] = [
           Math.max(-DRAG_BOUNDS_MAX, Math.min(DRAG_BOUNDS_MAX, intersection.x)),
-          Math.max(-DRAG_BOUNDS_MAX, Math.min(DRAG_BOUNDS_MAX, intersection.y)),
+          Math.max(-DRAG_BOUNDS_MAX, Math.min(DRAG_BOUNDS_MAX, intersection.z)),
         ];
 
         // Update ref position immediately for smooth dragging
@@ -140,10 +156,14 @@ function MassHandle({ mass }: MassHandleProps) {
   // Memoized computed values to prevent unnecessary recalculations
   const isSelected = selectedMassId === mass.id;
   const scale = useMemo(() => {
-    if (isSelected) return MASS_SCALE_SELECTED;
-    if (isHovered) return MASS_SCALE_HOVERED;
-    return MASS_SCALE_DEFAULT;
-  }, [isSelected, isHovered]);
+    // Get base scale proportional to mass value
+    const massProportionalScale = getMassProportionalScale(mass.mass);
+
+    // Apply interactive scaling modifiers on top of mass-proportional scale
+    if (isSelected) return massProportionalScale * MASS_SCALE_SELECTED;
+    if (isHovered) return massProportionalScale * MASS_SCALE_HOVERED;
+    return massProportionalScale * MASS_SCALE_DEFAULT;
+  }, [isSelected, isHovered, mass.mass]);
 
   const color = useMemo(() => {
     if (isSelected) return MASS_COLOR_SELECTED;
@@ -151,9 +171,9 @@ function MassHandle({ mass }: MassHandleProps) {
     return MASS_COLOR_DEFAULT;
   }, [isSelected, isHovered]);
 
-  // Constrain mass position to stay above the plane
+  // Map 2-D logical position (x, z) to world-space XZ, keeping constant Y height
   const position = useMemo(
-    () => [mass.position[0], mass.position[1], MASS_Z_POSITION] as const,
+    () => [mass.position[0], MASS_Z_POSITION, mass.position[1]] as const,
     [mass.position],
   );
   const scaleArray = useMemo(() => [scale, scale, scale] as const, [scale]);

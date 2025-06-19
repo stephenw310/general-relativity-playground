@@ -15,7 +15,70 @@ import {
   CAMERA_MIN_DISTANCE,
   CAMERA_MAX_DISTANCE,
   CAMERA_MAX_POLAR_ANGLE,
+  CAMERA_PAN_BOUNDS,
+  CAMERA_PAN_BOUNDS_Y,
 } from "@/constants";
+import { useRef } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+
+function BoundedOrbitControls({ isDragging }: { isDragging: boolean }) {
+  const controlsRef = useRef<OrbitControlsImpl>(null);
+  const { camera } = useThree();
+
+  // Clamp target and maintain relative camera offset
+  useFrame(() => {
+    const controls = controlsRef.current;
+    if (!controls) return;
+
+    const target = controls.target;
+
+    const clampedX = Math.max(
+      -CAMERA_PAN_BOUNDS,
+      Math.min(CAMERA_PAN_BOUNDS, target.x),
+    );
+    const clampedZ = Math.max(
+      -CAMERA_PAN_BOUNDS,
+      Math.min(CAMERA_PAN_BOUNDS, target.z),
+    );
+    const clampedY = Math.max(
+      -CAMERA_PAN_BOUNDS_Y,
+      Math.min(CAMERA_PAN_BOUNDS_Y, target.y),
+    );
+
+    if (
+      clampedX !== target.x ||
+      clampedZ !== target.z ||
+      clampedY !== target.y
+    ) {
+      const deltaX = target.x - clampedX;
+      const deltaZ = target.z - clampedZ;
+      const deltaY = target.y - clampedY;
+
+      // Move target to clamped position
+      target.set(clampedX, clampedY, clampedZ);
+
+      // Move camera by same delta so relative view is preserved
+      camera.position.set(
+        camera.position.x - deltaX,
+        camera.position.y - deltaY,
+        camera.position.z - deltaZ,
+      );
+    }
+  });
+
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      enablePan={!isDragging}
+      enableZoom={!isDragging}
+      enableRotate={!isDragging}
+      maxPolarAngle={CAMERA_MAX_POLAR_ANGLE}
+      minDistance={CAMERA_MIN_DISTANCE}
+      maxDistance={CAMERA_MAX_DISTANCE}
+    />
+  );
+}
 
 export default function Home() {
   const masses = useMasses();
@@ -27,7 +90,8 @@ export default function Home() {
       <Leva />
       <Controls />
 
-      <div className="absolute top-4 left-4 z-10 text-white">
+      {/* HUD: bottom-left on mobile, top-left on md+ */}
+      <div className="absolute bottom-4 left-4 z-10 rounded-md bg-gray-900/60 p-3 text-white backdrop-blur-sm md:top-4 md:left-4 md:bg-transparent md:p-0 md:backdrop-blur-none">
         <h1 className="mb-2 text-2xl font-bold">Relativity Playground</h1>
         <div className="space-y-1 text-sm text-gray-300">
           <p>• Drag colored spheres to move them</p>
@@ -50,14 +114,7 @@ export default function Home() {
         }}
         gl={{ antialias: true }}
       >
-        <OrbitControls
-          enablePan={!isDragging}
-          enableZoom={!isDragging}
-          enableRotate={!isDragging}
-          maxPolarAngle={CAMERA_MAX_POLAR_ANGLE}
-          minDistance={CAMERA_MIN_DISTANCE}
-          maxDistance={CAMERA_MAX_DISTANCE}
-        />
+        <BoundedOrbitControls isDragging={isDragging} />
 
         <ambientLight intensity={0.3} />
         <directionalLight position={[10, 10, 5]} intensity={0.8} />

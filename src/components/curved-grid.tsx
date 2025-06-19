@@ -111,7 +111,8 @@ export function CurvedGrid({
       massCount: { value: 0 },
       warpStrength: { value: warpStrength },
     }),
-    [maxMasses],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [maxMasses], // warpStrength is updated separately via useEffect for performance
   );
 
   const shaderMaterial = useMemo(() => {

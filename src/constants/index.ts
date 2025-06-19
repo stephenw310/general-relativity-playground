@@ -34,6 +34,12 @@ export const CAMERA_MIN_DISTANCE = 8;
 export const CAMERA_MAX_DISTANCE = 25;
 export const CAMERA_MAX_POLAR_ANGLE = Math.PI / 2.2;
 
+// Camera panning bounds (matches grid extents)
+export const CAMERA_PAN_BOUNDS = GRID_MAX_BOUNDS;
+
+// Clamp camera target Y to keep near the plane
+export const CAMERA_PAN_BOUNDS_Y = 0;
+
 // UI scaling
 export const MASS_SCALE_DEFAULT = 1.0;
 export const MASS_SCALE_HOVERED = 1.0;

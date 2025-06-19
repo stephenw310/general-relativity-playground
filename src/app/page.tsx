@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, Stats } from "@react-three/drei";
 import { Leva } from "leva";
 import { CurvedGrid } from "@/components/curved-grid";
 import { MassHandles } from "@/components/mass-handles";
@@ -127,6 +127,8 @@ export default function Home() {
         />
 
         <MassHandles masses={masses} />
+
+        <Stats />
       </Canvas>
     </div>
   );

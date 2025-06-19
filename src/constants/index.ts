@@ -12,12 +12,16 @@ export const MASS_SPHERE_RADIUS = 1;
 export const MASS_SPHERE_SEGMENTS = 16;
 export const MASS_Z_POSITION = 0;
 
+// Collision configuration
+export const MASS_COLLISION_BUFFER = 0.3; // Buffer space between mass visual boundaries
+export const COLLISION_RESOLUTION_ITERATIONS = 3; // Max iterations for resolving complex collisions
+
 // Warp configuration
 export const WARP_STRENGTH_DEFAULT = 2.0;
 export const WARP_STRENGTH_MIN = 0.1;
 export const WARP_STRENGTH_MAX = 5.0;
 export const WARP_STRENGTH_STEP = 0.1;
-export const WARP_EPSILON = 0.5;
+export const WARP_EPSILON = 0.9;
 
 // Shader configuration
 export const MAX_MASSES_DEFAULT = 16;
@@ -31,7 +35,7 @@ export const DRAG_BOUNDS_MAX = GRID_MAX_BOUNDS;
 export const CAMERA_POSITION: [number, number, number] = [0, 12, 12];
 export const CAMERA_FOV = 50;
 export const CAMERA_MIN_DISTANCE = 8;
-export const CAMERA_MAX_DISTANCE = 25;
+export const CAMERA_MAX_DISTANCE = 35;
 export const CAMERA_MAX_POLAR_ANGLE = Math.PI / 2.2;
 
 // Camera panning bounds (matches grid extents)

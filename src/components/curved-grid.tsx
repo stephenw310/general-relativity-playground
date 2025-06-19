@@ -9,7 +9,6 @@ import {
   GRID_RESOLUTION,
   WARP_STRENGTH_DEFAULT,
   MAX_MASSES_DEFAULT,
-  MAX_MASSES_MIN,
   WARP_EPSILON,
   GRID_RESOLUTION_BY_MASS_COUNT,
 } from "@/constants";
@@ -89,10 +88,8 @@ export function CurvedGrid({
   warpStrength = WARP_STRENGTH_DEFAULT,
 }: CurvedGridProps) {
   const meshRef = useRef<Mesh>(null);
-  const maxMasses = Math.min(
-    Math.max(masses.length, MAX_MASSES_MIN),
-    MAX_MASSES_DEFAULT,
-  );
+  // Use fixed max masses to prevent material recreation
+  const maxMasses = MAX_MASSES_DEFAULT;
 
   // Adaptive grid resolution based on performance needs
   const adaptiveResolution = useMemo(() => {
@@ -106,7 +103,9 @@ export function CurvedGrid({
 
   const uniforms = useMemo(
     () => ({
-      masses: { value: new Array(maxMasses).fill(new Vector3(0, 0, 0)) },
+      masses: {
+        value: new Array(maxMasses).fill(null).map(() => new Vector3(0, 0, 0)),
+      },
       massValues: { value: new Array(maxMasses).fill(0) },
       massCount: { value: 0 },
       warpStrength: { value: warpStrength },
@@ -129,14 +128,16 @@ export function CurvedGrid({
     uniforms.warpStrength.value = warpStrength;
   }, [warpStrength, uniforms]);
 
-  // Create a change detection hash for better performance
+  // Create a change detection hash for better performance - enhanced for multiple masses
   const massesHash = useMemo(() => {
-    return masses
+    const hash = masses
       .map(
         (m) =>
           `${m.id}:${m.position[0].toFixed(3)}:${m.position[1].toFixed(3)}:${m.mass.toFixed(2)}`,
       )
       .join("|");
+    // Include count in hash to ensure proper detection of add/remove operations
+    return `count:${masses.length}|${hash}`;
   }, [masses]);
 
   const previousHashRef = useRef<string>("");
@@ -152,6 +153,7 @@ export function CurvedGrid({
       massValues[i] = 0;
     }
 
+    // Populate with current masses
     masses.forEach((mass, index) => {
       if (index < maxMasses) {
         // Local plane Y axis maps to -world Z after the -90° X rotation, so flip sign
@@ -160,16 +162,23 @@ export function CurvedGrid({
       }
     });
 
-    uniforms.massCount.value = Math.min(masses.length, maxMasses);
+    const massCount = Math.min(masses.length, maxMasses);
+    uniforms.massCount.value = massCount;
+
     previousHashRef.current = massesHash;
   }, [masses, uniforms, maxMasses, massesHash]);
 
-  // Only update when hash actually changes
+  // Only update when hash actually changes, but ensure it always updates for multiple masses
   useFrame(() => {
     if (massesHash !== previousHashRef.current) {
       updateMassUniforms();
     }
   });
+
+  // Additional effect to ensure updates when masses change (fallback)
+  useEffect(() => {
+    updateMassUniforms();
+  }, [updateMassUniforms]);
 
   return (
     <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]}>

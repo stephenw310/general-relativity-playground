@@ -8,6 +8,7 @@ import {
   useUpdateMassPosition,
   useSelectMass,
   useSetIsDragging,
+  useMasses,
 } from "@/store/store";
 import { MassHandleProps, MassHandlesProps } from "@/types";
 import {
@@ -26,6 +27,8 @@ import {
   MASS_COLOR_SELECTED,
   MASS_COLOR_HOVERED,
   EMISSIVE_INTENSITY,
+  MASS_COLLISION_BUFFER,
+  COLLISION_RESOLUTION_ITERATIONS,
 } from "@/constants";
 
 // Create reusable objects outside component to avoid memory allocation
@@ -41,6 +44,82 @@ function getMassProportionalScale(massValue: number): number {
   return MASS_SCALE_MIN + normalizedMass * (MASS_SCALE_MAX - MASS_SCALE_MIN);
 }
 
+// Calculate actual visual radius for collision detection based on mass value
+function getActualVisualRadius(massValue: number): number {
+  const scale = getMassProportionalScale(massValue);
+  return MASS_SPHERE_RADIUS * scale;
+}
+
+// Collision detection and resolution with dynamic radii
+function resolveCollisions(
+  proposedPosition: [number, number],
+  currentMassId: string,
+  allMasses: Array<{ id: string; position: [number, number]; mass: number }>,
+): [number, number] {
+  let resolvedPosition: [number, number] = [...proposedPosition];
+
+  // Find the current mass to get its mass value
+  const currentMass = allMasses.find((m) => m.id === currentMassId);
+  if (!currentMass) return resolvedPosition; // Safety check
+
+  const currentRadius = getActualVisualRadius(currentMass.mass);
+
+  // Iterative collision resolution for complex scenarios
+  for (
+    let iteration = 0;
+    iteration < COLLISION_RESOLUTION_ITERATIONS;
+    iteration++
+  ) {
+    let collisionDetected = false;
+
+    for (const otherMass of allMasses) {
+      // Skip self
+      if (otherMass.id === currentMassId) continue;
+
+      // Calculate distance between positions
+      const dx = resolvedPosition[0] - otherMass.position[0];
+      const dy = resolvedPosition[1] - otherMass.position[1];
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      // Calculate dynamic collision distance: sum of both radii plus buffer
+      const otherRadius = getActualVisualRadius(otherMass.mass);
+      const minCollisionDistance =
+        currentRadius + otherRadius + MASS_COLLISION_BUFFER;
+
+      // Check if collision detected
+      if (distance < minCollisionDistance) {
+        collisionDetected = true;
+
+        // Calculate collision resolution vector
+        if (distance > 0) {
+          // Normalize the collision vector
+          const normalX = dx / distance;
+          const normalY = dy / distance;
+
+          // Push away to maintain minimum distance
+          const pushDistance = minCollisionDistance - distance;
+          resolvedPosition = [
+            resolvedPosition[0] + normalX * pushDistance,
+            resolvedPosition[1] + normalY * pushDistance,
+          ];
+        } else {
+          // Handle edge case of exact overlap - push in random direction
+          const angle = Math.random() * Math.PI * 2;
+          resolvedPosition = [
+            resolvedPosition[0] + Math.cos(angle) * minCollisionDistance,
+            resolvedPosition[1] + Math.sin(angle) * minCollisionDistance,
+          ];
+        }
+      }
+    }
+
+    // If no collisions detected in this iteration, we're done
+    if (!collisionDetected) break;
+  }
+
+  return resolvedPosition;
+}
+
 function MassHandle({ mass }: MassHandleProps) {
   const meshRef = useRef<Mesh>(null);
   const { camera, gl, raycaster, pointer } = useThree();
@@ -48,6 +127,7 @@ function MassHandle({ mass }: MassHandleProps) {
   const updateMassPosition = useUpdateMassPosition();
   const selectMass = useSelectMass();
   const setIsDragging = useSetIsDragging();
+  const allMasses = useMasses(); // Get all masses for collision detection
 
   const [isHovered, setIsHovered] = useState(false);
   const isDragging = useRef(false);
@@ -92,10 +172,13 @@ function MassHandle({ mass }: MassHandleProps) {
       raycaster.setFromCamera(pointer, camera);
       if (raycaster.ray.intersectPlane(dragPlane, intersection)) {
         // Define boundaries that match the grid size
-        const newPosition: [number, number] = [
+        let newPosition: [number, number] = [
           Math.max(-DRAG_BOUNDS_MAX, Math.min(DRAG_BOUNDS_MAX, intersection.x)),
           Math.max(-DRAG_BOUNDS_MAX, Math.min(DRAG_BOUNDS_MAX, intersection.z)),
         ];
+
+        // Apply collision detection and resolution
+        newPosition = resolveCollisions(newPosition, mass.id, allMasses);
 
         // Update ref position immediately for smooth dragging
         dragPosition.current = newPosition;
@@ -111,7 +194,7 @@ function MassHandle({ mass }: MassHandleProps) {
         }
       }
     },
-    [mass.id, pointer, raycaster, camera, updateMassPosition],
+    [mass.id, pointer, raycaster, camera, updateMassPosition, allMasses],
   );
 
   const handlePointerUp = useCallback(

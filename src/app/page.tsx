@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, Stats } from "@react-three/drei";
 import { Leva } from "leva";
 import { CurvedGrid } from "@/components/curved-grid";
 import { MassHandles } from "@/components/mass-handles";
@@ -18,7 +18,7 @@ import {
   CAMERA_PAN_BOUNDS,
   CAMERA_PAN_BOUNDS_Y,
 } from "@/constants";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
@@ -84,6 +84,7 @@ export default function Home() {
   const masses = useMasses();
   const warpStrength = useWarpStrength();
   const isDragging = useIsDragging();
+  const [showStats, setShowStats] = useState(false);
 
   return (
     <div className="h-screen w-full bg-gradient-to-b from-gray-900 to-black">
@@ -105,6 +106,13 @@ export default function Home() {
           <p>• Right click + drag: Pan camera</p>
           <p>• Scroll wheel: Zoom in/out</p>
         </div>
+
+        <button
+          className="mt-4 rounded bg-gray-700 px-2 py-1 text-xs font-medium"
+          onClick={() => setShowStats((s) => !s)}
+        >
+          {showStats ? "Hide FPS" : "Show FPS"}
+        </button>
       </div>
 
       <Canvas
@@ -127,6 +135,10 @@ export default function Home() {
         />
 
         <MassHandles masses={masses} />
+
+        {showStats && (
+          <Stats className="!fixed !bottom-4 !right-4 !top-auto !left-auto" />
+        )}
       </Canvas>
     </div>
   );

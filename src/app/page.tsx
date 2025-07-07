@@ -107,7 +107,7 @@ export default function Home() {
         </div>
 
         <button
-          className="mt-4 rounded bg-gray-700 px-2 py-1 text-xs font-medium"
+          className="mt-4 cursor-pointer rounded bg-gray-700 px-2 py-1 text-xs font-medium hover:bg-gray-600"
           onClick={() => setShowStats((s) => !s)}
         >
           {showStats ? "Hide FPS" : "Show FPS"}
@@ -135,7 +135,7 @@ export default function Home() {
         <MassHandles masses={masses} />
 
         {showStats && (
-          <Stats className="!fixed !bottom-4 !right-4 !top-auto !left-auto" />
+          <Stats className="!fixed !top-auto !right-4 !bottom-4 !left-auto" />
         )}
       </Canvas>
     </div>

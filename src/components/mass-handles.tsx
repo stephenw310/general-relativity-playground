@@ -16,109 +16,17 @@ import {
   MASS_SPHERE_RADIUS,
   MASS_SPHERE_SEGMENTS,
   MASS_Z_POSITION,
-  MASS_SCALE_DEFAULT,
-  MASS_SCALE_HOVERED,
-  MASS_SCALE_SELECTED,
-  MASS_SCALE_MIN,
-  MASS_SCALE_MAX,
-  MASS_MIN_VALUE,
-  MASS_MAX_VALUE,
   MASS_COLOR_DEFAULT,
   MASS_COLOR_SELECTED,
   MASS_COLOR_HOVERED,
   EMISSIVE_INTENSITY,
-  MASS_COLLISION_BUFFER,
-  COLLISION_RESOLUTION_ITERATIONS,
 } from "@/constants";
+import { getFinalMassScale } from "@/utils/mass-calculations";
+import { resolveCollisions } from "@/utils/collision-detection";
 
 // Create reusable objects outside component to avoid memory allocation
 const dragPlane = new Plane(new Vector3(0, 1, 0), 0);
 const intersection = new Vector3();
-
-// Calculate mass-proportional base scale
-function getMassProportionalScale(massValue: number): number {
-  // Normalize mass value from [MASS_MIN_VALUE, MASS_MAX_VALUE] to [0, 1]
-  const normalizedMass =
-    (massValue - MASS_MIN_VALUE) / (MASS_MAX_VALUE - MASS_MIN_VALUE);
-  // Map to scale range [MASS_SCALE_MIN, MASS_SCALE_MAX]
-  return MASS_SCALE_MIN + normalizedMass * (MASS_SCALE_MAX - MASS_SCALE_MIN);
-}
-
-// Calculate actual visual radius for collision detection based on mass value
-function getActualVisualRadius(massValue: number): number {
-  const scale = getMassProportionalScale(massValue);
-  return MASS_SPHERE_RADIUS * scale;
-}
-
-// Collision detection and resolution with dynamic radii
-function resolveCollisions(
-  proposedPosition: [number, number],
-  currentMassId: string,
-  allMasses: Array<{ id: string; position: [number, number]; mass: number }>,
-): [number, number] {
-  let resolvedPosition: [number, number] = [...proposedPosition];
-
-  // Find the current mass to get its mass value
-  const currentMass = allMasses.find((m) => m.id === currentMassId);
-  if (!currentMass) return resolvedPosition; // Safety check
-
-  const currentRadius = getActualVisualRadius(currentMass.mass);
-
-  // Iterative collision resolution for complex scenarios
-  for (
-    let iteration = 0;
-    iteration < COLLISION_RESOLUTION_ITERATIONS;
-    iteration++
-  ) {
-    let collisionDetected = false;
-
-    for (const otherMass of allMasses) {
-      // Skip self
-      if (otherMass.id === currentMassId) continue;
-
-      // Calculate distance between positions
-      const dx = resolvedPosition[0] - otherMass.position[0];
-      const dy = resolvedPosition[1] - otherMass.position[1];
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      // Calculate dynamic collision distance: sum of both radii plus buffer
-      const otherRadius = getActualVisualRadius(otherMass.mass);
-      const minCollisionDistance =
-        currentRadius + otherRadius + MASS_COLLISION_BUFFER;
-
-      // Check if collision detected
-      if (distance < minCollisionDistance) {
-        collisionDetected = true;
-
-        // Calculate collision resolution vector
-        if (distance > 0) {
-          // Normalize the collision vector
-          const normalX = dx / distance;
-          const normalY = dy / distance;
-
-          // Push away to maintain minimum distance
-          const pushDistance = minCollisionDistance - distance;
-          resolvedPosition = [
-            resolvedPosition[0] + normalX * pushDistance,
-            resolvedPosition[1] + normalY * pushDistance,
-          ];
-        } else {
-          // Handle edge case of exact overlap - push in random direction
-          const angle = Math.random() * Math.PI * 2;
-          resolvedPosition = [
-            resolvedPosition[0] + Math.cos(angle) * minCollisionDistance,
-            resolvedPosition[1] + Math.sin(angle) * minCollisionDistance,
-          ];
-        }
-      }
-    }
-
-    // If no collisions detected in this iteration, we're done
-    if (!collisionDetected) break;
-  }
-
-  return resolvedPosition;
-}
 
 function MassHandle({ mass }: MassHandleProps) {
   const meshRef = useRef<Mesh>(null);
@@ -239,13 +147,7 @@ function MassHandle({ mass }: MassHandleProps) {
   // Memoized computed values to prevent unnecessary recalculations
   const isSelected = selectedMassId === mass.id;
   const scale = useMemo(() => {
-    // Get base scale proportional to mass value
-    const massProportionalScale = getMassProportionalScale(mass.mass);
-
-    // Apply interactive scaling modifiers on top of mass-proportional scale
-    if (isSelected) return massProportionalScale * MASS_SCALE_SELECTED;
-    if (isHovered) return massProportionalScale * MASS_SCALE_HOVERED;
-    return massProportionalScale * MASS_SCALE_DEFAULT;
+    return getFinalMassScale(mass.mass, isSelected, isHovered);
   }, [isSelected, isHovered, mass.mass]);
 
   const color = useMemo(() => {

@@ -34,8 +34,8 @@ A browser-based interactive visualization of general relativity concepts. Drop p
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/stephenw310/relativity-playground
-   cd relativity-playground
+   git clone https://github.com/stephenw310/general-relativity-playground
+   cd general-relativity-playground
    ```
 
 2. Install dependencies:

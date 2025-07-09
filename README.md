@@ -1,8 +1,8 @@
 # General Relativity Playground
 
-A browser-based interactive visualization of general relativity concepts. Drop point masses onto a 2D "rubber sheet" and watch real-time spacetime curvature using authentic Schwarzschild physics.
+![Next.js](https://img.shields.io/badge/Next.js-15-black) ![Three.js](https://img.shields.io/badge/Three.js-WebGL-red) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 
-![Relativity Playground](https://img.shields.io/badge/physics-general%20relativity-blue) ![Next.js](https://img.shields.io/badge/Next.js-15-black) ![Three.js](https://img.shields.io/badge/Three.js-WebGL-red) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+A browser-based interactive visualization of various general relativity concepts.
 
 ## Features
 

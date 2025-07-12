@@ -7,6 +7,7 @@ import { CurvedGrid } from "@/components/curved-grid";
 import { MassHandles } from "@/components/mass-handles";
 import { Controls } from "@/components/controls";
 import { BoundedOrbitControls } from "@/components/bounded-orbit-controls";
+import { StarField } from "@/components/star-field";
 import { useMasses, useIsDragging } from "@/store/store";
 import {
   GRID_SIZE,
@@ -23,7 +24,7 @@ export function SpacetimeSimulation() {
   const [showStats, setShowStats] = useState(false);
 
   return (
-    <div className="h-screen w-full bg-gradient-to-b from-gray-900 to-black">
+    <div className="h-screen w-full bg-black">
       {/* Navigation Bar */}
       <nav className="bg-white-900/80 absolute top-0 left-0 z-20 w-full backdrop-blur-sm">
         <div className="flex items-center justify-between px-6 py-3">
@@ -75,8 +76,10 @@ export function SpacetimeSimulation() {
       >
         <BoundedOrbitControls isDragging={isDragging} />
 
-        <ambientLight intensity={0.3} />
-        <directionalLight position={[10, 10, 5]} intensity={0.8} />
+        <StarField />
+
+        <ambientLight intensity={0.1} />
+        <directionalLight position={[10, 10, 5]} intensity={0.6} />
 
         <CurvedGrid
           masses={masses}

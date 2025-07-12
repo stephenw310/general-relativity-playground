@@ -70,15 +70,21 @@ export const fragmentShader = `
     vec2 grid = abs(fract(vPosition.xy * 2.0) - 0.5) / fwidth(vPosition.xy * 2.0);
     float line = min(grid.x, grid.y);
     
-    // Color based on height (depth)
+    // Color based on height (depth) - cosmic spacetime theme
     vec3 color = mix(
-      vec3(0.2, 0.5, 1.0), // Blue for deep warps
-      vec3(1.0, 1.0, 1.0), // White for flat areas
+      vec3(0.1, 0.05, 0.3), // Deep purple/indigo for deep warps
+      vec3(0.05, 0.05, 0.05), // Very dark gray for flat areas
       clamp(vHeight + 0.5, 0.0, 1.0)
     );
     
-    // Apply grid lines
-    color = mix(color, vec3(0.8, 0.8, 0.8), 1.0 - min(line, 1.0));
+    // Apply grid lines with cosmic blue-purple color
+    vec3 gridColor = vec3(0.3, 0.3, 0.8);
+    
+    // Add subtle glow effect near warps
+    float warpGlow = 1.0 - clamp(vHeight + 0.3, 0.0, 1.0);
+    gridColor += vec3(0.2, 0.1, 0.4) * warpGlow;
+    
+    color = mix(color, gridColor, 1.0 - min(line, 1.0));
     
     gl_FragColor = vec4(color, 1.0);
   }

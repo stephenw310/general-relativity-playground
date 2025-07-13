@@ -19,10 +19,13 @@ import {
   MASS_COLOR_DEFAULT,
   MASS_COLOR_SELECTED,
   MASS_COLOR_HOVERED,
-  EMISSIVE_INTENSITY,
 } from "@/constants";
 import { getFinalMassScale } from "@/utils/mass-calculations";
 import { resolveCollisions } from "@/utils/collision-detection";
+import {
+  createCosmicTexture,
+  getCosmicTypeByMass,
+} from "@/utils/cosmic-textures";
 
 // Create reusable objects outside component to avoid memory allocation
 const dragPlane = new Plane(new Vector3(0, 1, 0), 0);
@@ -150,6 +153,12 @@ function MassHandle({ mass }: MassHandleProps) {
     return getFinalMassScale(mass.mass, isSelected, isHovered);
   }, [isSelected, isHovered, mass.mass]);
 
+  // Create cosmic texture based on stored cosmic type
+  const cosmicTexture = useMemo(() => {
+    const type = mass.cosmicType || getCosmicTypeByMass(mass.mass);
+    return createCosmicTexture(type);
+  }, [mass.cosmicType, mass.mass]);
+
   const color = useMemo(() => {
     if (isSelected) return MASS_COLOR_SELECTED;
     if (isHovered) return MASS_COLOR_HOVERED;
@@ -178,11 +187,7 @@ function MassHandle({ mass }: MassHandleProps) {
       <sphereGeometry
         args={[MASS_SPHERE_RADIUS, MASS_SPHERE_SEGMENTS, MASS_SPHERE_SEGMENTS]}
       />
-      <meshStandardMaterial
-        color={color}
-        emissive={color}
-        emissiveIntensity={EMISSIVE_INTENSITY}
-      />
+      <meshBasicMaterial map={cosmicTexture} color={color} />
     </mesh>
   );
 }

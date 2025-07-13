@@ -42,25 +42,23 @@ export function SpacetimeSimulation() {
       <Controls />
 
       {/* HUD: bottom-left on mobile, top-left on md+ */}
-      <div className="absolute bottom-4 left-4 z-10 rounded-md bg-gray-900/60 p-3 text-white backdrop-blur-sm md:top-20 md:left-4 md:bg-transparent md:p-0 md:backdrop-blur-none">
-        <h2 className="mb-2 text-2xl font-bold">
-          Spacetime Curvature Simulation
-        </h2>
-        <div className="space-y-1 text-sm text-gray-300">
-          <p>• Drag colored spheres to move them</p>
-          <p>• Masses are measured in solar masses (0.5-10 M☉)</p>
-          <p>• Click &ldquo;Add Mass&rdquo; button to add masses</p>
+      <div className="absolute bottom-4 left-4 z-10 h-fit rounded-md bg-gray-800/25 p-4 text-white backdrop-blur-md md:top-20 md:left-4">
+        <h2 className="mb-3 text-2xl font-bold">Relativity Playground</h2>
+        <div className="space-y-1 text-sm text-gray-200">
+          <p>• Drag cosmic objects to move them in spacetime</p>
+          <p>• Choose from realistic stellar types with preset masses</p>
+          <p>• Watch how massive objects warp the fabric of space</p>
         </div>
 
-        <div className="mt-4 space-y-1 text-xs text-gray-400">
-          <h3 className="text-sm font-semibold text-gray-300">Navigation:</h3>
-          <p>• Left click + drag: Rotate camera</p>
+        <div className="mt-4 space-y-1 text-xs text-gray-300">
+          <h3 className="text-sm font-semibold text-gray-200">Controls:</h3>
+          <p>• Left click + drag: Rotate view</p>
           <p>• Right click + drag: Pan camera</p>
           <p>• Scroll wheel: Zoom in/out</p>
         </div>
 
         <button
-          className="mt-4 cursor-pointer rounded bg-gray-700 px-2 py-1 text-xs font-medium hover:bg-gray-600"
+          className="mt-4 cursor-pointer rounded bg-gray-700/80 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-gray-600/80"
           onClick={() => setShowStats((s) => !s)}
         >
           {showStats ? "Hide FPS" : "Show FPS"}

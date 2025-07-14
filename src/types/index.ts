@@ -2,6 +2,7 @@ export interface Mass {
   id: string;
   position: [number, number];
   mass: number;
+  cosmicType?: import("@/utils/cosmic-textures").CosmicObjectType;
 }
 
 export interface StoreState {
@@ -10,10 +11,17 @@ export interface StoreState {
   isDragging: boolean;
 
   // Actions
-  addMass: (position: [number, number]) => void;
+  addMass: (
+    position: [number, number],
+    cosmicType?: import("@/utils/cosmic-textures").CosmicObjectType,
+  ) => void;
   removeMass: (id: string) => void;
   updateMassPosition: (id: string, position: [number, number]) => void;
   updateMassValue: (id: string, mass: number) => void;
+  updateCosmicType: (
+    id: string,
+    cosmicType: import("@/utils/cosmic-textures").CosmicObjectType,
+  ) => void;
   selectMass: (id: string | null) => void;
 
   setIsDragging: (dragging: boolean) => void;

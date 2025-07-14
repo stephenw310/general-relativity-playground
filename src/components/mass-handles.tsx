@@ -25,6 +25,7 @@ import { resolveCollisions } from "@/utils/collision-detection";
 import {
   createCosmicTexture,
   getCosmicTypeByMass,
+  generateSeedFromId,
 } from "@/utils/cosmic-textures";
 
 // Create reusable objects outside component to avoid memory allocation
@@ -156,8 +157,10 @@ function MassHandle({ mass }: MassHandleProps) {
   // Create cosmic texture based on stored cosmic type
   const cosmicTexture = useMemo(() => {
     const type = mass.cosmicType || getCosmicTypeByMass(mass.mass);
-    return createCosmicTexture(type);
-  }, [mass.cosmicType, mass.mass]);
+    // Use better hash function for consistent textures per object
+    const seed = generateSeedFromId(mass.id);
+    return createCosmicTexture(type, 256, seed);
+  }, [mass.cosmicType, mass.mass, mass.id]);
 
   const color = useMemo(() => {
     if (isSelected) return MASS_COLOR_SELECTED;
@@ -187,7 +190,12 @@ function MassHandle({ mass }: MassHandleProps) {
       <sphereGeometry
         args={[MASS_SPHERE_RADIUS, MASS_SPHERE_SEGMENTS, MASS_SPHERE_SEGMENTS]}
       />
-      <meshBasicMaterial map={cosmicTexture} color={color} />
+      <meshBasicMaterial
+        map={cosmicTexture}
+        color={isSelected || isHovered ? color : "white"}
+        transparent={isSelected || isHovered}
+        opacity={isSelected || isHovered ? 0.9 : 1.0}
+      />
     </mesh>
   );
 }

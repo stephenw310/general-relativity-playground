@@ -27,10 +27,6 @@ export interface StoreState {
   setIsDragging: (dragging: boolean) => void;
 
   reset: () => void;
-
-  // Optimized selectors
-  getMassById: (id: string) => Mass | undefined;
-  getMassCount: () => number;
 }
 
 export interface CurvedGridProps {

@@ -3,3 +3,4 @@ export * from "./physics";
 export * from "./ui";
 export * from "./camera";
 export * from "./grid";
+export * from "./stars";

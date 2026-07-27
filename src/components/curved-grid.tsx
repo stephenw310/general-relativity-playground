@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useMemo, useEffect, useCallback } from "react";
-import { Mesh, ShaderMaterial, Vector3 } from "three";
+import { useMemo, useEffect, useCallback } from "react";
+import { ShaderMaterial, Vector3 } from "three";
 import { CurvedGridProps } from "@/types";
 import {
   GRID_SIZE,
@@ -19,7 +19,6 @@ export function CurvedGrid({
   gridSize = GRID_SIZE,
   gridResolution = GRID_RESOLUTION,
 }: CurvedGridProps) {
-  const meshRef = useRef<Mesh>(null);
   // Use fixed max masses to prevent material recreation
   const maxMasses = MAX_MASSES_DEFAULT;
 
@@ -83,7 +82,7 @@ export function CurvedGrid({
   }, [updateMassUniforms]);
 
   return (
-    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]}>
+    <mesh rotation={[-Math.PI / 2, 0, 0]}>
       <planeGeometry
         args={[gridSize, gridSize, adaptiveResolution, adaptiveResolution]}
       />

@@ -393,17 +393,6 @@ function generateRedGiantSurface(
   }
 }
 
-export function getRandomCosmicType(): CosmicObjectType {
-  const types: CosmicObjectType[] = [
-    "star",
-    "pulsar",
-    "neutron_star",
-    "white_dwarf",
-    "red_giant",
-  ];
-  return types[Math.floor(Math.random() * types.length)];
-}
-
 export function getCosmicTypeByMass(mass: number): CosmicObjectType {
   // Assign cosmic object types based on realistic mass ranges (in solar masses)
   if (mass < 0.8) return "white_dwarf";

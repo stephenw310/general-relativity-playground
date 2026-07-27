@@ -12,8 +12,7 @@ export const GRID_RESOLUTION_BY_MASS_COUNT = {
 
 // Shader configuration
 export const MAX_MASSES_DEFAULT = 16;
-export const MAX_MASSES_MIN = 4;
 
 // Drag configuration
 export const DRAG_BOUNDS_SAFE = 8;
-export const DRAG_BOUNDS_MAX = 9.5; // GRID_MAX_BOUNDS
+export const DRAG_BOUNDS_MAX = GRID_MAX_BOUNDS;

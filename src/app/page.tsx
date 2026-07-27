@@ -1,61 +1,8 @@
-"use client";
-
 import Link from "next/link";
 import { SimulationCard } from "@/components/simulation-card";
+import { SIMULATIONS } from "@/constants/simulations";
 
 export default function Home() {
-  const simulations = [
-    {
-      id: "spacetime",
-      title: "Spacetime Curvature",
-      description:
-        "Drop masses on a rubber sheet and watch spacetime curve in real-time.",
-      route: "/spacetime",
-      status: "available" as const,
-      thumbnail: "/spacetime-preview.jpg", // Add thumbnail when available
-    },
-    {
-      id: "lensing",
-      title: "Gravitational Lensing",
-      description:
-        "See how massive objects bend light and create Einstein rings.",
-      route: "/lensing",
-      status: "coming-soon" as const,
-    },
-    {
-      id: "time-dilation",
-      title: "Time Dilation",
-      description:
-        "Watch time slow down near massive objects and speed up in empty space.",
-      route: "/time-dilation",
-      status: "coming-soon" as const,
-    },
-    {
-      id: "geodesics",
-      title: "Geodesics",
-      description:
-        "Follow the paths of particles and light through curved spacetime.",
-      route: "/geodesics",
-      status: "coming-soon" as const,
-    },
-    {
-      id: "black-hole",
-      title: "Black Holes",
-      description:
-        "Journey to the event horizon and explore extreme spacetime curvature.",
-      route: "/black-hole",
-      status: "coming-soon" as const,
-    },
-    {
-      id: "waves",
-      title: "Gravitational Waves",
-      description:
-        "Visualize ripples in spacetime created by accelerating masses.",
-      route: "/gravitational-waves",
-      status: "coming-soon" as const,
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Hero Section */}
@@ -107,15 +54,8 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {simulations.map((simulation) => (
-              <SimulationCard
-                key={simulation.id}
-                title={simulation.title}
-                description={simulation.description}
-                route={simulation.route}
-                status={simulation.status}
-                thumbnail={simulation.thumbnail}
-              />
+            {SIMULATIONS.map(({ id, ...simulation }) => (
+              <SimulationCard key={id} {...simulation} />
             ))}
           </div>
         </div>

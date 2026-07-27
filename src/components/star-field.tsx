@@ -19,6 +19,7 @@ import {
   STAR_ROTATION_SPEED_Y,
   STAR_ROTATION_SPEED_X,
 } from "@/constants";
+import { isCoarsePointer } from "@/utils/device";
 
 const STAR_SEED = 0x5eed;
 
@@ -47,10 +48,7 @@ function mulberry32(seed: number): () => number {
 }
 
 function getDefaultStarCount(): number {
-  if (typeof window === "undefined") return STAR_COUNT_DESKTOP;
-  return window.matchMedia("(pointer: coarse)").matches
-    ? STAR_COUNT_MOBILE
-    : STAR_COUNT_DESKTOP;
+  return isCoarsePointer() ? STAR_COUNT_MOBILE : STAR_COUNT_DESKTOP;
 }
 
 interface StarFieldProps {

@@ -16,6 +16,7 @@ import {
   CAMERA_POSITION,
   CAMERA_FOV,
 } from "@/constants";
+import { isCoarsePointer } from "@/utils/device";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -23,6 +24,10 @@ export function SpacetimeSimulation() {
   const masses = useMasses();
   const isDragging = useIsDragging();
   const [showStats, setShowStats] = useState(false);
+  const [hudOpen, setHudOpen] = useState(false);
+  // Leva renders in a client-only portal, so reading media queries for its
+  // initial state cannot cause a hydration mismatch
+  const [levaCollapsed] = useState(isCoarsePointer);
 
   return (
     <WebGLErrorBoundary>
@@ -40,23 +45,50 @@ export function SpacetimeSimulation() {
           </div>
         </nav>
 
-        <Leva />
+        <Leva collapsed={levaCollapsed} />
         <Controls />
 
-        {/* HUD: bottom-left on mobile, top-left on md+ */}
-        <div className="absolute bottom-4 left-4 z-10 h-fit rounded-md bg-gray-800/25 p-4 text-white backdrop-blur-md md:top-20 md:left-4">
-          <h2 className="mb-3 text-2xl font-bold">Relativity Playground</h2>
+        {/* Mobile HUD toggle */}
+        <button
+          className="absolute bottom-4 left-4 z-20 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-800/60 text-lg text-white backdrop-blur-md md:hidden"
+          onClick={() => setHudOpen((o) => !o)}
+          aria-expanded={hudOpen}
+          aria-label={hudOpen ? "Hide instructions" : "Show instructions"}
+        >
+          {hudOpen ? "×" : "?"}
+        </button>
+
+        {/* HUD: collapsible bottom sheet on mobile, always visible top-left on md+ */}
+        <div
+          className={`absolute bottom-16 left-4 z-10 h-fit max-w-[calc(100vw-2rem)] rounded-md bg-gray-800/25 p-4 text-white backdrop-blur-md md:top-20 md:bottom-auto md:left-4 md:block md:max-w-sm ${
+            hudOpen ? "block" : "hidden"
+          }`}
+        >
+          <h2 className="mb-3 text-xl font-bold md:text-2xl">
+            Relativity Playground
+          </h2>
           <div className="space-y-1 text-sm text-gray-200">
-            <p>• Drag cosmic objects to move them in spacetime</p>
+            <p className="pointer-coarse:hidden">
+              • Drag cosmic objects to move them in spacetime
+            </p>
+            <p className="hidden pointer-coarse:block">
+              • Touch and drag cosmic objects to move them
+            </p>
             <p>• Choose from realistic stellar types with preset masses</p>
             <p>• Watch how massive objects warp the fabric of space</p>
           </div>
 
-          <div className="mt-4 space-y-1 text-xs text-gray-300">
+          <div className="mt-4 space-y-1 text-xs text-gray-300 pointer-coarse:hidden">
             <h3 className="text-sm font-semibold text-gray-200">Controls:</h3>
             <p>• Left click + drag: Rotate view</p>
             <p>• Right click + drag: Pan camera</p>
             <p>• Scroll wheel: Zoom in/out</p>
+          </div>
+          <div className="mt-4 hidden space-y-1 text-xs text-gray-300 pointer-coarse:block">
+            <h3 className="text-sm font-semibold text-gray-200">Controls:</h3>
+            <p>• One finger drag: Rotate view</p>
+            <p>• Two finger drag: Pan camera</p>
+            <p>• Pinch: Zoom in/out</p>
           </div>
 
           <button

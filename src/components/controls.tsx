@@ -58,12 +58,16 @@ export function Controls() {
       "🛠️ Custom": "custom" as CosmicObjectType,
     };
 
+    // Controls are keyed by mass id so leva's persisted state can never
+    // cross-wire between masses when one is removed; label carries the
+    // user-facing positional name.
     return masses.reduce(
       (controls, mass, index) => {
-        const massKey = `Mass ${index + 1}`;
+        const massLabel = `Mass ${index + 1}`;
         // Only show mass slider for custom type
         if (mass.cosmicType === "custom") {
-          controls[`${massKey} (solar masses)`] = {
+          controls[`mass-${mass.id}-value`] = {
+            label: `${massLabel} (M☉)`,
             value: mass.mass,
             min: MASS_MIN_VALUE,
             max: MASS_MAX_VALUE,
@@ -74,7 +78,8 @@ export function Controls() {
           };
         }
 
-        controls[`${massKey} Type`] = {
+        controls[`mass-${mass.id}-type`] = {
+          label: `${massLabel} Type`,
           value: mass.cosmicType || "custom",
           options: cosmicTypeOptions,
           onChange: (value: CosmicObjectType) => {
@@ -87,7 +92,7 @@ export function Controls() {
           },
         };
 
-        controls[`Remove ${massKey}`] = button(() => {
+        controls[`Remove ${massLabel}`] = button(() => {
           removeMass(mass.id);
         });
         return controls;
@@ -96,11 +101,10 @@ export function Controls() {
     );
   }, [masses, updateMassValue, updateCosmicType, removeMass]);
 
-  // Simplified dependency key - only mass count and IDs matter for structure
+  // Rebuild the leva schema only on structural changes (ids, types) — never
+  // on mass value ticks, which used to tear down the slider mid-drag
   const massControlsKey = useMemo(() => {
-    return masses
-      .map((m) => `${m.id}-${m.mass.toFixed(1)}-${m.cosmicType}`)
-      .join("|");
+    return masses.map((m) => `${m.id}-${m.cosmicType}`).join("|");
   }, [masses]);
 
   useControls("Mass Controls", massControls, { collapsed: false }, [

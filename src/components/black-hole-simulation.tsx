@@ -27,7 +27,7 @@ import {
   BH_STAR_COUNT_LOW,
   BH_STAR_COUNT_HIGH,
 } from "@/constants";
-import { isCoarsePointer } from "@/utils/device";
+import { isCompactViewport } from "@/utils/device";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -41,7 +41,7 @@ export function BlackHoleSimulation() {
 
   const [showStats, setShowStats] = useState(false);
   const [hudOpen, setHudOpen] = useState(false);
-  const [levaCollapsed] = useState(isCoarsePointer);
+  const [levaCollapsed] = useState(isCompactViewport);
 
   const rs = mass * SCHWARZSCHILD_SCALE;
   const starCount =

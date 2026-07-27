@@ -16,7 +16,7 @@ import {
   CAMERA_POSITION,
   CAMERA_FOV,
 } from "@/constants";
-import { isCoarsePointer } from "@/utils/device";
+import { isCompactViewport } from "@/utils/device";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -27,7 +27,7 @@ export function SpacetimeSimulation() {
   const [hudOpen, setHudOpen] = useState(false);
   // Leva renders in a client-only portal, so reading media queries for its
   // initial state cannot cause a hydration mismatch
-  const [levaCollapsed] = useState(isCoarsePointer);
+  const [levaCollapsed] = useState(isCompactViewport);
 
   return (
     <WebGLErrorBoundary>

@@ -2,7 +2,7 @@
 
 import { useMemo, useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { AdditiveBlending, DoubleSide, Mesh, ShaderMaterial } from "three";
+import { AdditiveBlending, DoubleSide, type Mesh, ShaderMaterial } from "three";
 import { DISK_INNER_FACTOR, DISK_OUTER_FACTOR } from "@/constants";
 import {
   diskVertexShader,

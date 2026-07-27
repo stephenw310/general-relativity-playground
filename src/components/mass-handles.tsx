@@ -10,7 +10,7 @@ import {
   useSelectMass,
   useSetIsDragging,
 } from "@/store/store";
-import { MassHandleProps, MassHandlesProps } from "@/types";
+import type { MassHandleProps, MassHandlesProps } from "@/types";
 import {
   DRAG_BOUNDS_MAX,
   MASS_SPHERE_RADIUS,

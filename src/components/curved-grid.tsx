@@ -2,7 +2,7 @@
 
 import { useMemo, useEffect, useCallback } from "react";
 import { ShaderMaterial, Vector3 } from "three";
-import { CurvedGridProps } from "@/types";
+import type { CurvedGridProps } from "@/types";
 import {
   GRID_SIZE,
   GRID_RESOLUTION,
@@ -40,7 +40,7 @@ export function CurvedGrid({
       massValues: { value: new Array(maxMasses).fill(0) },
       massCount: { value: 0 },
     }),
-    [maxMasses],
+    [],
   );
 
   const shaderMaterial = useMemo(() => {
@@ -50,7 +50,7 @@ export function CurvedGrid({
       uniforms,
       wireframe: false,
     });
-  }, [uniforms, maxMasses]);
+  }, [uniforms]);
 
   // Optimized mass update function
   const updateMassUniforms = useCallback(() => {
@@ -74,7 +74,7 @@ export function CurvedGrid({
 
     const massCount = Math.min(masses.length, maxMasses);
     uniforms.massCount.value = massCount;
-  }, [masses, uniforms, maxMasses]);
+  }, [masses, uniforms]);
 
   // Update uniforms when masses change
   useEffect(() => {

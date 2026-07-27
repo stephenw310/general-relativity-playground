@@ -1,0 +1,17 @@
+# https://lefthook.dev/configuration/
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: biome
+      # Formats, lints and applies safe fixes to staged files only;
+      # stage_fixed re-stages whatever Biome rewrote.
+      glob: "*.{js,jsx,ts,tsx,json,jsonc,css,md}"
+      run: npx biome check --write --no-errors-on-unmatched --colors=off {staged_files}
+      stage_fixed: true
+
+    - name: typecheck
+      # tsc has no per-file mode that respects the project graph, so this runs
+      # project-wide, but only when a TypeScript file is actually staged.
+      glob: "*.{ts,tsx}"
+      run: npx tsc --noEmit

@@ -1,0 +1,79 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.5/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": ["**", "!.next", "!out", "!next-env.d.ts"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 80
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all",
+      "bracketSpacing": true
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "domains": {
+      "react": "recommended",
+      "next": "recommended"
+    },
+    "rules": {
+      "preset": "recommended",
+      "nursery": {
+        // Replaces prettier-plugin-tailwindcss. Still a nursery rule with an
+        // unsafe fix, so it is applied via `npm run lint:fix`, not on format.
+        "useSortedClasses": {
+          "level": "warn",
+          "options": {
+            "attributes": ["className"]
+          }
+        }
+      }
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "off"
+      }
+    }
+  },
+  "overrides": [
+    {
+      // react-three-fiber intrinsics (mesh, points, group) are three.js scene
+      // graph objects, not DOM nodes, so DOM a11y rules do not apply to them.
+      "includes": [
+        "src/components/curved-grid.tsx",
+        "src/components/mass-handles.tsx",
+        "src/components/star-field.tsx",
+        "src/components/bounded-orbit-controls.tsx",
+        "src/components/black-hole/**"
+      ],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noStaticElementInteractions": "off"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -36,7 +36,7 @@ export function SimulationCard({
           </div>
         )}
         {!isAvailable && (
-          <span className="absolute top-3 right-3 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-gray-200 backdrop-blur-sm">
+          <span className="absolute top-3 right-3 rounded-full bg-black/60 px-3 py-1 font-medium text-gray-200 text-xs backdrop-blur-sm">
             Coming Soon
           </span>
         )}
@@ -45,15 +45,15 @@ export function SimulationCard({
       {/* Content */}
       <div className="p-6">
         <h3 className="mb-2 font-semibold text-white">{title}</h3>
-        <p className="mb-4 text-sm text-gray-300">{description}</p>
+        <p className="mb-4 text-gray-300 text-sm">{description}</p>
 
         {isAvailable ? (
-          <span className="inline-flex h-9 w-full cursor-pointer items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors group-hover:bg-blue-700">
+          <span className="inline-flex h-9 w-full cursor-pointer items-center justify-center rounded-md bg-blue-600 px-4 py-2 font-medium text-sm text-white transition-colors group-hover:bg-blue-700">
             <span className="mr-2">▶</span>
             Launch Simulation
           </span>
         ) : (
-          <span className="inline-flex h-9 w-full cursor-not-allowed items-center justify-center rounded-md bg-gray-700 px-4 py-2 text-sm font-medium text-gray-400">
+          <span className="inline-flex h-9 w-full cursor-not-allowed items-center justify-center rounded-md bg-gray-700 px-4 py-2 font-medium text-gray-400 text-sm">
             Coming Soon
           </span>
         )}

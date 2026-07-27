@@ -29,6 +29,8 @@ A browser-based interactive visualization of various general relativity concepts
 - **Styling**: Tailwind CSS v4
 - **State Management**: Zustand
 - **Language**: TypeScript
+- **Lint/Format**: Biome
+- **Git Hooks**: Lefthook
 
 ## Getting Started
 
@@ -65,8 +67,14 @@ A browser-based interactive visualization of various general relativity concepts
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run format` - Format code with Prettier
+- `npm run typecheck` - Type check with `tsc --noEmit`
+- `npm run lint` - Lint and check formatting with Biome
+- `npm run lint:fix` - Apply Biome fixes, including Tailwind class sorting
+- `npm run format` - Format code with Biome
+
+Git hooks are managed by Lefthook and installed automatically by `npm install`.
+On commit, Biome formats and fixes staged files and `tsc` type checks the
+project.
 
 ## How to Use
 

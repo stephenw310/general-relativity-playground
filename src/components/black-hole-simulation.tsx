@@ -77,6 +77,7 @@ export function BlackHoleSimulation() {
 
         {/* Mobile HUD toggle */}
         <button
+          type="button"
           className="absolute bottom-4 left-4 z-20 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-800/60 text-lg text-white backdrop-blur-md md:hidden"
           onClick={() => setHudOpen((o) => !o)}
           aria-expanded={hudOpen}
@@ -91,28 +92,29 @@ export function BlackHoleSimulation() {
             hudOpen ? "block" : "hidden"
           }`}
         >
-          <h2 className="mb-3 text-xl font-bold md:text-2xl">Black Hole</h2>
-          <div className="space-y-1 text-sm text-gray-200">
+          <h2 className="mb-3 font-bold text-xl md:text-2xl">Black Hole</h2>
+          <div className="space-y-1 text-gray-200 text-sm">
             <p>• The black disk is the shadow — light that fell in</p>
             <p>• Background stars warp around the horizon</p>
             <p>• The disk&apos;s bright side spins toward you</p>
           </div>
 
-          <div className="mt-4 space-y-1 text-xs text-gray-300 pointer-coarse:hidden">
-            <h3 className="text-sm font-semibold text-gray-200">Controls:</h3>
+          <div className="mt-4 pointer-coarse:hidden space-y-1 text-gray-300 text-xs">
+            <h3 className="font-semibold text-gray-200 text-sm">Controls:</h3>
             <p>• Left click + drag: Orbit the black hole</p>
             <p>• Scroll wheel: Zoom in/out</p>
             <p>• Panel (top right): Mass, lensing, disk</p>
           </div>
-          <div className="mt-4 hidden space-y-1 text-xs text-gray-300 pointer-coarse:block">
-            <h3 className="text-sm font-semibold text-gray-200">Controls:</h3>
+          <div className="mt-4 pointer-coarse:block hidden space-y-1 text-gray-300 text-xs">
+            <h3 className="font-semibold text-gray-200 text-sm">Controls:</h3>
             <p>• One finger drag: Orbit the black hole</p>
             <p>• Pinch: Zoom in/out</p>
             <p>• Panel (top right): Mass, lensing, disk</p>
           </div>
 
           <button
-            className="mt-4 cursor-pointer rounded bg-gray-700/80 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-gray-600/80"
+            type="button"
+            className="mt-4 cursor-pointer rounded bg-gray-700/80 px-3 py-1.5 font-medium text-xs transition-colors hover:bg-gray-600/80"
             onClick={() => setShowStats((s) => !s)}
           >
             {showStats ? "Hide FPS" : "Show FPS"}

@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { BlackHoleSimulation } from "@/components/black-hole-simulation";
 
 export const metadata: Metadata = {

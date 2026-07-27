@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import { StoreState } from "@/types";
+import type { StoreState } from "@/types";
 import { MASS_DEFAULT_VALUE } from "@/constants";
-import { type CosmicObjectType } from "@/utils/cosmic-textures";
+import type { CosmicObjectType } from "@/utils/cosmic-textures";
 
 const initialState = {
   masses: [

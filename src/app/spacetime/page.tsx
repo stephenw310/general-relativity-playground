@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { SpacetimeSimulation } from "@/components/spacetime-simulation";
 
 export const metadata: Metadata = {

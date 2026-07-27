@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { BlackHoleStoreState } from "@/types";
+import type { BlackHoleStoreState } from "@/types";
 import {
   BH_MASS_DEFAULT,
   DISK_SPEED_DEFAULT,

@@ -18,30 +18,30 @@
     "**/*.{css,md,json}": "prettier --write --ignore-unknown"
   },
   "dependencies": {
-    "@react-three/drei": "^10.3.0",
-    "@react-three/fiber": "^9.1.2",
-    "@types/three": "^0.177.0",
-    "leva": "^0.10.0",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
+    "@types/three": "^0.185.1",
+    "leva": "^0.10.1",
     "next": "15.3.3",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "three": "^0.177.0",
-    "zustand": "^5.0.5"
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "three": "^0.185.1",
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
-    "eslint-config-prettier": "^10.1.5",
+    "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.2",
-    "prettier": "3.5.3",
-    "prettier-plugin-tailwindcss": "^0.6.12",
+    "lint-staged": "^17.2.0",
+    "prettier": "^3.9.6",
+    "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5.9.3"
   }
 }

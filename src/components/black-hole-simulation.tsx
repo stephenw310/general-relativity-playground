@@ -27,7 +27,7 @@ import {
   BH_STAR_COUNT_LOW,
   BH_STAR_COUNT_HIGH,
 } from "@/constants";
-import { isCompactViewport } from "@/utils/device";
+import { useIsCompactViewport } from "@/utils/device";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -41,7 +41,10 @@ export function BlackHoleSimulation() {
 
   const [showStats, setShowStats] = useState(false);
   const [hudOpen, setHudOpen] = useState(false);
-  const [levaCollapsed] = useState(isCompactViewport);
+  // Collapsed on compact viewports until the user toggles it themselves
+  const isCompact = useIsCompactViewport();
+  const [levaToggled, setLevaToggled] = useState<boolean | null>(null);
+  const levaCollapsed = levaToggled ?? isCompact;
 
   const rs = mass * SCHWARZSCHILD_SCALE;
   const starCount =
@@ -67,7 +70,9 @@ export function BlackHoleSimulation() {
           </div>
         </nav>
 
-        <Leva collapsed={levaCollapsed} />
+        <Leva
+          collapsed={{ collapsed: levaCollapsed, onChange: setLevaToggled }}
+        />
         <BlackHoleControls />
 
         {/* Mobile HUD toggle */}

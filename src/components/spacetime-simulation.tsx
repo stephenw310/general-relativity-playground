@@ -16,7 +16,7 @@ import {
   CAMERA_POSITION,
   CAMERA_FOV,
 } from "@/constants";
-import { isCompactViewport } from "@/utils/device";
+import { useIsCompactViewport } from "@/utils/device";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -25,9 +25,10 @@ export function SpacetimeSimulation() {
   const isDragging = useIsDragging();
   const [showStats, setShowStats] = useState(false);
   const [hudOpen, setHudOpen] = useState(false);
-  // Leva renders in a client-only portal, so reading media queries for its
-  // initial state cannot cause a hydration mismatch
-  const [levaCollapsed] = useState(isCompactViewport);
+  // Collapsed on compact viewports until the user toggles it themselves
+  const isCompact = useIsCompactViewport();
+  const [levaToggled, setLevaToggled] = useState<boolean | null>(null);
+  const levaCollapsed = levaToggled ?? isCompact;
 
   return (
     <WebGLErrorBoundary>
@@ -45,7 +46,9 @@ export function SpacetimeSimulation() {
           </div>
         </nav>
 
-        <Leva collapsed={levaCollapsed} />
+        <Leva
+          collapsed={{ collapsed: levaCollapsed, onChange: setLevaToggled }}
+        />
         <Controls />
 
         {/* Mobile HUD toggle */}

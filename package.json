@@ -6,13 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "format": "prettier --write .",
     "prepare": "husky"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [
-      "next lint --fix --dir src",
+      "eslint --fix",
       "prettier --write --ignore-unknown"
     ],
     "**/*.{css,md,json}": "prettier --write --ignore-unknown"
@@ -22,20 +22,19 @@
     "@react-three/fiber": "^9.6.1",
     "@types/three": "^0.185.1",
     "leva": "^0.10.1",
-    "next": "15.3.3",
+    "next": "^16.2.12",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "three": "^0.185.1",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "eslint": "^9",
-    "eslint-config-next": "15.3.3",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.2.12",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
     "lint-staged": "^17.2.0",

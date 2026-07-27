@@ -19,7 +19,7 @@ export function SimulationCard({
 }: SimulationCardProps) {
   const isAvailable = status === "available";
 
-  const CardContent = () => (
+  const cardContent = (
     <div className="group overflow-hidden rounded-xl border border-gray-600 bg-gray-900 transition-all duration-300 hover:border-blue-500 hover:shadow-xl">
       {/* Thumbnail/Preview Area */}
       <div className="relative overflow-hidden">
@@ -53,9 +53,9 @@ export function SimulationCard({
 
   return isAvailable ? (
     <Link href={route} className="block">
-      <CardContent />
+      {cardContent}
     </Link>
   ) : (
-    <CardContent />
+    cardContent
   );
 }

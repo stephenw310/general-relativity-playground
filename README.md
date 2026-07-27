@@ -1,6 +1,6 @@
 # General Relativity Playground
 
-![Next.js](https://img.shields.io/badge/Next.js-15-black) ![Three.js](https://img.shields.io/badge/Three.js-WebGL-red) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Next.js](https://img.shields.io/badge/Next.js-16-black) ![Three.js](https://img.shields.io/badge/Three.js-WebGL-red) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 
 A browser-based interactive visualization of various general relativity concepts.
 
@@ -15,7 +15,7 @@ A browser-based interactive visualization of various general relativity concepts
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 with App Router
+- **Framework**: Next.js 16 with App Router
 - **3D Graphics**: Three.js with react-three-fiber
 - **Shaders**: Custom GLSL vertex/fragment shaders
 - **Styling**: Tailwind CSS v4
@@ -26,7 +26,7 @@ A browser-based interactive visualization of various general relativity concepts
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20.9+
 - npm
 
 ### Installation

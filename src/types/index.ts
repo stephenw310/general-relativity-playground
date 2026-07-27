@@ -29,6 +29,25 @@ export interface StoreState {
   reset: () => void;
 }
 
+export type BlackHoleQuality = "auto" | "low" | "high";
+
+export interface BlackHoleStoreState {
+  mass: number; // solar masses
+  showDisk: boolean;
+  diskSpeed: number;
+  showPhotonSphere: boolean;
+  lensingStrength: number;
+  quality: BlackHoleQuality;
+
+  // Actions
+  setMass: (mass: number) => void;
+  setShowDisk: (showDisk: boolean) => void;
+  setDiskSpeed: (diskSpeed: number) => void;
+  setShowPhotonSphere: (showPhotonSphere: boolean) => void;
+  setLensingStrength: (lensingStrength: number) => void;
+  setQuality: (quality: BlackHoleQuality) => void;
+}
+
 export interface CurvedGridProps {
   masses: Mass[];
   gridSize?: number;

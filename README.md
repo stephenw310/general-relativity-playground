@@ -4,13 +4,21 @@
 
 A browser-based interactive visualization of various general relativity concepts.
 
+## Simulations
+
+- **Spacetime Curvature** (`/spacetime`): Drag stellar objects across a rubber-sheet
+  spacetime grid warped by the Schwarzschild metric.
+- **Black Holes** (`/black-hole`): Orbit a Schwarzschild black hole with an event
+  horizon, photon sphere, Doppler-beamed accretion disk, and screen-space
+  gravitational lensing of the background stars.
+
 ## Features
 
 - **Authentic Physics**: Uses true Schwarzschild metric `h(r) = rs/r` where `rs = 2GM/c²`
 - **Interactive Masses**: Drag and drop solar mass objects (0.5-10 M☉)
 - **Real-time Visualization**: GPU-accelerated GLSL shaders for smooth 60fps+ performance
 - **Collision Detection**: Prevents mass overlap with dynamic radius calculation
-- **Responsive Design**: Works on desktop and mobile devices
+- **Responsive Design**: Works on desktop and mobile devices, with device-adaptive quality
 - **Natural Units**: Uses G=1, c=1 scaling standard in theoretical physics
 
 ## Tech Stack

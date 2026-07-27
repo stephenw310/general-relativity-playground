@@ -4,3 +4,4 @@ export * from "./ui";
 export * from "./camera";
 export * from "./grid";
 export * from "./stars";
+export * from "./black-hole";

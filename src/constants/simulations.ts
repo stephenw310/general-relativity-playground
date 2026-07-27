@@ -55,7 +55,8 @@ export const SIMULATIONS: SimulationMeta[] = [
     description:
       "Journey to the event horizon and explore extreme spacetime curvature.",
     route: "/black-hole",
-    status: "coming-soon",
+    status: "available",
+    thumbnail: "/black-hole-preview.jpg",
     gradient: "from-slate-950 via-purple-950/60 to-black",
   },
   {

@@ -15,6 +15,8 @@ const eslintConfig = [
       "src/components/curved-grid.tsx",
       "src/components/mass-handles.tsx",
       "src/components/star-field.tsx",
+      "src/components/black-hole/accretion-disk.tsx",
+      "src/components/black-hole/lensed-star-field.tsx",
     ],
     rules: {
       "react-hooks/immutability": "off",

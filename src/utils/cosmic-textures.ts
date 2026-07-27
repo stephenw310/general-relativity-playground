@@ -1,12 +1,7 @@
 import { CanvasTexture, Color } from "three";
 
 export type CosmicObjectType =
-  | "star"
-  | "pulsar"
-  | "neutron_star"
-  | "white_dwarf"
-  | "red_giant"
-  | "custom";
+  "star" | "pulsar" | "neutron_star" | "white_dwarf" | "red_giant" | "custom";
 
 interface CosmicObjectConfig {
   baseColor: Color;

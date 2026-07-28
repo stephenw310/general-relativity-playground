@@ -1,16 +1,16 @@
 "use client";
 
-import { useRef, useState, useCallback, useMemo } from "react";
+import { memo, useRef, useState, useCallback, useMemo } from "react";
 import { useThree } from "@react-three/fiber";
-import { Mesh, Vector3, Plane } from "three";
+import { Vector3, Plane } from "three";
 import {
+  useStore,
   useSelectedMassId,
   useUpdateMassPosition,
   useSelectMass,
   useSetIsDragging,
-  useMasses,
 } from "@/store/store";
-import { MassHandleProps, MassHandlesProps } from "@/types";
+import type { MassHandleProps, MassHandlesProps } from "@/types";
 import {
   DRAG_BOUNDS_MAX,
   MASS_SPHERE_RADIUS,
@@ -32,14 +32,12 @@ import {
 const dragPlane = new Plane(new Vector3(0, 1, 0), 0);
 const intersection = new Vector3();
 
-function MassHandle({ mass }: MassHandleProps) {
-  const meshRef = useRef<Mesh>(null);
+const MassHandle = memo(function MassHandle({ mass }: MassHandleProps) {
   const { camera, gl, raycaster, pointer } = useThree();
   const selectedMassId = useSelectedMassId();
   const updateMassPosition = useUpdateMassPosition();
   const selectMass = useSelectMass();
   const setIsDragging = useSetIsDragging();
-  const allMasses = useMasses(); // Get all masses for collision detection
 
   const [isHovered, setIsHovered] = useState(false);
   const isDragging = useRef(false);
@@ -89,8 +87,13 @@ function MassHandle({ mass }: MassHandleProps) {
           Math.max(-DRAG_BOUNDS_MAX, Math.min(DRAG_BOUNDS_MAX, intersection.z)),
         ];
 
-        // Apply collision detection and resolution
-        newPosition = resolveCollisions(newPosition, mass.id, allMasses);
+        // Apply collision detection and resolution; read peers transiently so
+        // dragging one handle doesn't subscribe every handle to the store
+        newPosition = resolveCollisions(
+          newPosition,
+          mass.id,
+          useStore.getState().masses,
+        );
 
         // Update ref position immediately for smooth dragging
         dragPosition.current = newPosition;
@@ -106,7 +109,7 @@ function MassHandle({ mass }: MassHandleProps) {
         }
       }
     },
-    [mass.id, pointer, raycaster, camera, updateMassPosition, allMasses],
+    [mass.id, pointer, raycaster, camera, updateMassPosition],
   );
 
   const handlePointerUp = useCallback(
@@ -177,7 +180,6 @@ function MassHandle({ mass }: MassHandleProps) {
 
   return (
     <mesh
-      ref={meshRef}
       position={position}
       scale={scaleArray}
       onPointerDown={handlePointerDown}
@@ -198,7 +200,7 @@ function MassHandle({ mass }: MassHandleProps) {
       />
     </mesh>
   );
-}
+});
 
 export function MassHandles({ masses }: MassHandlesProps) {
   return (

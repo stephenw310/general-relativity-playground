@@ -1,0 +1,77 @@
+"use client";
+
+import { Component, type ReactNode } from "react";
+import Link from "next/link";
+
+interface WebGLErrorBoundaryProps {
+  children: ReactNode;
+}
+
+interface WebGLErrorBoundaryState {
+  hasError: boolean;
+}
+
+// Probe once per page load. This runs from render(), and creating a WebGL
+// context per render leaks contexts until the browser evicts the oldest one
+// — which is the running simulation's canvas ("Context Lost" flicker).
+let cachedSupport: boolean | null = null;
+
+function isWebGLAvailable(): boolean {
+  if (typeof window === "undefined") return true;
+  if (cachedSupport === null) {
+    try {
+      const canvas = document.createElement("canvas");
+      const gl = canvas.getContext("webgl2") ?? canvas.getContext("webgl");
+      cachedSupport = Boolean(gl);
+      // Release the probe's context immediately instead of waiting for GC
+      gl?.getExtension("WEBGL_lose_context")?.loseContext();
+    } catch {
+      cachedSupport = false;
+    }
+  }
+  return cachedSupport;
+}
+
+function FallbackPanel({ message }: { message: string }) {
+  return (
+    <div className="flex h-screen w-full items-center justify-center bg-black px-6">
+      <div className="max-w-md rounded-xl border border-gray-700 bg-gray-900 p-8 text-center">
+        <h2 className="mb-3 font-semibold text-white text-xl">
+          Unable to render simulation
+        </h2>
+        <p className="mb-6 text-gray-300 text-sm">{message}</p>
+        <Link
+          href="/"
+          className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-blue-700"
+        >
+          ← Back to Home
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export class WebGLErrorBoundary extends Component<
+  WebGLErrorBoundaryProps,
+  WebGLErrorBoundaryState
+> {
+  state: WebGLErrorBoundaryState = { hasError: false };
+
+  static getDerivedStateFromError(): WebGLErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <FallbackPanel message="Something went wrong while rendering the 3D scene. Try reloading the page." />
+      );
+    }
+    if (!isWebGLAvailable()) {
+      return (
+        <FallbackPanel message="Your browser or device does not support WebGL, which this simulation needs. Try a recent version of Chrome, Firefox, or Safari." />
+      );
+    }
+    return this.props.children;
+  }
+}

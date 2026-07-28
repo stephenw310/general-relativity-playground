@@ -6,8 +6,9 @@ const shaderCache = new Map<number, string>();
 // Generate optimized vertex shader based on mass count
 export function generateVertexShader(maxMasses: number): string {
   // Check cache first
-  if (shaderCache.has(maxMasses)) {
-    return shaderCache.get(maxMasses)!;
+  const cached = shaderCache.get(maxMasses);
+  if (cached !== undefined) {
+    return cached;
   }
 
   const shader = `

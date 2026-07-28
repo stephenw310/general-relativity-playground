@@ -1,8 +1,16 @@
 # General Relativity Playground
 
-![Next.js](https://img.shields.io/badge/Next.js-15-black) ![Three.js](https://img.shields.io/badge/Three.js-WebGL-red) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Next.js](https://img.shields.io/badge/Next.js-16-black) ![Three.js](https://img.shields.io/badge/Three.js-WebGL-red) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 
 A browser-based interactive visualization of various general relativity concepts.
+
+## Simulations
+
+- **Spacetime Curvature** (`/spacetime`): Drag stellar objects across a rubber-sheet
+  spacetime grid warped by the Schwarzschild metric.
+- **Black Holes** (`/black-hole`): Orbit a Schwarzschild black hole with an event
+  horizon, photon sphere, Doppler-beamed accretion disk, and screen-space
+  gravitational lensing of the background stars.
 
 ## Features
 
@@ -10,23 +18,25 @@ A browser-based interactive visualization of various general relativity concepts
 - **Interactive Masses**: Drag and drop solar mass objects (0.5-10 M☉)
 - **Real-time Visualization**: GPU-accelerated GLSL shaders for smooth 60fps+ performance
 - **Collision Detection**: Prevents mass overlap with dynamic radius calculation
-- **Responsive Design**: Works on desktop and mobile devices
+- **Responsive Design**: Works on desktop and mobile devices, with device-adaptive quality
 - **Natural Units**: Uses G=1, c=1 scaling standard in theoretical physics
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 with App Router
+- **Framework**: Next.js 16 with App Router
 - **3D Graphics**: Three.js with react-three-fiber
 - **Shaders**: Custom GLSL vertex/fragment shaders
 - **Styling**: Tailwind CSS v4
 - **State Management**: Zustand
 - **Language**: TypeScript
+- **Lint/Format**: Biome
+- **Git Hooks**: Lefthook
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20.9+
 - npm
 
 ### Installation
@@ -57,8 +67,14 @@ A browser-based interactive visualization of various general relativity concepts
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run format` - Format code with Prettier
+- `npm run typecheck` - Type check with `tsc --noEmit`
+- `npm run lint` - Lint and check formatting with Biome
+- `npm run lint:fix` - Apply Biome fixes, including Tailwind class sorting
+- `npm run format` - Format code with Biome
+
+Git hooks are managed by Lefthook and installed automatically by `npm install`.
+On commit, Biome formats and fixes staged files and `tsc` type checks the
+project.
 
 ## How to Use
 

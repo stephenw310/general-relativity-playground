@@ -1,61 +1,8 @@
-"use client";
-
 import Link from "next/link";
 import { SimulationCard } from "@/components/simulation-card";
+import { SIMULATIONS } from "@/constants/simulations";
 
 export default function Home() {
-  const simulations = [
-    {
-      id: "spacetime",
-      title: "Spacetime Curvature",
-      description:
-        "Drop masses on a rubber sheet and watch spacetime curve in real-time.",
-      route: "/spacetime",
-      status: "available" as const,
-      thumbnail: "/spacetime-preview.jpg", // Add thumbnail when available
-    },
-    {
-      id: "lensing",
-      title: "Gravitational Lensing",
-      description:
-        "See how massive objects bend light and create Einstein rings.",
-      route: "/lensing",
-      status: "coming-soon" as const,
-    },
-    {
-      id: "time-dilation",
-      title: "Time Dilation",
-      description:
-        "Watch time slow down near massive objects and speed up in empty space.",
-      route: "/time-dilation",
-      status: "coming-soon" as const,
-    },
-    {
-      id: "geodesics",
-      title: "Geodesics",
-      description:
-        "Follow the paths of particles and light through curved spacetime.",
-      route: "/geodesics",
-      status: "coming-soon" as const,
-    },
-    {
-      id: "black-hole",
-      title: "Black Holes",
-      description:
-        "Journey to the event horizon and explore extreme spacetime curvature.",
-      route: "/black-hole",
-      status: "coming-soon" as const,
-    },
-    {
-      id: "waves",
-      title: "Gravitational Waves",
-      description:
-        "Visualize ripples in spacetime created by accelerating masses.",
-      route: "/gravitational-waves",
-      status: "coming-soon" as const,
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Hero Section */}
@@ -63,11 +10,11 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 md:px-6">
           <div className="flex flex-col items-center space-y-8 text-center">
             <div className="space-y-4">
-              <h1 className="text-4xl font-bold tracking-tighter text-white sm:text-5xl md:text-6xl lg:text-7xl">
+              <h1 className="font-bold text-4xl text-white tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
                 General Relativity
                 <span className="block text-blue-400">Playground</span>
               </h1>
-              <p className="mx-auto max-w-[700px] text-lg text-gray-300 md:text-xl">
+              <p className="mx-auto max-w-[700px] text-gray-300 text-lg md:text-xl">
                 Interactive simulations to explore Einstein&apos;s theory of
                 spacetime.
               </p>
@@ -84,7 +31,7 @@ export default function Home() {
                 href="https://github.com/stephenw310/general-relativity-playground"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-10 cursor-pointer items-center justify-center rounded-md border border-blue-400 bg-transparent px-8 text-lg text-blue-400 hover:bg-blue-400/25"
+                className="inline-flex h-10 cursor-pointer items-center justify-center rounded-md border border-blue-400 bg-transparent px-8 text-blue-400 text-lg hover:bg-blue-400/25"
               >
                 <span className="mr-2">⭐</span>
                 Star on GitHub
@@ -98,34 +45,27 @@ export default function Home() {
       <section id="simulations" className="bg-gray-950 py-10">
         <div className="mx-auto max-w-7xl px-4 md:px-6">
           <div className="mb-12 text-center">
-            <h2 className="mb-4 text-3xl font-bold tracking-tighter text-white sm:text-4xl md:text-5xl">
+            <h2 className="mb-4 font-bold text-3xl text-white tracking-tighter sm:text-4xl md:text-5xl">
               Simulations
             </h2>
-            <p className="mx-auto max-w-[600px] text-lg text-gray-300">
+            <p className="mx-auto max-w-[600px] text-gray-300 text-lg">
               Explore fundamental concepts through interactive experiments.
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {simulations.map((simulation) => (
-              <SimulationCard
-                key={simulation.id}
-                title={simulation.title}
-                description={simulation.description}
-                route={simulation.route}
-                status={simulation.status}
-                thumbnail={simulation.thumbnail}
-              />
+            {SIMULATIONS.map(({ id, ...simulation }) => (
+              <SimulationCard key={id} {...simulation} />
             ))}
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-800 bg-black">
+      <footer className="border-gray-800 border-t bg-black">
         <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
           <div className="space-y-4 text-center">
-            <div className="text-sm text-gray-500">
+            <div className="text-gray-500 text-sm">
               <p>
                 &copy; {new Date().getFullYear()} General Relativity Playground.
               </p>

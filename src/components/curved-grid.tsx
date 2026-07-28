@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useMemo, useEffect, useCallback } from "react";
-import { Mesh, ShaderMaterial, Vector3 } from "three";
-import { CurvedGridProps } from "@/types";
+import { useMemo, useEffect, useCallback } from "react";
+import { ShaderMaterial, Vector3 } from "three";
+import type { CurvedGridProps } from "@/types";
 import {
   GRID_SIZE,
   GRID_RESOLUTION,
@@ -19,7 +19,6 @@ export function CurvedGrid({
   gridSize = GRID_SIZE,
   gridResolution = GRID_RESOLUTION,
 }: CurvedGridProps) {
-  const meshRef = useRef<Mesh>(null);
   // Use fixed max masses to prevent material recreation
   const maxMasses = MAX_MASSES_DEFAULT;
 
@@ -41,7 +40,7 @@ export function CurvedGrid({
       massValues: { value: new Array(maxMasses).fill(0) },
       massCount: { value: 0 },
     }),
-    [maxMasses],
+    [],
   );
 
   const shaderMaterial = useMemo(() => {
@@ -51,7 +50,7 @@ export function CurvedGrid({
       uniforms,
       wireframe: false,
     });
-  }, [uniforms, maxMasses]);
+  }, [uniforms]);
 
   // Optimized mass update function
   const updateMassUniforms = useCallback(() => {
@@ -75,7 +74,7 @@ export function CurvedGrid({
 
     const massCount = Math.min(masses.length, maxMasses);
     uniforms.massCount.value = massCount;
-  }, [masses, uniforms, maxMasses]);
+  }, [masses, uniforms]);
 
   // Update uniforms when masses change
   useEffect(() => {
@@ -83,7 +82,7 @@ export function CurvedGrid({
   }, [updateMassUniforms]);
 
   return (
-    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]}>
+    <mesh rotation={[-Math.PI / 2, 0, 0]}>
       <planeGeometry
         args={[gridSize, gridSize, adaptiveResolution, adaptiveResolution]}
       />

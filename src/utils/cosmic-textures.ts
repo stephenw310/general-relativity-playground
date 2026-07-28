@@ -156,15 +156,17 @@ function createFallbackTexture(
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
-  const ctx = canvas.getContext("2d")!;
+  const ctx = canvas.getContext("2d");
 
-  const actualType = type === "custom" ? "star" : type;
-  const config = COSMIC_CONFIGS[actualType];
-  const baseColorHex = `#${config.baseColor.getHexString()}`;
+  // This is already the failure path; if even the fallback context is
+  // unavailable, hand back the blank canvas rather than throwing
+  if (ctx) {
+    const actualType = type === "custom" ? "star" : type;
+    const config = COSMIC_CONFIGS[actualType];
 
-  // Simple solid color fallback
-  ctx.fillStyle = baseColorHex;
-  ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = `#${config.baseColor.getHexString()}`;
+    ctx.fillRect(0, 0, size, size);
+  }
 
   const texture = new CanvasTexture(canvas);
   texture.needsUpdate = true;
@@ -396,17 +398,6 @@ function generateRedGiantSurface(
       data[idx + 3] = 255;
     }
   }
-}
-
-export function getRandomCosmicType(): CosmicObjectType {
-  const types: CosmicObjectType[] = [
-    "star",
-    "pulsar",
-    "neutron_star",
-    "white_dwarf",
-    "red_giant",
-  ];
-  return types[Math.floor(Math.random() * types.length)];
 }
 
 export function getCosmicTypeByMass(mass: number): CosmicObjectType {

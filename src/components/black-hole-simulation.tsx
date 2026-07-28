@@ -3,32 +3,56 @@
 import { Canvas } from "@react-three/fiber";
 import { Stats } from "@react-three/drei";
 import { Leva } from "leva";
-import { CurvedGrid } from "@/components/curved-grid";
-import { MassHandles } from "@/components/mass-handles";
-import { Controls } from "@/components/controls";
 import { BoundedOrbitControls } from "@/components/bounded-orbit-controls";
-import { StarField } from "@/components/star-field";
 import { WebGLErrorBoundary } from "@/components/webgl-error-boundary";
-import { useMasses, useIsDragging } from "@/store/store";
+import { EventHorizon } from "@/components/black-hole/event-horizon";
+import { AccretionDisk } from "@/components/black-hole/accretion-disk";
+import { LensedStarField } from "@/components/black-hole/lensed-star-field";
+import { BlackHoleControls } from "@/components/black-hole/black-hole-controls";
 import {
-  GRID_SIZE,
-  GRID_RESOLUTION,
-  CAMERA_POSITION,
-  CAMERA_FOV,
+  useBlackHoleMass,
+  useShowDisk,
+  useDiskSpeed,
+  useShowPhotonSphere,
+  useLensingStrength,
+  useBlackHoleQuality,
+} from "@/store/black-hole-store";
+import {
+  SCHWARZSCHILD_SCALE,
+  BH_CAMERA_POSITION,
+  BH_CAMERA_FOV,
+  BH_CAMERA_MIN_DISTANCE_FACTOR,
+  BH_CAMERA_MAX_DISTANCE_FACTOR,
+  BH_MAX_POLAR_ANGLE,
+  BH_STAR_COUNT_LOW,
+  BH_STAR_COUNT_HIGH,
 } from "@/constants";
 import { useIsCompactViewport } from "@/utils/device";
 import { useState } from "react";
 import Link from "next/link";
 
-export function SpacetimeSimulation() {
-  const masses = useMasses();
-  const isDragging = useIsDragging();
+export function BlackHoleSimulation() {
+  const mass = useBlackHoleMass();
+  const showDisk = useShowDisk();
+  const diskSpeed = useDiskSpeed();
+  const showPhotonSphere = useShowPhotonSphere();
+  const lensingStrength = useLensingStrength();
+  const quality = useBlackHoleQuality();
+
   const [showStats, setShowStats] = useState(false);
   const [hudOpen, setHudOpen] = useState(false);
   // Collapsed on compact viewports until the user toggles it themselves
   const isCompact = useIsCompactViewport();
   const [levaToggled, setLevaToggled] = useState<boolean | null>(null);
   const levaCollapsed = levaToggled ?? isCompact;
+
+  const rs = mass * SCHWARZSCHILD_SCALE;
+  const starCount =
+    quality === "low"
+      ? BH_STAR_COUNT_LOW
+      : quality === "high"
+        ? BH_STAR_COUNT_HIGH
+        : undefined; // auto: StarField picks by device
 
   return (
     <WebGLErrorBoundary>
@@ -49,7 +73,7 @@ export function SpacetimeSimulation() {
         <Leva
           collapsed={{ collapsed: levaCollapsed, onChange: setLevaToggled }}
         />
-        <Controls />
+        <BlackHoleControls />
 
         {/* Mobile HUD toggle */}
         <button
@@ -68,31 +92,24 @@ export function SpacetimeSimulation() {
             hudOpen ? "block" : "hidden"
           }`}
         >
-          <h2 className="mb-3 font-bold text-xl md:text-2xl">
-            Relativity Playground
-          </h2>
+          <h2 className="mb-3 font-bold text-xl md:text-2xl">Black Hole</h2>
           <div className="space-y-1 text-gray-200 text-sm">
-            <p className="pointer-coarse:hidden">
-              • Drag cosmic objects to move them in spacetime
-            </p>
-            <p className="pointer-coarse:block hidden">
-              • Touch and drag cosmic objects to move them
-            </p>
-            <p>• Choose from realistic stellar types with preset masses</p>
-            <p>• Watch how massive objects warp the fabric of space</p>
+            <p>• The black disk is the shadow — light that fell in</p>
+            <p>• Background stars warp around the horizon</p>
+            <p>• The disk&apos;s bright side spins toward you</p>
           </div>
 
           <div className="mt-4 pointer-coarse:hidden space-y-1 text-gray-300 text-xs">
             <h3 className="font-semibold text-gray-200 text-sm">Controls:</h3>
-            <p>• Left click + drag: Rotate view</p>
-            <p>• Right click + drag: Pan camera</p>
+            <p>• Left click + drag: Orbit the black hole</p>
             <p>• Scroll wheel: Zoom in/out</p>
+            <p>• Panel (top right): Mass, lensing, disk</p>
           </div>
           <div className="mt-4 pointer-coarse:block hidden space-y-1 text-gray-300 text-xs">
             <h3 className="font-semibold text-gray-200 text-sm">Controls:</h3>
-            <p>• One finger drag: Rotate view</p>
-            <p>• Two finger drag: Pan camera</p>
+            <p>• One finger drag: Orbit the black hole</p>
             <p>• Pinch: Zoom in/out</p>
+            <p>• Panel (top right): Mass, lensing, disk</p>
           </div>
 
           <button
@@ -106,26 +123,28 @@ export function SpacetimeSimulation() {
 
         <Canvas
           camera={{
-            position: CAMERA_POSITION,
-            fov: CAMERA_FOV,
+            position: BH_CAMERA_POSITION,
+            fov: BH_CAMERA_FOV,
           }}
           gl={{ antialias: true }}
           dpr={[1, 2]}
         >
-          <BoundedOrbitControls isDragging={isDragging} />
-
-          <StarField />
-
-          <ambientLight intensity={0.1} />
-          <directionalLight position={[10, 10, 5]} intensity={0.6} />
-
-          <CurvedGrid
-            masses={masses}
-            gridSize={GRID_SIZE}
-            gridResolution={GRID_RESOLUTION}
+          <BoundedOrbitControls
+            isDragging={false}
+            minDistance={rs * BH_CAMERA_MIN_DISTANCE_FACTOR}
+            maxDistance={rs * BH_CAMERA_MAX_DISTANCE_FACTOR}
+            enablePan={false}
+            maxPolarAngle={BH_MAX_POLAR_ANGLE}
           />
 
-          <MassHandles masses={masses} />
+          <LensedStarField
+            rs={rs}
+            lensingStrength={lensingStrength}
+            starCount={starCount}
+          />
+
+          <EventHorizon rs={rs} showPhotonSphere={showPhotonSphere} />
+          {showDisk && <AccretionDisk rs={rs} speed={diskSpeed} />}
 
           {showStats && (
             <Stats className="!fixed !top-auto !right-4 !bottom-4 !left-auto" />

@@ -24,8 +24,11 @@ export const DISK_SPEED_MAX = 3;
 // Camera
 export const BH_CAMERA_POSITION: [number, number, number] = [0, 4, 14];
 export const BH_CAMERA_FOV = 60;
-export const BH_CAMERA_MIN_DISTANCE = 4;
-export const BH_CAMERA_MAX_DISTANCE = 60;
+// Orbit limits are multiples of rs, not fixed world units: every feature in
+// the scene scales with rs, so fixed limits let the camera end up inside the
+// disk (outer edge 8 rs) or even inside the shadow at high mass.
+export const BH_CAMERA_MIN_DISTANCE_FACTOR = 10; // clears DISK_OUTER_FACTOR
+export const BH_CAMERA_MAX_DISTANCE_FACTOR = 60;
 export const BH_MAX_POLAR_ANGLE = Math.PI - 0.35;
 
 // Star field quality presets

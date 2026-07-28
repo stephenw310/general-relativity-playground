@@ -21,8 +21,8 @@ import {
   SCHWARZSCHILD_SCALE,
   BH_CAMERA_POSITION,
   BH_CAMERA_FOV,
-  BH_CAMERA_MIN_DISTANCE,
-  BH_CAMERA_MAX_DISTANCE,
+  BH_CAMERA_MIN_DISTANCE_FACTOR,
+  BH_CAMERA_MAX_DISTANCE_FACTOR,
   BH_MAX_POLAR_ANGLE,
   BH_STAR_COUNT_LOW,
   BH_STAR_COUNT_HIGH,
@@ -131,8 +131,8 @@ export function BlackHoleSimulation() {
         >
           <BoundedOrbitControls
             isDragging={false}
-            minDistance={BH_CAMERA_MIN_DISTANCE}
-            maxDistance={BH_CAMERA_MAX_DISTANCE}
+            minDistance={rs * BH_CAMERA_MIN_DISTANCE_FACTOR}
+            maxDistance={rs * BH_CAMERA_MAX_DISTANCE_FACTOR}
             enablePan={false}
             maxPolarAngle={BH_MAX_POLAR_ANGLE}
           />

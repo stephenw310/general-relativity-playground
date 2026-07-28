@@ -11,14 +11,25 @@ interface WebGLErrorBoundaryState {
   hasError: boolean;
 }
 
+// Probe once per page load. This runs from render(), and creating a WebGL
+// context per render leaks contexts until the browser evicts the oldest one
+// — which is the running simulation's canvas ("Context Lost" flicker).
+let cachedSupport: boolean | null = null;
+
 function isWebGLAvailable(): boolean {
   if (typeof window === "undefined") return true;
-  try {
-    const canvas = document.createElement("canvas");
-    return Boolean(canvas.getContext("webgl2") ?? canvas.getContext("webgl"));
-  } catch {
-    return false;
+  if (cachedSupport === null) {
+    try {
+      const canvas = document.createElement("canvas");
+      const gl = canvas.getContext("webgl2") ?? canvas.getContext("webgl");
+      cachedSupport = Boolean(gl);
+      // Release the probe's context immediately instead of waiting for GC
+      gl?.getExtension("WEBGL_lose_context")?.loseContext();
+    } catch {
+      cachedSupport = false;
+    }
   }
+  return cachedSupport;
 }
 
 function FallbackPanel({ message }: { message: string }) {

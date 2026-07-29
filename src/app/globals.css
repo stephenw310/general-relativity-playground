@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #000000;
-  --foreground: #ededed;
+  --background: #04060b;
+  --foreground: #f4f6fa;
+  --landing-line: rgba(255, 255, 255, 0.16);
+  --landing-accent: #9cb5ff;
+  --landing-online: #a9f37d;
 }
 
 @theme inline {
@@ -12,8 +15,600 @@
   --font-mono: var(--font-geist-mono);
 }
 
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
+}
+
 body {
+  min-width: 320px;
+  margin: 0;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.landing-shell {
+  min-height: 100vh;
+  overflow: hidden;
+  background: #04060b;
+  color: #fff;
+}
+
+.landing-stage {
+  position: relative;
+  min-height: 770px;
+  overflow: hidden;
+  background: #080b12;
+}
+
+.landing-hero-slides,
+.landing-hero-slide {
+  position: absolute;
+  inset: 0;
+}
+
+.landing-hero-slide {
+  opacity: 0;
+  overflow: hidden;
+  background: #080b12;
+  transition: opacity 1.6s ease;
+}
+
+.landing-hero-slide.is-active {
+  opacity: 1;
+}
+
+.landing-hero-slide > img {
+  object-fit: cover;
+  filter: saturate(0.76) brightness(0.56);
+  transform: scale(1.03);
+  animation: landing-drift 14s ease-in-out infinite alternate;
+}
+
+.landing-hero-slide.is-black-hole > img {
+  filter: saturate(0.9) brightness(0.62);
+}
+
+@keyframes landing-drift {
+  to {
+    transform: scale(1.075) translate3d(-0.8%, -0.5%, 0);
+  }
+}
+
+.landing-stage::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(0deg, #04060b 0, rgba(4, 6, 11, 0.3) 55%, rgba(4, 6, 11, 0.16)),
+    linear-gradient(90deg, rgba(2, 4, 9, 0.9), rgba(2, 4, 9, 0.08) 70%);
+}
+
+.landing-concept-art {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0.66;
+}
+
+.landing-concept-lensing {
+  background:
+    radial-gradient(circle at 67% 43%, #f4c985 0 1.3%, transparent 1.5%),
+    radial-gradient(
+      circle at 67% 43%,
+      transparent 0 10%,
+      rgba(148, 178, 255, 0.42) 10.2% 10.5%,
+      transparent 10.7% 18%,
+      rgba(148, 178, 255, 0.18) 18.2% 18.5%,
+      transparent 18.7%
+    ),
+    radial-gradient(circle at 66% 42%, #1d2843, #070b15 34%, #020409 72%);
+}
+
+.landing-concept-time {
+  background:
+    repeating-radial-gradient(
+      circle at 68% 43%,
+      transparent 0 48px,
+      rgba(130, 157, 233, 0.18) 49px 50px
+    ),
+    radial-gradient(circle at 68% 43%, #25375d 0 4%, #0c1426 18%, #03060c 64%);
+}
+
+.landing-concept-geodesic {
+  background:
+    radial-gradient(circle at 70% 45%, #74a88d 0 1%, transparent 1.2%),
+    radial-gradient(circle at 70% 45%, #14291f 0 7%, #07100f 20%, #03070a 62%);
+}
+
+.landing-concept-waves {
+  background:
+    repeating-radial-gradient(
+      circle at 68% 45%,
+      transparent 0 55px,
+      rgba(173, 188, 255, 0.25) 57px 58px
+    ),
+    radial-gradient(circle at 68% 45%, #222d4f, #080c18 34%, #020409 72%);
+}
+
+.landing-hero-slide .landing-concept-art {
+  opacity: 1;
+}
+
+.landing-hero-slide .landing-concept-lensing::after {
+  content: "";
+  position: absolute;
+  width: 37vw;
+  height: 13vw;
+  min-height: 130px;
+  top: 29%;
+  right: 14vw;
+  border: 1px solid rgba(165, 190, 255, 0.5);
+  border-radius: 50%;
+  box-shadow: 0 0 60px rgba(114, 148, 244, 0.16);
+  transform: rotate(-17deg);
+}
+
+.landing-hero-slide .landing-concept-time::before,
+.landing-hero-slide .landing-concept-time::after {
+  content: "";
+  position: absolute;
+  top: 43%;
+  left: 68%;
+  width: 2px;
+  background: #9db5ff;
+  box-shadow: 0 0 14px #718ee6;
+  transform-origin: bottom;
+}
+
+.landing-hero-slide .landing-concept-time::before {
+  height: 21vh;
+  transform: translateY(-100%) rotate(42deg);
+}
+
+.landing-hero-slide .landing-concept-time::after {
+  height: 14vh;
+  transform: translateY(-100%) rotate(126deg);
+}
+
+.landing-hero-slide .landing-concept-geodesic::before,
+.landing-hero-slide .landing-concept-geodesic::after {
+  content: "";
+  position: absolute;
+  top: 20%;
+  right: 5vw;
+  width: 55vw;
+  height: 28vw;
+  border: 1px solid rgba(111, 181, 146, 0.42);
+  border-radius: 50%;
+  box-shadow: 0 0 45px rgba(73, 137, 105, 0.1);
+  transform: rotate(-12deg);
+}
+
+.landing-hero-slide .landing-concept-geodesic::after {
+  top: 27%;
+  right: 14vw;
+  width: 38vw;
+  height: 18vw;
+  transform: rotate(19deg);
+}
+
+.landing-hero-slide .landing-concept-waves {
+  animation: landing-wave-pulse 7s ease-in-out infinite alternate;
+}
+
+@keyframes landing-wave-pulse {
+  to {
+    filter: brightness(1.15);
+    transform: scale(1.08);
+  }
+}
+
+.landing-brand,
+.landing-github {
+  position: absolute;
+  z-index: 4;
+  top: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(5, 8, 14, 0.46);
+  backdrop-filter: blur(14px);
+}
+
+.landing-brand {
+  left: 4vw;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 8px 13px 8px 9px;
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.landing-brand img {
+  object-fit: contain;
+}
+
+.landing-github {
+  right: 4vw;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  opacity: 0.92;
+  transition:
+    border-color 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.landing-github:hover,
+.landing-github:focus-visible {
+  border-color: rgba(255, 255, 255, 0.48);
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.landing-github img {
+  width: 19px;
+  height: 19px;
+  filter: grayscale(1) invert(1) brightness(1.9);
+}
+
+.landing-stage-copy {
+  position: relative;
+  z-index: 3;
+  width: min(680px, 62vw);
+  padding: 218px 0 230px 4vw;
+}
+
+.landing-context {
+  margin: 0 0 18px;
+  color: #b8c3d8;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.landing-stage-copy h1 {
+  max-width: 670px;
+  margin: 0;
+  font-size: clamp(58px, 6.2vw, 94px);
+  font-weight: 570;
+  letter-spacing: -0.065em;
+  line-height: 0.94;
+  text-wrap: balance;
+}
+
+.landing-intro {
+  max-width: 575px;
+  margin: 28px 0 0;
+  color: #c3cad5;
+  font-size: clamp(16px, 1.45vw, 20px);
+  line-height: 1.55;
+  text-wrap: balance;
+}
+
+.landing-mission-select {
+  position: relative;
+  z-index: 5;
+  width: min(1320px, 92vw);
+  margin: -138px auto 0;
+  padding-bottom: 110px;
+}
+
+.landing-mission-bar {
+  min-height: 62px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--landing-line);
+  border-bottom: 0;
+  background: rgba(7, 10, 16, 0.86);
+  backdrop-filter: blur(18px);
+  font-size: 13px;
+}
+
+.landing-mission-count {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #b8c0ce;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11px;
+}
+
+.landing-mission-count::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--landing-online);
+  box-shadow: 0 0 10px var(--landing-online);
+}
+
+.landing-mission-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--landing-line);
+  border-left: 1px solid var(--landing-line);
+  background: #070910;
+}
+
+.landing-mission {
+  position: relative;
+  min-height: 330px;
+  padding: 22px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  border-right: 1px solid var(--landing-line);
+  border-bottom: 1px solid var(--landing-line);
+  background: rgba(255, 255, 255, 0.025);
+  text-align: left;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.landing-mission.is-live {
+  cursor: pointer;
+}
+
+.landing-mission.is-live:hover,
+.landing-mission.is-live:focus-visible {
+  background: rgba(255, 255, 255, 0.065);
+  outline: none;
+}
+
+.landing-mission.is-selected {
+  z-index: 2;
+  box-shadow:
+    inset 0 0 0 2px var(--landing-accent),
+    0 0 32px rgba(120, 151, 255, 0.14);
+}
+
+.landing-mission > img {
+  position: absolute;
+  inset: 0;
+  object-fit: cover;
+  opacity: 0.56;
+  filter: saturate(0.78);
+  transition:
+    opacity 0.3s ease,
+    transform 0.4s ease;
+}
+
+.landing-mission.is-live:hover > img,
+.landing-mission.is-live:focus-visible > img {
+  opacity: 0.68;
+  transform: scale(1.03);
+}
+
+.landing-mission.is-live::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(3, 5, 10, 0.96), transparent 73%);
+}
+
+.landing-mission-top,
+.landing-mission-copy,
+.landing-mission-launch {
+  position: relative;
+  z-index: 2;
+}
+
+.landing-mission-top {
+  display: flex;
+  justify-content: space-between;
+  color: #c5cbd6;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 10px;
+}
+
+.landing-mission-number,
+.landing-availability {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.landing-mission-number b {
+  color: #fff;
+  font-weight: 500;
+}
+
+.landing-availability::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--landing-online);
+}
+
+.landing-availability.is-locked {
+  color: #747d8d;
+}
+
+.landing-availability.is-locked::before {
+  background: #68717e;
+}
+
+.landing-mission-copy {
+  margin-top: auto;
+  transition: transform 0.2s ease;
+}
+
+.landing-mission-copy h2 {
+  margin: 0 0 9px;
+  font-size: 29px;
+  font-weight: 570;
+  letter-spacing: -0.04em;
+  line-height: 1.04;
+}
+
+.landing-mission-copy p {
+  max-width: 360px;
+  margin: 0;
+  color: #9da6b6;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.landing-mission.is-live .landing-mission-copy p {
+  color: #c4cad4;
+}
+
+.landing-mission-launch {
+  position: absolute;
+  z-index: 4;
+  right: 20px;
+  bottom: 20px;
+  width: 132px;
+  height: 40px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #fff;
+  color: #090b10;
+  font-size: 11px;
+  font-weight: 650;
+  opacity: 0;
+  transform: translateY(7px);
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.landing-mission.is-live:hover .landing-mission-launch,
+.landing-mission.is-live:focus-visible .landing-mission-launch {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.landing-mission.is-live .landing-mission-launch:hover {
+  background: #dfe7ff;
+  box-shadow: 0 9px 24px rgba(94, 125, 215, 0.28);
+  transform: translateY(-2px);
+}
+
+.landing-mission-launch b {
+  transition: transform 0.2s ease;
+}
+
+.landing-mission-launch:hover b {
+  transform: translateX(3px);
+}
+
+.landing-mission.is-live:hover .landing-mission-copy,
+.landing-mission.is-live:focus-visible .landing-mission-copy {
+  transform: translateY(-48px);
+}
+
+.landing-mission .landing-concept-art {
+  background-color: #090c13;
+}
+
+@media (max-width: 900px) {
+  .landing-stage {
+    min-height: 720px;
+  }
+
+  .landing-stage-copy {
+    width: min(720px, 88vw);
+    padding-top: 205px;
+  }
+
+  .landing-mission-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 620px) {
+  .landing-stage {
+    min-height: 690px;
+  }
+
+  .landing-brand {
+    left: 20px;
+  }
+
+  .landing-github {
+    right: 20px;
+  }
+
+  .landing-stage-copy {
+    width: auto;
+    padding: 166px 20px 190px;
+  }
+
+  .landing-stage-copy h1 {
+    font-size: clamp(48px, 14.5vw, 68px);
+  }
+
+  .landing-intro {
+    margin-top: 22px;
+    font-size: 16px;
+  }
+
+  .landing-mission-select {
+    width: calc(100vw - 24px);
+    margin-top: -90px;
+    padding-bottom: 78px;
+  }
+
+  .landing-mission-bar {
+    padding: 0 14px;
+  }
+
+  .landing-mission-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-mission {
+    min-height: 290px;
+  }
+
+  .landing-mission.is-live .landing-mission-launch {
+    opacity: 1;
+    transform: none;
+  }
+
+  .landing-mission.is-live .landing-mission-copy {
+    padding-bottom: 58px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-hero-slide,
+  .landing-hero-slide > img,
+  .landing-hero-slide .landing-concept-waves,
+  .landing-mission,
+  .landing-mission > img,
+  .landing-mission-copy,
+  .landing-mission-launch,
+  .landing-github {
+    animation: none;
+    transition: none;
+  }
 }

@@ -3,10 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import {
-  SIMULATIONS,
-  type SimulationMeta,
-} from "@/constants/simulations";
+import { SIMULATIONS, type SimulationMeta } from "@/constants/simulations";
 
 const MISSION_ORDER = [
   "spacetime",
@@ -210,13 +207,13 @@ export default function Home() {
           rel="noopener noreferrer"
           aria-label="View Relativity Playground on GitHub"
         >
-          {/* GitHub's favicon provides the official mark without another icon dependency. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="https://github.com/favicon.ico" alt="" />
+          <span className="sr-only">GitHub</span>
         </a>
 
         <div className="landing-stage-copy">
-          <p className="landing-context">An interactive relativity playground</p>
+          <p className="landing-context">
+            An interactive relativity playground
+          </p>
           <h1>Play with spacetime.</h1>
           <p className="landing-intro">
             Choose a simulation, change the conditions, and see how space, time,

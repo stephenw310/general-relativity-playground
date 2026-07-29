@@ -91,7 +91,12 @@ a {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(0deg, #04060b 0, rgba(4, 6, 11, 0.3) 55%, rgba(4, 6, 11, 0.16)),
+    linear-gradient(
+      0deg,
+      #04060b 0,
+      rgba(4, 6, 11, 0.3) 55%,
+      rgba(4, 6, 11, 0.16)
+    ),
     linear-gradient(90deg, rgba(2, 4, 9, 0.9), rgba(2, 4, 9, 0.08) 70%);
 }
 
@@ -261,9 +266,11 @@ a {
   transform: translateY(-2px);
 }
 
-.landing-github img {
+.landing-github::before {
+  content: "";
   width: 19px;
   height: 19px;
+  background: url("https://github.com/favicon.ico") center / contain no-repeat;
   filter: grayscale(1) invert(1) brightness(1.9);
 }
 

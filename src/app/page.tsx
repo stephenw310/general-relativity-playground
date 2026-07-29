@@ -86,11 +86,13 @@ function MissionArtwork({
 function MissionCard({
   mission,
   index,
+  selected,
   onPreview,
   onPreviewEnd,
 }: {
   mission: LandingMission;
   index: number;
+  selected: boolean;
   onPreview: () => void;
   onPreviewEnd: () => void;
 }) {
@@ -125,7 +127,7 @@ function MissionCard({
     return (
       <Link
         href={mission.route}
-        className={`landing-mission is-live${index === 0 ? " is-selected" : ""}`}
+        className={`landing-mission is-live${selected ? " is-selected" : ""}`}
         onMouseEnter={onPreview}
         onMouseLeave={onPreviewEnd}
         onFocus={onPreview}
@@ -138,7 +140,7 @@ function MissionCard({
 
   return (
     <article
-      className="landing-mission"
+      className={`landing-mission${selected ? " is-selected" : ""}`}
       aria-disabled="true"
       onMouseEnter={onPreview}
       onMouseLeave={onPreviewEnd}
@@ -162,6 +164,9 @@ export default function Home() {
   );
   const [activeMission, setActiveMission] = useState(0);
   const [rotationPaused, setRotationPaused] = useState(false);
+  const availableMissionCount = missions.filter(
+    (mission) => mission.status === "available",
+  ).length;
 
   useEffect(() => {
     if (rotationPaused) return;
@@ -225,7 +230,10 @@ export default function Home() {
       <main className="landing-mission-select">
         <div className="landing-mission-bar">
           <strong>Mission select</strong>
-          <span className="landing-mission-count">2 missions available</span>
+          <span className="landing-mission-count">
+            {availableMissionCount}{" "}
+            {availableMissionCount === 1 ? "mission" : "missions"} available
+          </span>
         </div>
 
         <div className="landing-mission-grid">
@@ -234,6 +242,7 @@ export default function Home() {
               key={mission.id}
               mission={mission}
               index={index}
+              selected={activeMission === index}
               onPreview={() => previewMission(index)}
               onPreviewEnd={() => setRotationPaused(false)}
             />

@@ -1,4 +1,4 @@
-import { CanvasTexture, Color } from "three";
+import { CanvasTexture, SRGBColorSpace } from "three";
 
 export type CosmicObjectType =
   | "star"
@@ -8,8 +8,24 @@ export type CosmicObjectType =
   | "red_giant"
   | "custom";
 
+interface RGBColor {
+  r: number;
+  g: number;
+  b: number;
+}
+
 interface CosmicObjectConfig {
-  baseColor: Color;
+  shadowColor: RGBColor;
+  baseColor: RGBColor;
+  highlightColor: RGBColor;
+}
+
+function rgb(hex: number): RGBColor {
+  return {
+    r: (hex >> 16) & 255,
+    g: (hex >> 8) & 255,
+    b: hex & 255,
+  };
 }
 
 const COSMIC_CONFIGS: Record<
@@ -17,20 +33,39 @@ const COSMIC_CONFIGS: Record<
   CosmicObjectConfig
 > = {
   star: {
-    baseColor: new Color(0xffd700),
+    shadowColor: rgb(0x8297bc),
+    baseColor: rgb(0xd7e5ff),
+    highlightColor: rgb(0xffffff),
   },
   pulsar: {
-    baseColor: new Color(0x00ffff),
+    shadowColor: rgb(0x52658d),
+    baseColor: rgb(0xa9c3ef),
+    highlightColor: rgb(0xf8fbff),
   },
   neutron_star: {
-    baseColor: new Color(0xaaffff),
+    shadowColor: rgb(0x687895),
+    baseColor: rgb(0xbccde9),
+    highlightColor: rgb(0xf7fbff),
   },
   white_dwarf: {
-    baseColor: new Color(0xffffff),
+    shadowColor: rgb(0x96aac4),
+    baseColor: rgb(0xe5effc),
+    highlightColor: rgb(0xffffff),
   },
   red_giant: {
-    baseColor: new Color(0xff4444),
+    shadowColor: rgb(0x743726),
+    baseColor: rgb(0xdb714a),
+    highlightColor: rgb(0xffb47b),
   },
+};
+
+export const COSMIC_GLOW_COLORS: Record<CosmicObjectType, string> = {
+  star: "#d7e5ff",
+  pulsar: "#a9c3ef",
+  neutron_star: "#c8d9f2",
+  white_dwarf: "#edf5ff",
+  red_giant: "#f08a60",
+  custom: "#dfe9ff",
 };
 
 export const COSMIC_MASS_PRESETS: Record<
@@ -62,6 +97,7 @@ interface CacheEntry {
 }
 
 const MAX_CACHE_SIZE = 50;
+const TEXTURE_PALETTE_VERSION = 2;
 const textureCache = new Map<string, CacheEntry>();
 
 function evictLeastRecentlyUsed() {
@@ -95,7 +131,7 @@ export function createCosmicTexture(
   const textureSeed = seed ?? Math.random() * 1000;
 
   // Create cache key with full precision to avoid collisions
-  const cacheKey = `${actualType}-${size}-${textureSeed.toFixed(3)}`;
+  const cacheKey = `${TEXTURE_PALETTE_VERSION}-${actualType}-${size}-${textureSeed.toFixed(3)}`;
 
   // Return cached texture if available
   const cacheEntry = textureCache.get(cacheKey);
@@ -137,6 +173,7 @@ export function createCosmicTexture(
   }
 
   const texture = new CanvasTexture(canvas);
+  texture.colorSpace = SRGBColorSpace;
   texture.needsUpdate = true;
 
   // Cache the texture for future use
@@ -164,11 +201,12 @@ function createFallbackTexture(
     const actualType = type === "custom" ? "star" : type;
     const config = COSMIC_CONFIGS[actualType];
 
-    ctx.fillStyle = `#${config.baseColor.getHexString()}`;
+    ctx.fillStyle = `rgb(${config.baseColor.r} ${config.baseColor.g} ${config.baseColor.b})`;
     ctx.fillRect(0, 0, size, size);
   }
 
   const texture = new CanvasTexture(canvas);
+  texture.colorSpace = SRGBColorSpace;
   texture.needsUpdate = true;
   return texture;
 }
@@ -211,38 +249,50 @@ function generateRealisticStellarSurface(
   const imageData = ctx.createImageData(size, size);
   const data = imageData.data;
 
-  const baseColor = config.baseColor;
-  const baseR = Math.floor(baseColor.r * 255);
-  const baseG = Math.floor(baseColor.g * 255);
-  const baseB = Math.floor(baseColor.b * 255);
-
   switch (type) {
     case "star":
-      generateSolarSurface(data, size, baseR, baseG, baseB, seed);
+      generateSolarSurface(data, size, config, seed);
       break;
     case "pulsar":
-      generatePulsarSurface(data, size, baseR, baseG, baseB, seed);
+      generatePulsarSurface(data, size, config, seed);
       break;
     case "neutron_star":
-      generateNeutronStarSurface(data, size, baseR, baseG, baseB, seed);
+      generateNeutronStarSurface(data, size, config, seed);
       break;
     case "white_dwarf":
-      generateWhiteDwarfSurface(data, size, baseR, baseG, baseB, seed);
+      generateWhiteDwarfSurface(data, size, config, seed);
       break;
     case "red_giant":
-      generateRedGiantSurface(data, size, baseR, baseG, baseB, seed);
+      generateRedGiantSurface(data, size, config, seed);
       break;
   }
 
   ctx.putImageData(imageData, 0, 0);
 }
 
+function writeStellarPixel(
+  data: Uint8ClampedArray,
+  index: number,
+  config: CosmicObjectConfig,
+  intensity: number,
+) {
+  const belowBase = intensity <= 1;
+  const from = belowBase ? config.shadowColor : config.baseColor;
+  const to = belowBase ? config.baseColor : config.highlightColor;
+  const blend = belowBase
+    ? Math.min(1, Math.max(0, (intensity - 0.45) / 0.55))
+    : Math.min(1, (intensity - 1) / 0.3);
+
+  data[index] = Math.round(from.r + (to.r - from.r) * blend);
+  data[index + 1] = Math.round(from.g + (to.g - from.g) * blend);
+  data[index + 2] = Math.round(from.b + (to.b - from.b) * blend);
+  data[index + 3] = 255;
+}
+
 function generateSolarSurface(
   data: Uint8ClampedArray,
   size: number,
-  r: number,
-  g: number,
-  b: number,
+  config: CosmicObjectConfig,
   seed: number,
 ) {
   // Solar granulation and convection cells
@@ -256,11 +306,7 @@ function generateSolarSurface(
       const microStructure = fbm(x / 8, y / 8, seed + 200, 4) * 0.1;
 
       const intensity = 0.7 + granulation + convection + microStructure;
-
-      data[idx] = Math.min(255, Math.max(0, r * intensity));
-      data[idx + 1] = Math.min(255, Math.max(0, g * intensity));
-      data[idx + 2] = Math.min(255, Math.max(0, b * intensity));
-      data[idx + 3] = 255;
+      writeStellarPixel(data, idx, config, intensity);
     }
   }
 }
@@ -268,9 +314,7 @@ function generateSolarSurface(
 function generatePulsarSurface(
   data: Uint8ClampedArray,
   size: number,
-  r: number,
-  g: number,
-  b: number,
+  config: CosmicObjectConfig,
   seed: number,
 ) {
   // Magnetic field patterns and high-energy emissions
@@ -297,11 +341,7 @@ function generatePulsarSurface(
       const hotspots = fbm(x / 15, y / 15, seed, 3) * 0.3;
 
       const intensity = baseIntensity + hotspots;
-
-      data[idx] = Math.min(255, Math.max(0, r * intensity));
-      data[idx + 1] = Math.min(255, Math.max(0, g * intensity));
-      data[idx + 2] = Math.min(255, Math.max(0, b * intensity));
-      data[idx + 3] = 255;
+      writeStellarPixel(data, idx, config, intensity);
     }
   }
 }
@@ -309,9 +349,7 @@ function generatePulsarSurface(
 function generateNeutronStarSurface(
   data: Uint8ClampedArray,
   size: number,
-  r: number,
-  g: number,
-  b: number,
+  config: CosmicObjectConfig,
   seed: number,
 ) {
   // Ultra-dense crystalline surface
@@ -328,11 +366,7 @@ function generateNeutronStarSurface(
       const density = fbm(x / 30, y / 30, seed, 2) * 0.1;
 
       const intensity = 0.8 + crystal + density;
-
-      data[idx] = Math.min(255, Math.max(0, r * intensity));
-      data[idx + 1] = Math.min(255, Math.max(0, g * intensity));
-      data[idx + 2] = Math.min(255, Math.max(0, b * intensity));
-      data[idx + 3] = 255;
+      writeStellarPixel(data, idx, config, intensity);
     }
   }
 }
@@ -340,9 +374,7 @@ function generateNeutronStarSurface(
 function generateWhiteDwarfSurface(
   data: Uint8ClampedArray,
   size: number,
-  r: number,
-  g: number,
-  b: number,
+  config: CosmicObjectConfig,
   seed: number,
 ) {
   // Degenerate matter surface with carbon-oxygen crystallization
@@ -359,11 +391,7 @@ function generateWhiteDwarfSurface(
       const surface = fbm(x / 25, y / 25, seed, 2) * 0.1;
 
       const intensity = 0.85 + crystalline + surface;
-
-      data[idx] = Math.min(255, Math.max(0, r * intensity));
-      data[idx + 1] = Math.min(255, Math.max(0, g * intensity));
-      data[idx + 2] = Math.min(255, Math.max(0, b * intensity));
-      data[idx + 3] = 255;
+      writeStellarPixel(data, idx, config, intensity);
     }
   }
 }
@@ -371,9 +399,7 @@ function generateWhiteDwarfSurface(
 function generateRedGiantSurface(
   data: Uint8ClampedArray,
   size: number,
-  r: number,
-  g: number,
-  b: number,
+  config: CosmicObjectConfig,
   seed: number,
 ) {
   // Turbulent convection and variable brightness
@@ -391,11 +417,7 @@ function generateRedGiantSurface(
         0.1;
 
       const intensity = 0.6 + convection + turbulence + cooling;
-
-      data[idx] = Math.min(255, Math.max(0, r * intensity));
-      data[idx + 1] = Math.min(255, Math.max(0, g * intensity));
-      data[idx + 2] = Math.min(255, Math.max(0, b * intensity));
-      data[idx + 3] = 255;
+      writeStellarPixel(data, idx, config, intensity);
     }
   }
 }

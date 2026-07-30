@@ -1,15 +1,24 @@
 import { create } from "zustand";
 import type { StoreState } from "@/types";
 import { MASS_DEFAULT_VALUE } from "@/constants";
-import type { CosmicObjectType } from "@/utils/cosmic-textures";
+import {
+  COSMIC_MASS_PRESETS,
+  type CosmicObjectType,
+} from "@/utils/cosmic-textures";
 
 const initialState = {
   masses: [
     {
-      id: "1",
-      position: [0, 0] as [number, number],
-      mass: MASS_DEFAULT_VALUE,
-      cosmicType: "custom" as CosmicObjectType,
+      id: "primary",
+      position: [-2.5, 0.3] as [number, number],
+      mass: 2.5,
+      cosmicType: "star" as CosmicObjectType,
+    },
+    {
+      id: "companion",
+      position: [2.6, -0.5] as [number, number],
+      mass: 1.4,
+      cosmicType: "neutron_star" as CosmicObjectType,
     },
   ],
   selectedMassId: null,
@@ -24,7 +33,10 @@ export const useStore = create<StoreState>()((set) => ({
       const newMass = {
         id: Math.random().toString(36).substring(2, 11),
         position,
-        mass: MASS_DEFAULT_VALUE,
+        mass:
+          cosmicType && cosmicType !== "custom"
+            ? COSMIC_MASS_PRESETS[cosmicType]
+            : MASS_DEFAULT_VALUE,
         cosmicType: cosmicType || "custom",
       };
       return { masses: [...state.masses, newMass] };

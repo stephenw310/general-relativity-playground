@@ -128,6 +128,7 @@ function MissionCard({
       <Link
         href={mission.route}
         className={`landing-mission is-live${selected ? " is-selected" : ""}`}
+        data-mission={mission.id}
         onMouseEnter={onPreview}
         onMouseLeave={onPreviewEnd}
         onFocus={onPreview}
@@ -141,6 +142,7 @@ function MissionCard({
   return (
     <article
       className={`landing-mission${selected ? " is-selected" : ""}`}
+      data-mission={mission.id}
       aria-disabled="true"
       onMouseEnter={onPreview}
       onMouseLeave={onPreviewEnd}

@@ -2,7 +2,7 @@
 
 import { memo, useRef, useState, useCallback, useMemo } from "react";
 import { useThree } from "@react-three/fiber";
-import { Vector3, Plane } from "three";
+import { AdditiveBlending, BackSide, Plane, Vector3 } from "three";
 import {
   useStore,
   useSelectedMassId,
@@ -15,14 +15,12 @@ import {
   DRAG_BOUNDS_MAX,
   MASS_SPHERE_RADIUS,
   MASS_SPHERE_SEGMENTS,
-  MASS_Z_POSITION,
-  MASS_COLOR_DEFAULT,
-  MASS_COLOR_SELECTED,
-  MASS_COLOR_HOVERED,
+  MASS_REFERENCE_PLANE_HEIGHT,
 } from "@/constants";
 import { getFinalMassScale } from "@/utils/mass-calculations";
 import { resolveCollisions } from "@/utils/collision-detection";
 import {
+  COSMIC_GLOW_COLORS,
   createCosmicTexture,
   getCosmicTypeByMass,
   generateSeedFromId,
@@ -56,8 +54,8 @@ const MassHandle = memo(function MassHandle({ mass }: MassHandleProps) {
       selectMass(mass.id);
       gl.domElement.style.cursor = "grabbing";
 
-      // Align drag plane with the sphere height (Y) to keep motion strictly in-plane
-      dragPlane.constant = -MASS_Z_POSITION;
+      // Object markers all live on the same undeformed reference plane.
+      dragPlane.constant = -MASS_REFERENCE_PLANE_HEIGHT;
 
       // Cache rect on drag start to avoid expensive recalculations
       cachedRect.current = gl.domElement.getBoundingClientRect();
@@ -156,49 +154,80 @@ const MassHandle = memo(function MassHandle({ mass }: MassHandleProps) {
   const scale = useMemo(() => {
     return getFinalMassScale(mass.mass, isSelected, isHovered);
   }, [isSelected, isHovered, mass.mass]);
+  const cosmicType = mass.cosmicType || getCosmicTypeByMass(mass.mass);
 
   // Create cosmic texture based on stored cosmic type
   const cosmicTexture = useMemo(() => {
-    const type = mass.cosmicType || getCosmicTypeByMass(mass.mass);
     // Use better hash function for consistent textures per object
     const seed = generateSeedFromId(mass.id);
-    return createCosmicTexture(type, 256, seed);
-  }, [mass.cosmicType, mass.mass, mass.id]);
+    return createCosmicTexture(cosmicType, 256, seed);
+  }, [cosmicType, mass.id]);
 
-  const color = useMemo(() => {
-    if (isSelected) return MASS_COLOR_SELECTED;
-    if (isHovered) return MASS_COLOR_HOVERED;
-    return MASS_COLOR_DEFAULT;
-  }, [isSelected, isHovered]);
+  const glowColor = COSMIC_GLOW_COLORS[cosmicType];
 
-  // Map 2-D logical position (x, z) to world-space XZ, keeping constant Y height
+  // Markers show the source locations; their height does not encode mass or
+  // curvature. Only the surface shader represents the field response.
   const position = useMemo(
-    () => [mass.position[0], MASS_Z_POSITION, mass.position[1]] as const,
+    () =>
+      [
+        mass.position[0],
+        MASS_REFERENCE_PLANE_HEIGHT,
+        mass.position[1],
+      ] as const,
     [mass.position],
   );
+
   const scaleArray = useMemo(() => [scale, scale, scale] as const, [scale]);
+  const glowScale = scale * (isSelected ? 1.36 : isHovered ? 1.33 : 1.3);
 
   return (
-    <mesh
-      position={position}
-      scale={scaleArray}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerEnter={handlePointerEnter}
-      onPointerLeave={handlePointerLeave}
-      onClick={handleClick}
-    >
-      <sphereGeometry
-        args={[MASS_SPHERE_RADIUS, MASS_SPHERE_SEGMENTS, MASS_SPHERE_SEGMENTS]}
-      />
-      <meshBasicMaterial
-        map={cosmicTexture}
-        color={isSelected || isHovered ? color : "white"}
-        transparent={isSelected || isHovered}
-        opacity={isSelected || isHovered ? 0.9 : 1.0}
-      />
-    </mesh>
+    <group position={position}>
+      <mesh scale={[glowScale, glowScale, glowScale]} raycast={() => undefined}>
+        <sphereGeometry args={[MASS_SPHERE_RADIUS, 24, 24]} />
+        <meshBasicMaterial
+          color={glowColor}
+          transparent
+          opacity={isSelected ? 0.14 : isHovered ? 0.1 : 0.08}
+          blending={AdditiveBlending}
+          depthWrite={false}
+          side={BackSide}
+        />
+      </mesh>
+
+      <mesh
+        scale={scaleArray}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerEnter={handlePointerEnter}
+        onPointerLeave={handlePointerLeave}
+        onClick={handleClick}
+      >
+        <sphereGeometry
+          args={[
+            MASS_SPHERE_RADIUS,
+            MASS_SPHERE_SEGMENTS,
+            MASS_SPHERE_SEGMENTS,
+          ]}
+        />
+        <meshBasicMaterial map={cosmicTexture} color="white" />
+      </mesh>
+
+      <mesh
+        position={[0, 0.025, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        raycast={() => undefined}
+      >
+        <ringGeometry args={[scale * 1.18, scale * 1.24, 64]} />
+        <meshBasicMaterial
+          color={glowColor}
+          transparent
+          opacity={isSelected ? 0.65 : isHovered ? 0.38 : 0.24}
+          blending={AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+    </group>
   );
 });
 

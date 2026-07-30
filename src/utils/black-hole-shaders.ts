@@ -250,6 +250,7 @@ export const lensFragmentShader = /* glsl */ `
     float escapeRadius = max(cameraRadius + 3.0, 24.0);
 
     bool traceExhausted = true;
+    bool hitDisk = false;
     bool escaped = false;
     vec3 result = vec3(0.0);
 
@@ -308,6 +309,7 @@ export const lensFragmentShader = /* glsl */ `
             diskRadius
           );
           traceExhausted = false;
+          hitDisk = true;
           break;
         }
       }
@@ -316,13 +318,15 @@ export const lensFragmentShader = /* glsl */ `
       direction = nextDirection;
     }
 
-    if (escaped && !insidePhysicalShadow) {
-      result = spaceColor(direction);
-    } else if (traceExhausted || insidePhysicalShadow) {
-      // Never sample the celestial background from a ray that has not
-      // crossed the escape boundary. Also keep the exact Schwarzschild
-      // capture cone dark if numerical stepping crosses its separatrix.
-      result = vec3(0.0);
+    if (!hitDisk) {
+      if (escaped && !insidePhysicalShadow) {
+        result = spaceColor(direction);
+      } else if (traceExhausted || insidePhysicalShadow) {
+        // Never sample the celestial background from a ray that has not
+        // crossed the escape boundary. Also keep the exact Schwarzschild
+        // capture cone dark if numerical stepping crosses its separatrix.
+        result = vec3(0.0);
+      }
     }
 
     if (uShowPhotonSphere > 0.5) {

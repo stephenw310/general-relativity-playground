@@ -75,7 +75,7 @@ a {
 }
 
 .landing-hero-slide.is-black-hole > img {
-  filter: saturate(0.9) brightness(0.62);
+  filter: saturate(1) brightness(0.88);
 }
 
 @keyframes landing-drift {
@@ -406,6 +406,11 @@ a {
   filter: saturate(1.08) brightness(1.16);
 }
 
+.landing-mission[data-mission="black-hole"] > img {
+  opacity: 0.76;
+  filter: saturate(1.04) brightness(1.15);
+}
+
 .landing-mission.is-live:hover > img,
 .landing-mission.is-live:focus-visible > img {
   opacity: 0.68;
@@ -415,6 +420,11 @@ a {
 .landing-mission[data-mission="spacetime"].is-live:hover > img,
 .landing-mission[data-mission="spacetime"].is-live:focus-visible > img {
   opacity: 0.94;
+}
+
+.landing-mission[data-mission="black-hole"].is-live:hover > img,
+.landing-mission[data-mission="black-hole"].is-live:focus-visible > img {
+  opacity: 0.9;
 }
 
 .landing-mission.is-live::after {

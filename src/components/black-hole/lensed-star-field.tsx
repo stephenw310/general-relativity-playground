@@ -1,43 +1,55 @@
 "use client";
 
-import { useMemo, useEffect } from "react";
-import { createPortal, useFrame, useThree } from "@react-three/fiber";
-import { useFBO, ScreenQuad } from "@react-three/drei";
-import { Scene, ShaderMaterial, Vector3 } from "three";
-import { StarField } from "@/components/star-field";
-import { SHADOW_FACTOR } from "@/constants";
+import { ScreenQuad } from "@react-three/drei";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useMemo } from "react";
+import { ShaderMaterial, Vector3 } from "three";
+import type { BlackHoleQuality } from "@/types";
 import {
-  lensVertexShader,
   lensFragmentShader,
+  lensVertexShader,
 } from "@/utils/black-hole-shaders";
 
 interface LensedStarFieldProps {
   /** Schwarzschild radius in world units */
   rs: number;
   lensingStrength: number;
-  starCount?: number;
+  showDisk: boolean;
+  diskSpeed: number;
+  showPhotonSphere: boolean;
+  quality: BlackHoleQuality;
 }
 
-const bhWorldPos = new Vector3();
+const cameraRight = new Vector3();
+const cameraUp = new Vector3();
+const cameraForward = new Vector3();
 
 export function LensedStarField({
   rs,
   lensingStrength,
-  starCount,
+  showDisk,
+  diskSpeed,
+  showPhotonSphere,
+  quality,
 }: LensedStarFieldProps) {
-  const starScene = useMemo(() => new Scene(), []);
-  const fbo = useFBO();
   const { size } = useThree();
 
   const lensMaterial = useMemo(
     () =>
       new ShaderMaterial({
         uniforms: {
-          uScene: { value: null },
-          uCenter: { value: [0.5, 0.5] },
-          uThetaE2: { value: 0 },
-          uShadowR: { value: 0 },
+          uCameraPosition: { value: new Vector3() },
+          uCameraRight: { value: new Vector3(1, 0, 0) },
+          uCameraUp: { value: new Vector3(0, 1, 0) },
+          uCameraForward: { value: new Vector3(0, 0, -1) },
           uAspect: { value: 1 },
+          uTanHalfFov: { value: Math.tan(Math.PI / 6) },
+          uTime: { value: 0 },
+          uDiskSpeed: { value: 1 },
+          uLensingStrength: { value: 1 },
+          uShowDisk: { value: 1 },
+          uShowPhotonSphere: { value: 0 },
+          uMaxSteps: { value: 112 },
         },
         vertexShader: lensVertexShader,
         fragmentShader: lensFragmentShader,
@@ -52,46 +64,31 @@ export function LensedStarField({
   }, [lensMaterial]);
 
   useFrame((state) => {
-    const { gl, camera } = state;
-
-    // Render the star scene to the offscreen target with the main camera
-    gl.setRenderTarget(fbo);
-    gl.clear();
-    gl.render(starScene, camera);
-    gl.setRenderTarget(null);
-
-    // Project the black hole (world origin) into screen UV space
-    bhWorldPos.set(0, 0, 0).project(camera);
-    const behind = bhWorldPos.z > 1;
-    const cx = bhWorldPos.x * 0.5 + 0.5;
-    const cy = bhWorldPos.y * 0.5 + 0.5;
-
-    // Angular radii (radians, small-angle) converted to aspect-corrected UV
-    // units: uvPerRadian maps view angle to vertical screen fraction
-    const dist = camera.position.length();
-    const fovRad =
-      ("fov" in camera ? (camera.fov as number) : 60) * (Math.PI / 180);
-    const uvPerRadian = 1 / (2 * Math.tan(fovRad / 2));
-
-    const thetaE = Math.sqrt((2 * rs) / Math.max(dist, rs)) * lensingStrength;
-    // Shadow shrinks toward the bare horizon as lensing strength drops
-    const shadowFactor = 1 + (SHADOW_FACTOR - 1) * Math.min(lensingStrength, 1);
-    const thetaShadow = (shadowFactor * rs) / Math.max(dist, rs);
+    const { camera, clock } = state;
+    cameraRight.set(1, 0, 0).applyQuaternion(camera.quaternion);
+    cameraUp.set(0, 1, 0).applyQuaternion(camera.quaternion);
+    cameraForward.set(0, 0, -1).applyQuaternion(camera.quaternion);
 
     const uniforms = lensMaterial.uniforms;
-    uniforms.uScene.value = fbo.texture;
-    uniforms.uCenter.value = [cx, cy];
+    uniforms.uCameraPosition.value.copy(camera.position).divideScalar(rs);
+    uniforms.uCameraRight.value.copy(cameraRight);
+    uniforms.uCameraUp.value.copy(cameraUp);
+    uniforms.uCameraForward.value.copy(cameraForward);
     uniforms.uAspect.value = size.width / size.height;
-    uniforms.uThetaE2.value = behind ? 0 : (thetaE * uvPerRadian) ** 2;
-    uniforms.uShadowR.value = behind ? 0 : thetaShadow * uvPerRadian;
+    const fov = "fov" in camera ? camera.fov : 60;
+    uniforms.uTanHalfFov.value = Math.tan((fov * Math.PI) / 360);
+    uniforms.uTime.value = clock.elapsedTime;
+    uniforms.uDiskSpeed.value = diskSpeed;
+    uniforms.uLensingStrength.value = lensingStrength;
+    uniforms.uShowDisk.value = showDisk ? 1 : 0;
+    uniforms.uShowPhotonSphere.value = showPhotonSphere ? 1 : 0;
+    uniforms.uMaxSteps.value =
+      quality === "low" ? 112 : quality === "high" ? 192 : 144;
   });
 
   return (
-    <>
-      {createPortal(<StarField count={starCount} />, starScene)}
-      <ScreenQuad renderOrder={-1} frustumCulled={false}>
-        <primitive object={lensMaterial} attach="material" />
-      </ScreenQuad>
-    </>
+    <ScreenQuad renderOrder={-1} frustumCulled={false}>
+      <primitive object={lensMaterial} attach="material" />
+    </ScreenQuad>
   );
 }

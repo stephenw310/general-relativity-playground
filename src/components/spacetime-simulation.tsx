@@ -1,137 +1,148 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { Stats } from "@react-three/drei";
-import { Leva } from "leva";
+import Link from "next/link";
+import { useState } from "react";
+import { BoundedOrbitControls } from "@/components/bounded-orbit-controls";
+import { Controls } from "@/components/controls";
 import { CurvedGrid } from "@/components/curved-grid";
 import { MassHandles } from "@/components/mass-handles";
-import { Controls } from "@/components/controls";
-import { BoundedOrbitControls } from "@/components/bounded-orbit-controls";
 import { StarField } from "@/components/star-field";
 import { WebGLErrorBoundary } from "@/components/webgl-error-boundary";
-import { useMasses, useIsDragging } from "@/store/store";
 import {
-  GRID_SIZE,
-  GRID_RESOLUTION,
-  CAMERA_POSITION,
   CAMERA_FOV,
+  CAMERA_POSITION,
+  GRID_RESOLUTION,
+  GRID_SIZE,
 } from "@/constants";
+import { useIsDragging, useMasses } from "@/store/store";
 import { useIsCompactViewport } from "@/utils/device";
-import { useState } from "react";
-import Link from "next/link";
 
 export function SpacetimeSimulation() {
   const masses = useMasses();
   const isDragging = useIsDragging();
-  const [showStats, setShowStats] = useState(false);
   const [hudOpen, setHudOpen] = useState(false);
-  // Collapsed on compact viewports until the user toggles it themselves
   const isCompact = useIsCompactViewport();
-  const [levaToggled, setLevaToggled] = useState<boolean | null>(null);
-  const levaCollapsed = levaToggled ?? isCompact;
+  const totalMass = masses.reduce((total, mass) => total + mass.mass, 0);
 
   return (
     <WebGLErrorBoundary>
-      <div className="h-screen w-full bg-black">
-        {/* Navigation Bar */}
-        <nav className="absolute top-0 left-0 z-20 w-full bg-gray-900/80 backdrop-blur-sm">
-          <div className="flex items-center justify-between px-6 py-3">
-            <Link
-              href="/"
-              className="flex items-center space-x-2 rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white transition-colors hover:bg-blue-800 focus:outline-none"
-            >
-              <span>←</span>
-              <span>Back to Home</span>
-            </Link>
+      <main className="spacetime-shell">
+        <nav className="spacetime-topbar" aria-label="Simulation navigation">
+          <Link href="/" className="spacetime-back">
+            <span aria-hidden="true">←</span>
+            <span>Mission select</span>
+          </Link>
+
+          <div className="spacetime-mission-id">
+            <span>01</span>
+            <b>Geometry</b>
+          </div>
+
+          <div className="spacetime-status">
+            <span aria-hidden="true" />
+            Online
           </div>
         </nav>
 
-        <Leva
-          collapsed={{ collapsed: levaCollapsed, onChange: setLevaToggled }}
-        />
         <Controls />
 
-        {/* Mobile HUD toggle */}
         <button
           type="button"
-          className="absolute bottom-4 left-4 z-20 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-800/60 text-lg text-white backdrop-blur-md md:hidden"
-          onClick={() => setHudOpen((o) => !o)}
+          className="spacetime-info-toggle"
+          onClick={() => setHudOpen((open) => !open)}
           aria-expanded={hudOpen}
+          aria-controls="spacetime-instructions"
           aria-label={hudOpen ? "Hide instructions" : "Show instructions"}
         >
           {hudOpen ? "×" : "?"}
         </button>
 
-        {/* HUD: collapsible bottom sheet on mobile, always visible top-left on md+ */}
-        <div
-          className={`absolute bottom-16 left-4 z-10 h-fit max-w-[calc(100vw-2rem)] rounded-md bg-gray-800/25 p-4 text-white backdrop-blur-md md:top-20 md:bottom-auto md:left-4 md:block md:max-w-sm ${
-            hudOpen ? "block" : "hidden"
-          }`}
+        <section
+          id="spacetime-instructions"
+          className={hudOpen ? "is-open spacetime-brief" : "spacetime-brief"}
+          aria-label="Simulation instructions"
         >
-          <h2 className="mb-3 font-bold text-xl md:text-2xl">
-            Relativity Playground
-          </h2>
-          <div className="space-y-1 text-gray-200 text-sm">
-            <p className="pointer-coarse:hidden">
-              • Drag cosmic objects to move them in spacetime
-            </p>
-            <p className="pointer-coarse:block hidden">
-              • Touch and drag cosmic objects to move them
-            </p>
-            <p>• Choose from realistic stellar types with preset masses</p>
-            <p>• Watch how massive objects warp the fabric of space</p>
+          <p className="spacetime-eyebrow">Interactive simulation</p>
+          <h1>Spacetime Curvature</h1>
+          <p className="spacetime-brief-copy">
+            Move objects across the field, change their mass, and see how
+            spacetime responds.
+          </p>
+
+          <div className="spacetime-readout">
+            <span>
+              <b>{masses.length}</b>
+              {masses.length === 1 ? "object" : "objects"}
+            </span>
+            <span>
+              <b>{totalMass.toFixed(1)}</b>
+              solar masses total
+            </span>
           </div>
 
-          <div className="mt-4 pointer-coarse:hidden space-y-1 text-gray-300 text-xs">
-            <h3 className="font-semibold text-gray-200 text-sm">Controls:</h3>
-            <p>• Left click + drag: Rotate view</p>
-            <p>• Right click + drag: Pan camera</p>
-            <p>• Scroll wheel: Zoom in/out</p>
+          <div className="spacetime-instructions">
+            <div>
+              <span className="spacetime-instruction-number">1</span>
+              <p>
+                <b>{isCompact ? "Touch and drag" : "Move an object"}</b>
+                Drag it across the field
+              </p>
+            </div>
+            <div>
+              <span className="spacetime-instruction-number">2</span>
+              <p>
+                <b>{isCompact ? "Drag the field" : "Rotate the view"}</b>
+                Explore the curve from every angle
+              </p>
+            </div>
           </div>
-          <div className="mt-4 pointer-coarse:block hidden space-y-1 text-gray-300 text-xs">
-            <h3 className="font-semibold text-gray-200 text-sm">Controls:</h3>
-            <p>• One finger drag: Rotate view</p>
-            <p>• Two finger drag: Pan camera</p>
-            <p>• Pinch: Zoom in/out</p>
-          </div>
+        </section>
 
-          <button
-            type="button"
-            className="mt-4 cursor-pointer rounded bg-gray-700/80 px-3 py-1.5 font-medium text-xs transition-colors hover:bg-gray-600/80"
-            onClick={() => setShowStats((s) => !s)}
-          >
-            {showStats ? "Hide FPS" : "Show FPS"}
-          </button>
+        <div
+          className="spacetime-depth-key"
+          role="img"
+          aria-label="Curvature depth key"
+        >
+          <span>Curvature</span>
+          <i aria-hidden="true" />
+          <span>Deep</span>
         </div>
 
-        <Canvas
-          camera={{
-            position: CAMERA_POSITION,
-            fov: CAMERA_FOV,
-          }}
-          gl={{ antialias: true }}
-          dpr={[1, 2]}
+        <section
+          className="spacetime-canvas"
+          aria-label="Interactive 3D spacetime"
         >
-          <BoundedOrbitControls isDragging={isDragging} />
+          <Canvas
+            camera={{ position: CAMERA_POSITION, fov: CAMERA_FOV }}
+            gl={{ antialias: true }}
+            dpr={[1, 2]}
+          >
+            <color attach="background" args={["#03050a"]} />
+            <fog attach="fog" args={["#03050a", 18, 48]} />
 
-          <StarField />
+            <BoundedOrbitControls isDragging={isDragging} />
+            <StarField />
 
-          <ambientLight intensity={0.1} />
-          <directionalLight position={[10, 10, 5]} intensity={0.6} />
+            <ambientLight intensity={0.16} />
+            <directionalLight
+              position={[8, 14, 6]}
+              intensity={0.8}
+              color="#c6d4ff"
+            />
 
-          <CurvedGrid
-            masses={masses}
-            gridSize={GRID_SIZE}
-            gridResolution={GRID_RESOLUTION}
-          />
+            <CurvedGrid
+              masses={masses}
+              gridSize={GRID_SIZE}
+              gridResolution={GRID_RESOLUTION}
+            />
+            <MassHandles masses={masses} />
+          </Canvas>
+        </section>
 
-          <MassHandles masses={masses} />
-
-          {showStats && (
-            <Stats className="!fixed !top-auto !right-4 !bottom-4 !left-auto" />
-          )}
-        </Canvas>
-      </div>
+        <div className="spacetime-vignette" aria-hidden="true" />
+        <div className="spacetime-grain" aria-hidden="true" />
+      </main>
     </WebGLErrorBoundary>
   );
 }

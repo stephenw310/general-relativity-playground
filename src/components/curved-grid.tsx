@@ -1,5 +1,6 @@
 "use client";
 
+import { useFrame } from "@react-three/fiber";
 import { useMemo, useEffect, useCallback } from "react";
 import { ShaderMaterial, Vector3 } from "three";
 import type { CurvedGridProps } from "@/types";
@@ -39,8 +40,10 @@ export function CurvedGrid({
       },
       massValues: { value: new Array(maxMasses).fill(0) },
       massCount: { value: 0 },
+      gridHalfExtent: { value: gridSize * 0.5 },
+      uTime: { value: 0 },
     }),
-    [],
+    [gridSize],
   );
 
   const shaderMaterial = useMemo(() => {
@@ -80,6 +83,18 @@ export function CurvedGrid({
   useEffect(() => {
     updateMassUniforms();
   }, [updateMassUniforms]);
+
+  useEffect(() => {
+    uniforms.gridHalfExtent.value = gridSize * 0.5;
+  }, [gridSize, uniforms]);
+
+  useFrame((state) => {
+    uniforms.uTime.value = state.clock.elapsedTime;
+  });
+
+  useEffect(() => {
+    return () => shaderMaterial.dispose();
+  }, [shaderMaterial]);
 
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]}>

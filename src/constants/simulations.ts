@@ -19,7 +19,7 @@ export const SIMULATIONS: SimulationMeta[] = [
       "Drop masses on a rubber sheet and watch spacetime curve in real-time.",
     route: "/spacetime",
     status: "available",
-    thumbnail: "/spacetime-preview.jpg",
+    thumbnail: "/spacetime-preview-v3.jpg",
     gradient: "from-indigo-950 via-violet-900/60 to-black",
   },
   {

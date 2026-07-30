@@ -17,6 +17,7 @@ interface BoundedOrbitControlsProps {
   maxDistance?: number;
   panBounds?: number;
   enablePan?: boolean;
+  enableZoom?: boolean;
   maxPolarAngle?: number;
 }
 
@@ -26,6 +27,7 @@ export function BoundedOrbitControls({
   maxDistance = CAMERA_MAX_DISTANCE,
   panBounds = CAMERA_PAN_BOUNDS,
   enablePan = true,
+  enableZoom = true,
   maxPolarAngle = CAMERA_MAX_POLAR_ANGLE,
 }: BoundedOrbitControlsProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
@@ -62,7 +64,7 @@ export function BoundedOrbitControls({
     <OrbitControls
       ref={controlsRef}
       enablePan={enablePan && !isDragging}
-      enableZoom={!isDragging}
+      enableZoom={enableZoom && !isDragging}
       enableRotate={!isDragging}
       screenSpacePanning={false}
       maxPolarAngle={maxPolarAngle}

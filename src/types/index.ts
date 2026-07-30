@@ -46,6 +46,7 @@ export interface BlackHoleStoreState {
   setShowPhotonSphere: (showPhotonSphere: boolean) => void;
   setLensingStrength: (lensingStrength: number) => void;
   setQuality: (quality: BlackHoleQuality) => void;
+  reset: () => void;
 }
 
 export interface CurvedGridProps {

@@ -12,7 +12,7 @@ const initialState = {
   diskSpeed: DISK_SPEED_DEFAULT,
   showPhotonSphere: false,
   lensingStrength: LENS_STRENGTH_DEFAULT,
-  quality: "auto" as const,
+  quality: "high" as const,
 };
 
 export const useBlackHoleStore = create<BlackHoleStoreState>()((set) => ({
@@ -24,6 +24,7 @@ export const useBlackHoleStore = create<BlackHoleStoreState>()((set) => ({
   setShowPhotonSphere: (showPhotonSphere) => set({ showPhotonSphere }),
   setLensingStrength: (lensingStrength) => set({ lensingStrength }),
   setQuality: (quality) => set({ quality }),
+  reset: () => set(initialState),
 }));
 
 // State selectors
@@ -50,3 +51,5 @@ export const useSetLensingStrength = () =>
   useBlackHoleStore((state) => state.setLensingStrength);
 export const useSetBlackHoleQuality = () =>
   useBlackHoleStore((state) => state.setQuality);
+export const useResetBlackHole = () =>
+  useBlackHoleStore((state) => state.reset);

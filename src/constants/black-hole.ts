@@ -6,6 +6,9 @@ export const BH_MASS_MIN = 5;
 export const BH_MASS_MAX = 30;
 export const BH_MASS_STEP = 1;
 export const SCHWARZSCHILD_SCALE = 0.1;
+// Physical Schwarzschild radius for one solar mass: 2GM/c² ≈ 2.953 km.
+// The simulation still uses SCHWARZSCHILD_SCALE for world-space rendering.
+export const SCHWARZSCHILD_KM_PER_SOLAR_MASS = 2.953;
 
 // Characteristic radii as multiples of rs
 export const PHOTON_SPHERE_FACTOR = 1.5;
@@ -15,22 +18,18 @@ export const SHADOW_FACTOR = 2.6; // photon capture impact parameter, 3*sqrt(3)/
 
 // Lensing
 export const LENS_STRENGTH_DEFAULT = 1;
-export const LENS_STRENGTH_MAX = 2;
+export const LENS_STRENGTH_MIN = 0.5;
+export const LENS_STRENGTH_MAX = 1.5;
 
 // Accretion disk
 export const DISK_SPEED_DEFAULT = 1;
 export const DISK_SPEED_MAX = 3;
 
 // Camera
-export const BH_CAMERA_POSITION: [number, number, number] = [0, 4, 14];
-export const BH_CAMERA_FOV = 60;
-// Orbit limits are multiples of rs, not fixed world units: every feature in
-// the scene scales with rs, so fixed limits let the camera end up inside the
-// disk (outer edge 8 rs) or even inside the shadow at high mass.
-export const BH_CAMERA_MIN_DISTANCE_FACTOR = 10; // clears DISK_OUTER_FACTOR
-export const BH_CAMERA_MAX_DISTANCE_FACTOR = 60;
+// The observer stays at a fixed world-space distance so mass changes remain
+// visible against the distant background instead of being canceled by zoom.
+// This framing keeps the full mass range readable without changing scale.
+export const BH_CAMERA_POSITION: [number, number, number] = [0, 22, 77];
+export const BH_CAMERA_DISTANCE = Math.hypot(...BH_CAMERA_POSITION);
+export const BH_CAMERA_FOV = 30;
 export const BH_MAX_POLAR_ANGLE = Math.PI - 0.35;
-
-// Star field quality presets
-export const BH_STAR_COUNT_LOW = 25000;
-export const BH_STAR_COUNT_HIGH = 80000;

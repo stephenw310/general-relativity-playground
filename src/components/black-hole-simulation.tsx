@@ -1,35 +1,29 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { Stats } from "@react-three/drei";
-import { Leva } from "leva";
+import Link from "next/link";
+import { useState } from "react";
+import { BlackHoleControls } from "@/components/black-hole/black-hole-controls";
+import { LensedStarField } from "@/components/black-hole/lensed-star-field";
 import { BoundedOrbitControls } from "@/components/bounded-orbit-controls";
 import { WebGLErrorBoundary } from "@/components/webgl-error-boundary";
-import { EventHorizon } from "@/components/black-hole/event-horizon";
-import { AccretionDisk } from "@/components/black-hole/accretion-disk";
-import { LensedStarField } from "@/components/black-hole/lensed-star-field";
-import { BlackHoleControls } from "@/components/black-hole/black-hole-controls";
+import {
+  BH_CAMERA_DISTANCE,
+  BH_CAMERA_FOV,
+  BH_CAMERA_POSITION,
+  BH_MAX_POLAR_ANGLE,
+  SCHWARZSCHILD_KM_PER_SOLAR_MASS,
+  SCHWARZSCHILD_SCALE,
+} from "@/constants";
 import {
   useBlackHoleMass,
-  useShowDisk,
-  useDiskSpeed,
-  useShowPhotonSphere,
-  useLensingStrength,
   useBlackHoleQuality,
+  useDiskSpeed,
+  useLensingStrength,
+  useShowDisk,
+  useShowPhotonSphere,
 } from "@/store/black-hole-store";
-import {
-  SCHWARZSCHILD_SCALE,
-  BH_CAMERA_POSITION,
-  BH_CAMERA_FOV,
-  BH_CAMERA_MIN_DISTANCE_FACTOR,
-  BH_CAMERA_MAX_DISTANCE_FACTOR,
-  BH_MAX_POLAR_ANGLE,
-  BH_STAR_COUNT_LOW,
-  BH_STAR_COUNT_HIGH,
-} from "@/constants";
 import { useIsCompactViewport } from "@/utils/device";
-import { useState } from "react";
-import Link from "next/link";
 
 export function BlackHoleSimulation() {
   const mass = useBlackHoleMass();
@@ -38,119 +32,144 @@ export function BlackHoleSimulation() {
   const showPhotonSphere = useShowPhotonSphere();
   const lensingStrength = useLensingStrength();
   const quality = useBlackHoleQuality();
-
-  const [showStats, setShowStats] = useState(false);
-  const [hudOpen, setHudOpen] = useState(false);
-  // Collapsed on compact viewports until the user toggles it themselves
   const isCompact = useIsCompactViewport();
-  const [levaToggled, setLevaToggled] = useState<boolean | null>(null);
-  const levaCollapsed = levaToggled ?? isCompact;
+  const [hudOpen, setHudOpen] = useState(false);
 
   const rs = mass * SCHWARZSCHILD_SCALE;
-  const starCount =
-    quality === "low"
-      ? BH_STAR_COUNT_LOW
-      : quality === "high"
-        ? BH_STAR_COUNT_HIGH
-        : undefined; // auto: StarField picks by device
+  const radiusKm = mass * SCHWARZSCHILD_KM_PER_SOLAR_MASS;
+  const pixelRatio = quality === "low" ? 0.6 : quality === "high" ? 1 : 0.78;
 
   return (
     <WebGLErrorBoundary>
-      <div className="h-screen w-full bg-black">
-        {/* Navigation Bar */}
-        <nav className="absolute top-0 left-0 z-20 w-full bg-gray-900/80 backdrop-blur-sm">
-          <div className="flex items-center justify-between px-6 py-3">
-            <Link
-              href="/"
-              className="flex items-center space-x-2 rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white transition-colors hover:bg-blue-800 focus:outline-none"
-            >
-              <span>←</span>
-              <span>Back to Home</span>
-            </Link>
+      <main className="black-hole-shell">
+        <nav
+          className="black-hole-topbar spacetime-topbar"
+          aria-label="Simulation navigation"
+        >
+          <Link href="/" className="spacetime-back">
+            <span aria-hidden="true">←</span>
+            <span>Mission select</span>
+          </Link>
+
+          <div className="spacetime-mission-id">
+            <span>02</span>
+            <b>Extreme gravity</b>
+          </div>
+
+          <div className="spacetime-status">
+            <span aria-hidden="true" />
+            Online
           </div>
         </nav>
 
-        <Leva
-          collapsed={{ collapsed: levaCollapsed, onChange: setLevaToggled }}
-        />
         <BlackHoleControls />
 
-        {/* Mobile HUD toggle */}
         <button
           type="button"
-          className="absolute bottom-4 left-4 z-20 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-800/60 text-lg text-white backdrop-blur-md md:hidden"
-          onClick={() => setHudOpen((o) => !o)}
+          className="spacetime-info-toggle"
+          onClick={() => setHudOpen((open) => !open)}
           aria-expanded={hudOpen}
+          aria-controls="black-hole-instructions"
           aria-label={hudOpen ? "Hide instructions" : "Show instructions"}
         >
           {hudOpen ? "×" : "?"}
         </button>
 
-        {/* HUD: collapsible bottom sheet on mobile, always visible top-left on md+ */}
-        <div
-          className={`absolute bottom-16 left-4 z-10 h-fit max-w-[calc(100vw-2rem)] rounded-md bg-gray-800/25 p-4 text-white backdrop-blur-md md:top-20 md:bottom-auto md:left-4 md:block md:max-w-sm ${
-            hudOpen ? "block" : "hidden"
-          }`}
+        <section
+          id="black-hole-instructions"
+          className={
+            hudOpen
+              ? "black-hole-brief is-open spacetime-brief"
+              : "black-hole-brief spacetime-brief"
+          }
+          aria-label="Simulation instructions"
         >
-          <h2 className="mb-3 font-bold text-xl md:text-2xl">Black Hole</h2>
-          <div className="space-y-1 text-gray-200 text-sm">
-            <p>• The black disk is the shadow — light that fell in</p>
-            <p>• Background stars warp around the horizon</p>
-            <p>• The disk&apos;s bright side spins toward you</p>
+          <p className="spacetime-eyebrow">Interactive simulation</p>
+          <h1>Black Hole</h1>
+          <p className="spacetime-brief-copy">
+            Orbit a Schwarzschild black hole and watch null geodesics form its
+            shadow, photon ring, and lensed accretion disk.
+          </p>
+
+          <div className="spacetime-readout">
+            <span>
+              <b>{mass}</b>
+              solar masses
+            </span>
+            <span>
+              <b>{radiusKm.toFixed(1)} km</b>
+              horizon radius
+            </span>
           </div>
 
-          <div className="mt-4 pointer-coarse:hidden space-y-1 text-gray-300 text-xs">
-            <h3 className="font-semibold text-gray-200 text-sm">Controls:</h3>
-            <p>• Left click + drag: Orbit the black hole</p>
-            <p>• Scroll wheel: Zoom in/out</p>
-            <p>• Panel (top right): Mass, lensing, disk</p>
+          <div className="spacetime-instructions">
+            <div>
+              <span className="spacetime-instruction-number">1</span>
+              <p>
+                <b>{isCompact ? "Drag to orbit" : "Rotate the view"}</b>
+                The disk tilts; the shadow scale stays fixed
+              </p>
+            </div>
+            <div>
+              <span className="spacetime-instruction-number">2</span>
+              <p>
+                <b>Change the mass</b>
+                Compare the shadow against the galaxy and stars
+              </p>
+            </div>
           </div>
-          <div className="mt-4 pointer-coarse:block hidden space-y-1 text-gray-300 text-xs">
-            <h3 className="font-semibold text-gray-200 text-sm">Controls:</h3>
-            <p>• One finger drag: Orbit the black hole</p>
-            <p>• Pinch: Zoom in/out</p>
-            <p>• Panel (top right): Mass, lensing, disk</p>
-          </div>
+        </section>
 
-          <button
-            type="button"
-            className="mt-4 cursor-pointer rounded bg-gray-700/80 px-3 py-1.5 font-medium text-xs transition-colors hover:bg-gray-600/80"
-            onClick={() => setShowStats((s) => !s)}
-          >
-            {showStats ? "Hide FPS" : "Show FPS"}
-          </button>
+        <div
+          className="black-hole-scale-key"
+          role="img"
+          aria-label="Black hole feature key"
+        >
+          <span>Black-hole shadow</span>
+          <i aria-hidden="true" />
+          <span>Ray-traced disk</span>
         </div>
 
-        <Canvas
-          camera={{
-            position: BH_CAMERA_POSITION,
-            fov: BH_CAMERA_FOV,
-          }}
-          gl={{ antialias: true }}
-          dpr={[1, 2]}
+        <section
+          className="black-hole-canvas"
+          aria-label="Interactive 3D black hole"
         >
-          <BoundedOrbitControls
-            isDragging={false}
-            minDistance={rs * BH_CAMERA_MIN_DISTANCE_FACTOR}
-            maxDistance={rs * BH_CAMERA_MAX_DISTANCE_FACTOR}
-            enablePan={false}
-            maxPolarAngle={BH_MAX_POLAR_ANGLE}
-          />
+          <Canvas
+            camera={{
+              position: BH_CAMERA_POSITION,
+              fov: BH_CAMERA_FOV,
+            }}
+            gl={{ antialias: true }}
+            dpr={pixelRatio}
+          >
+            <color attach="background" args={["#010204"]} />
 
-          <LensedStarField
-            rs={rs}
-            lensingStrength={lensingStrength}
-            starCount={starCount}
-          />
+            <BoundedOrbitControls
+              isDragging={false}
+              minDistance={BH_CAMERA_DISTANCE}
+              maxDistance={BH_CAMERA_DISTANCE}
+              enablePan={false}
+              enableZoom={false}
+              maxPolarAngle={BH_MAX_POLAR_ANGLE}
+            />
 
-          <EventHorizon rs={rs} showPhotonSphere={showPhotonSphere} />
-          {showDisk && <AccretionDisk rs={rs} speed={diskSpeed} />}
+            <LensedStarField
+              rs={rs}
+              lensingStrength={lensingStrength}
+              showDisk={showDisk}
+              diskSpeed={diskSpeed}
+              showPhotonSphere={showPhotonSphere || !showDisk}
+              quality={quality}
+            />
+          </Canvas>
+        </section>
 
-          {showStats && (
-            <Stats className="!fixed !top-auto !right-4 !bottom-4 !left-auto" />
-          )}
-        </Canvas>
-      </div>
+        <div
+          className="black-hole-vignette spacetime-vignette"
+          aria-hidden="true"
+        />
+        <div className="black-hole-grain spacetime-grain" aria-hidden="true" />
+      </main>
     </WebGLErrorBoundary>
   );
 }

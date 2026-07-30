@@ -30,7 +30,8 @@ export const lensFragmentShader = /* glsl */ `
   const float HORIZON_RHO = 0.252;
   const float DISK_INNER = 3.0;
   const float DISK_OUTER = 8.0;
-  const int MAX_TRACE_STEPS = 192;
+  const int MAX_TRACE_STEPS = 320;
+  const int ADAPTIVE_TRACE_STEPS = 128;
 
   float hash21(vec2 p) {
     p = fract(p * vec2(123.34, 456.21));
@@ -45,6 +46,23 @@ export const lensFragmentShader = /* glsl */ `
     return mix(
       mix(hash21(i), hash21(i + vec2(1.0, 0.0)), f.x),
       mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0)), f.x),
+      f.y
+    );
+  }
+
+  float periodicValueNoise(vec2 p, float periodX) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    vec2 i0 = vec2(mod(i.x, periodX), i.y);
+    vec2 i1 = vec2(mod(i.x + 1.0, periodX), i.y);
+    return mix(
+      mix(hash21(i0), hash21(i1), f.x),
+      mix(
+        hash21(i0 + vec2(0.0, 1.0)),
+        hash21(i1 + vec2(0.0, 1.0)),
+        f.x
+      ),
       f.y
     );
   }
@@ -68,19 +86,36 @@ export const lensFragmentShader = /* glsl */ `
   }
 
   vec3 starLayer(vec2 uv, vec2 grid, float threshold, vec3 tint) {
-    vec2 cell = floor(uv * grid);
-    vec2 local = fract(uv * grid);
-    float seed = hash21(cell);
-    vec2 center = vec2(
-      hash21(cell + 19.17),
-      hash21(cell + 73.91)
-    );
-    float size = mix(0.025, 0.11, pow(hash21(cell + 7.31), 7.0));
-    float point = 1.0 -
-      smoothstep(size * 0.28, size, length(local - center));
-    float visible = step(threshold, seed);
-    float brightness = mix(0.35, 1.8, pow(seed, 7.0));
-    return tint * point * visible * brightness;
+    vec2 gridPosition = uv * grid;
+    vec2 baseCell = floor(gridPosition);
+    vec2 local = fract(gridPosition);
+    float intensity = 0.0;
+
+    for (int offsetX = -1; offsetX <= 1; offsetX++) {
+      vec2 offset = vec2(float(offsetX), 0.0);
+      vec2 cell = baseCell + offset;
+      cell.x = mod(cell.x, grid.x);
+      float seed = hash21(cell);
+      vec2 center = vec2(
+        hash21(cell + 19.17),
+        hash21(cell + 73.91)
+      );
+      float size = mix(
+        0.025,
+        0.11,
+        pow(hash21(cell + 7.31), 7.0)
+      );
+      float point = 1.0 - smoothstep(
+        size * 0.28,
+        size,
+        length(offset + center - local)
+      );
+      float visible = step(threshold, seed);
+      float brightness = mix(0.35, 1.8, pow(seed, 7.0));
+      intensity += point * visible * brightness;
+    }
+
+    return tint * intensity;
   }
 
   vec3 spaceColor(vec3 direction) {
@@ -95,7 +130,10 @@ export const lensFragmentShader = /* glsl */ `
       normalize(vec3(-0.22, 0.91, 0.35))
     ));
     float milkyWay = exp(-galacticLatitude * 10.5);
-    float cloud = valueNoise(uv * vec2(7.0, 4.0) + 4.7);
+    float cloud = periodicValueNoise(
+      uv * vec2(7.0, 4.0) + 4.7,
+      7.0
+    );
     vec3 color = vec3(0.0015, 0.0025, 0.006);
     color += vec3(0.018, 0.025, 0.052) *
       milkyWay * (0.35 + 0.65 * cloud);
@@ -244,9 +282,9 @@ export const lensFragmentShader = /* glsl */ `
       -normalize(uCameraPosition),
       direction
     ));
+    bool physicalModel = abs(uLensingStrength - 1.0) < 0.001;
     bool insidePhysicalShadow =
-      abs(uLensingStrength - 1.0) < 0.001 &&
-      raySin <= criticalSin;
+      physicalModel && raySin <= criticalSin;
     float escapeRadius = max(cameraRadius + 3.0, 24.0);
 
     bool traceExhausted = true;
@@ -255,7 +293,9 @@ export const lensFragmentShader = /* glsl */ `
     vec3 result = vec3(0.0);
 
     for (int i = 0; i < MAX_TRACE_STEPS; i++) {
-      if (i >= uMaxSteps) break;
+      // Presets set the primary budget. Only the small set of unresolved
+      // rays receive this adaptive tail near the critical curve.
+      if (i >= uMaxSteps + ADAPTIVE_TRACE_STEPS) break;
 
       float rho = length(position);
       if (rho <= HORIZON_RHO) {
@@ -319,17 +359,19 @@ export const lensFragmentShader = /* glsl */ `
     }
 
     if (!hitDisk) {
-      if (escaped && !insidePhysicalShadow) {
-        result = spaceColor(direction);
-      } else if (traceExhausted || insidePhysicalShadow) {
-        // Never sample the celestial background from a ray that has not
-        // crossed the escape boundary. Also keep the exact Schwarzschild
-        // capture cone dark if numerical stepping crosses its separatrix.
+      if (insidePhysicalShadow) {
         result = vec3(0.0);
+      } else if (escaped) {
+        result = spaceColor(direction);
+      } else if (traceExhausted) {
+        // A ray exactly on the separatrix can remain unresolved at any finite
+        // budget. Give that narrow band its own neutral treatment instead of
+        // expanding either the captured shadow or the escaped background.
+        result = vec3(0.006, 0.009, 0.016);
       }
     }
 
-    if (uShowPhotonSphere > 0.5) {
+    if (uShowPhotonSphere > 0.5 && physicalModel) {
       float guideDistance = abs(raySin - criticalSin);
       float guideHalo = 1.0 - smoothstep(
         0.0015,

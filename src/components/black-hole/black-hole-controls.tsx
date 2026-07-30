@@ -6,6 +6,7 @@ import {
   BH_MASS_MIN,
   BH_MASS_STEP,
   DISK_SPEED_MAX,
+  LENS_STRENGTH_DEFAULT,
   LENS_STRENGTH_MAX,
   LENS_STRENGTH_MIN,
   SCHWARZSCHILD_KM_PER_SOLAR_MASS,
@@ -49,6 +50,8 @@ export function BlackHoleControls() {
   const [panelOpen, setPanelOpen] = useState(false);
 
   const radiusKm = mass * SCHWARZSCHILD_KM_PER_SOLAR_MASS;
+  const physicalLensing =
+    Math.abs(lensingStrength - LENS_STRENGTH_DEFAULT) < 0.001;
 
   return (
     <>
@@ -209,19 +212,27 @@ export function BlackHoleControls() {
               </div>
             </div>
 
-            <label className="black-hole-switch-row">
+            <label
+              className={
+                physicalLensing
+                  ? "black-hole-switch-row"
+                  : "black-hole-switch-row is-disabled"
+              }
+            >
               <span>
                 <b>Photon ring guide</b>
                 <small>
-                  {showDisk
-                    ? "Outlines the critical light curve at the shadow edge"
-                    : "Shown automatically to anchor the disk-off view"}
+                  {!physicalLensing
+                    ? "Available at 1.00× Schwarzschild gravity"
+                    : showDisk
+                      ? "Outlines the critical light curve at the shadow edge"
+                      : "Shown automatically to anchor the disk-off view"}
                 </small>
               </span>
               <input
                 type="checkbox"
-                checked={showPhotonSphere || !showDisk}
-                disabled={!showDisk}
+                checked={physicalLensing && (showPhotonSphere || !showDisk)}
+                disabled={!physicalLensing || !showDisk}
                 onChange={(event) => setShowPhotonSphere(event.target.checked)}
               />
               <i aria-hidden="true" />

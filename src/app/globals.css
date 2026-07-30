@@ -1621,6 +1621,11 @@ a {
   cursor: pointer;
 }
 
+.black-hole-switch-row.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
 .black-hole-switch-row > span {
   min-width: 0;
   display: grid;

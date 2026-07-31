@@ -49,6 +49,30 @@ export interface BlackHoleStoreState {
   reset: () => void;
 }
 
+export interface LensingStoreState {
+  lensMass: number; // trillions of solar masses
+  sourceX: number; // Einstein radii
+  sourceY: number; // Einstein radii
+  sourceSize: number;
+  stellarEllipticity: number;
+  haloFraction: number;
+  externalShear: number;
+  showSubstructure: boolean;
+  showLensGalaxy: boolean;
+  showGuides: boolean;
+
+  setLensMass: (lensMass: number) => void;
+  setSourcePosition: (sourceX: number, sourceY: number) => void;
+  setSourceSize: (sourceSize: number) => void;
+  setStellarEllipticity: (stellarEllipticity: number) => void;
+  setHaloFraction: (haloFraction: number) => void;
+  setExternalShear: (externalShear: number) => void;
+  setShowSubstructure: (showSubstructure: boolean) => void;
+  setShowLensGalaxy: (showLensGalaxy: boolean) => void;
+  setShowGuides: (showGuides: boolean) => void;
+  reset: () => void;
+}
+
 export interface CurvedGridProps {
   masses: Mass[];
   gridSize?: number;

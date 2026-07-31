@@ -2,6 +2,7 @@
 @import "./styles/landing.css";
 @import "./styles/spacetime.css";
 @import "./styles/black-hole.css";
+@import "./styles/lensing.css";
 
 :root {
   --background: #04060b;

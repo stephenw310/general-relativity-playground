@@ -28,7 +28,8 @@ export const SIMULATIONS: SimulationMeta[] = [
     description:
       "See how massive objects bend light and create Einstein rings.",
     route: "/lensing",
-    status: "coming-soon",
+    status: "available",
+    thumbnail: "/lensing-preview.jpg",
     gradient: "from-amber-950 via-orange-900/50 to-black",
   },
   {

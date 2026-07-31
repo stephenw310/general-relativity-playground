@@ -11,6 +11,10 @@ A browser-based interactive visualization of various general relativity concepts
 - **Black Holes** (`/black-hole`): Orbit a Schwarzschild black hole with an event
   horizon, photon sphere, Doppler-beamed accretion disk, and screen-space
   gravitational lensing of the background stars.
+- **Gravitational Lensing** (`/lensing`): Move a distant source behind a
+  foreground galaxy to form multiple images, luminous arcs, and Einstein rings
+  with GPU inverse ray shooting through stars, dark matter, tidal shear, and
+  satellite substructure.
 
 ## Features
 

@@ -1,0 +1,354 @@
+/* Gravitational lensing mission */
+
+.lensing-shell {
+  --sim-line: rgba(152, 193, 255, 0.18);
+  --sim-line-strong: rgba(172, 207, 255, 0.32);
+  --sim-panel: rgba(3, 8, 19, 0.8);
+  --sim-panel-solid: #07101e;
+  --sim-muted: #93a7c2;
+  --lensing-accent: #72b7ff;
+  --lensing-accent-bright: #b7dcff;
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  min-height: 520px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #01030a;
+  color: #f3f8ff;
+}
+
+.lensing-canvas {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+}
+
+.lensing-canvas canvas {
+  display: block;
+  touch-action: none;
+}
+
+.lensing-topbar {
+  background: linear-gradient(
+    180deg,
+    rgba(2, 6, 15, 0.95),
+    rgba(2, 6, 15, 0.67)
+  );
+}
+
+.lensing-shell .spacetime-back:hover > span:first-child,
+.lensing-shell .spacetime-back:focus-visible > span:first-child {
+  border-color: rgba(138, 194, 255, 0.65);
+  background: rgba(74, 153, 237, 0.13);
+}
+
+.lensing-shell .spacetime-eyebrow,
+.lensing-shell .spacetime-panel-kicker {
+  color: #93c9ff;
+}
+
+.lensing-brief {
+  background:
+    linear-gradient(145deg, rgba(86, 164, 255, 0.08), transparent 42%),
+    var(--sim-panel);
+}
+
+.lensing-brief h1 {
+  max-width: 310px;
+}
+
+.lensing-brief .spacetime-brief-copy {
+  color: #b9c9dc;
+}
+
+.lensing-controls {
+  background:
+    linear-gradient(155deg, rgba(76, 156, 247, 0.065), transparent 34%),
+    var(--sim-panel);
+}
+
+.lensing-control-list {
+  scrollbar-color: rgba(89, 166, 255, 0.38) transparent;
+}
+
+.lensing-shell .black-hole-control-heading > span {
+  color: #6ba8e9;
+}
+
+.lensing-shell .black-hole-control-heading h3 {
+  color: #edf6ff;
+}
+
+.lensing-shell .black-hole-control-heading p {
+  color: #91a5bd;
+}
+
+.lensing-shell .black-hole-range-field {
+  color: #b8c8da;
+}
+
+.lensing-shell .black-hole-range-field b {
+  color: #f1f8ff;
+}
+
+.lensing-shell .black-hole-range-field small {
+  color: #8297b0;
+}
+
+.lensing-shell .black-hole-range-field input::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    90deg,
+    rgba(97, 173, 255, 0.82),
+    rgba(255, 255, 255, 0.17)
+  );
+}
+
+.lensing-shell .black-hole-range-field input::-webkit-slider-thumb {
+  border-color: #07111d;
+  background: var(--lensing-accent-bright);
+  box-shadow:
+    0 0 0 1px rgba(184, 222, 255, 0.62),
+    0 0 16px rgba(67, 151, 241, 0.3);
+}
+
+.lensing-shell .black-hole-range-field input::-moz-range-progress {
+  background: rgba(97, 173, 255, 0.82);
+}
+
+.lensing-shell .black-hole-range-field input::-moz-range-thumb {
+  border-color: #07111d;
+  background: var(--lensing-accent-bright);
+}
+
+.lensing-shell .black-hole-range-field input:focus-visible {
+  outline-color: rgba(140, 198, 255, 0.78);
+}
+
+.lensing-shell .black-hole-switch-row b {
+  color: #dceafa;
+}
+
+.lensing-shell .black-hole-switch-row small {
+  color: #8196ad;
+}
+
+.lensing-shell .black-hole-switch-row i {
+  border-color: rgba(179, 211, 242, 0.25);
+}
+
+.lensing-shell .black-hole-switch-row input:checked + i {
+  border-color: rgba(126, 188, 255, 0.62);
+  background: rgba(77, 157, 244, 0.2);
+}
+
+.lensing-shell .black-hole-switch-row input:checked + i::after {
+  background: var(--lensing-accent-bright);
+}
+
+.lensing-shell .black-hole-switch-row input:focus-visible + i {
+  outline-color: rgba(140, 198, 255, 0.8);
+}
+
+.lensing-preset-grid {
+  margin-top: 17px;
+  min-width: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  border: 0;
+}
+
+.lensing-preset-grid button {
+  height: 38px;
+  border: 1px solid var(--sim-line);
+  background: rgba(255, 255, 255, 0.025);
+  color: #9daec1;
+  cursor: pointer;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: 12px;
+  font-weight: 570;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.lensing-preset-grid button:hover,
+.lensing-preset-grid button:focus-visible,
+.lensing-preset-grid button.is-active {
+  border-color: rgba(125, 190, 255, 0.5);
+  background: rgba(70, 151, 238, 0.13);
+  color: #e9f4ff;
+  outline: none;
+}
+
+.lensing-preset-grid button.is-active {
+  box-shadow: inset 0 -2px 0 var(--lensing-accent);
+}
+
+.lensing-controls-actions {
+  grid-template-columns: 1fr;
+}
+
+.lensing-controls-actions button:hover,
+.lensing-controls-actions button:focus-visible {
+  border-color: rgba(154, 207, 255, 0.72);
+  background: rgba(70, 151, 238, 0.14);
+}
+
+.lensing-drag-surface {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+}
+
+.lensing-drag-surface:active {
+  cursor: grabbing;
+}
+
+.lensing-drag-surface:focus-visible {
+  box-shadow: inset 0 0 0 1px rgba(116, 184, 255, 0.52);
+}
+
+.lensing-observation {
+  position: absolute;
+  z-index: 12;
+  right: 428px;
+  bottom: 24px;
+  min-width: 150px;
+  padding: 10px 13px;
+  border: 1px solid var(--sim-line);
+  background: rgba(3, 9, 19, 0.68);
+  color: #8199b3;
+  pointer-events: none;
+  backdrop-filter: blur(14px);
+}
+
+.lensing-shell .lensing-observation span,
+.lensing-shell .lensing-observation b {
+  display: block;
+}
+
+.lensing-shell .lensing-observation span {
+  font-size: 9px;
+  line-height: 1.3;
+}
+
+.lensing-shell .lensing-observation b {
+  margin-top: 3px;
+  color: #d9edff;
+  font-size: 13px;
+  font-weight: 590;
+}
+
+.lensing-scale-key {
+  position: absolute;
+  z-index: 12;
+  bottom: 24px;
+  left: 24px;
+  width: 260px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  color: #8fa1b7;
+  font-size: 10px;
+}
+
+.lensing-shell .lensing-scale-key i {
+  height: 2px;
+  background: linear-gradient(90deg, #e9a45f, #e4e5dc, #52a9ff);
+  box-shadow: 0 0 11px rgba(83, 170, 255, 0.38);
+}
+
+.lensing-vignette {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(1, 3, 9, 0.26),
+      transparent 36%,
+      transparent 72%,
+      rgba(1, 3, 9, 0.2)
+    ),
+    radial-gradient(
+      circle at 50% 49%,
+      transparent 38%,
+      rgba(0, 2, 8, 0.34) 100%
+    );
+}
+
+.lensing-grain {
+  opacity: 0.034;
+  background-image:
+    repeating-radial-gradient(
+      circle at 29% 31%,
+      #e5f4ff 0 0.4px,
+      transparent 0.8px 4px
+    ),
+    repeating-radial-gradient(
+      circle at 67% 69%,
+      #5faeff 0 0.35px,
+      transparent 0.75px 5px
+    );
+}
+
+@media (max-width: 1080px) and (min-width: 768px) {
+  .lensing-observation {
+    right: 388px;
+  }
+}
+
+@media (max-height: 760px) and (min-width: 768px) {
+  .lensing-preset-grid,
+  .lensing-shell .black-hole-range-field,
+  .lensing-shell .black-hole-switch-row {
+    margin-top: 12px;
+  }
+}
+
+@media (max-width: 767px) {
+  .lensing-shell {
+    min-height: 480px;
+  }
+
+  .lensing-controls-toggle {
+    min-width: 128px;
+  }
+
+  .lensing-shell .spacetime-objects-toggle b {
+    background: rgba(70, 151, 238, 0.15);
+    color: #a9d4ff;
+  }
+
+  .lensing-observation {
+    top: 72px;
+    right: 12px;
+    bottom: auto;
+    min-width: 142px;
+  }
+
+  .lensing-scale-key {
+    display: none;
+  }
+
+  .lensing-shell .black-hole-control-section {
+    padding-right: 17px;
+    padding-left: 17px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lensing-preset-grid button {
+    transition: none;
+  }
+}

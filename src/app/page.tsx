@@ -122,7 +122,9 @@ function MissionCard({
     return (
       <Link
         href={mission.route}
-        className={`landing-mission is-live${selected ? " is-selected" : ""}`}
+        className={["landing-mission", "is-live", selected && "is-selected"]
+          .filter(Boolean)
+          .join(" ")}
         data-mission={mission.id}
         onMouseEnter={onPreview}
         onMouseLeave={onPreviewEnd}
@@ -136,7 +138,9 @@ function MissionCard({
 
   return (
     <article
-      className={`landing-mission${selected ? " is-selected" : ""}`}
+      className={["landing-mission", selected && "is-selected"]
+        .filter(Boolean)
+        .join(" ")}
       data-mission={mission.id}
       aria-disabled="true"
       onMouseEnter={onPreview}
@@ -185,9 +189,13 @@ export default function Home() {
           {missions.map((mission, index) => (
             <div
               key={mission.id}
-              className={`landing-hero-slide${
-                activeMission === index ? " is-active" : ""
-              }${mission.id === "black-hole" ? " is-black-hole" : ""}`}
+              className={[
+                "landing-hero-slide",
+                activeMission === index && "is-active",
+                mission.id === "black-hole" && "is-black-hole",
+              ]
+                .filter(Boolean)
+                .join(" ")}
             >
               <MissionArtwork mission={mission} priority={index < 2} />
             </div>

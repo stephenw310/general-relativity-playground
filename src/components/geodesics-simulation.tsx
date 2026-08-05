@@ -39,16 +39,37 @@ function drawPath(
   context.restore();
 }
 
+function newtonianOrbit(
+  semiLatusRectum: number,
+  eccentricity: number,
+): GeodesicPoint[] {
+  return Array.from({ length: 361 }, (_, index) => {
+    const phi = (index / 360) * Math.PI * 2;
+    const r = semiLatusRectum / (2 * (1 + eccentricity * Math.cos(phi)));
+    return { x: r * Math.cos(phi), y: r * Math.sin(phi), r, phi };
+  });
+}
+
 function GeodesicField({
   mode,
   primaryPath,
   bundlePaths,
+  ghostPath,
+  persistentTrails,
   viewRadius,
+  energy,
+  angularMomentum,
+  impactParameter,
 }: {
   mode: GeodesicMode;
   primaryPath: GeodesicPoint[];
   bundlePaths: GeodesicPoint[][];
+  ghostPath: GeodesicPoint[];
+  persistentTrails: GeodesicPoint[][];
   viewRadius: number;
+  energy: number;
+  angularMomentum: number;
+  impactParameter: number;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -164,6 +185,34 @@ function GeodesicField({
         drawPath(context, path, centerX, centerY, scale, "#82ffc1", 0.75, 0.16);
       }
 
+      for (const path of persistentTrails) {
+        drawPath(context, path, centerX, centerY, scale, "#90eab8", 1, 0.25);
+      }
+
+      if (mode === "massive" && ghostPath.length) {
+        context.save();
+        context.setLineDash([6, 7]);
+        drawPath(
+          context,
+          ghostPath,
+          centerX,
+          centerY,
+          scale,
+          "#aeb8b3",
+          1.1,
+          0.52,
+        );
+        context.restore();
+        context.fillStyle = "rgba(201, 211, 206, 0.62)";
+        context.font = "500 10px ui-monospace, monospace";
+        context.textAlign = "left";
+        context.fillText(
+          "NEWTONIAN PREDICTION · CLOSED ELLIPSE",
+          centerX - available * 0.72,
+          centerY - available * 0.62,
+        );
+      }
+
       context.shadowBlur = 13;
       context.shadowColor = mode === "light" ? "#b7ffda" : "#96ffc5";
       drawPath(
@@ -178,12 +227,14 @@ function GeodesicField({
       );
       context.shadowBlur = 0;
 
+      let animatedPoint: GeodesicPoint | null = null;
       if (primaryPath.length) {
         const speed = mode === "light" ? 0.055 : 0.022;
         const progress = reduceMotion
           ? primaryPath.length - 1
           : Math.floor(now * speed) % primaryPath.length;
         const point = primaryPath[progress];
+        animatedPoint = point;
         const x = centerX + point.x * scale;
         const y = centerY - point.y * scale;
         context.fillStyle = mode === "light" ? "#f5fff9" : "#9affc9";
@@ -210,6 +261,87 @@ function GeodesicField({
         centerY + 14,
       );
 
+      if (width >= 700 && height >= 560) {
+        const panelX = 24;
+        const panelY = height - 190;
+        const panelWidth = Math.min(350, width * 0.34);
+        const panelHeight = 148;
+        const plotLeft = panelX + 14;
+        const plotTop = panelY + 38;
+        const plotWidth = panelWidth - 28;
+        const plotHeight = panelHeight - 54;
+        const minR = 1.04;
+        const maxR = Math.max(
+          8,
+          Math.min(viewRadius * 0.82, mode === "massive" ? 18 : 12),
+        );
+        const samples = Array.from({ length: 150 }, (_, index) => {
+          const r = minR + (index / 149) * (maxR - minR);
+          const potential =
+            mode === "massive"
+              ? (1 - 1 / r) * (1 + angularMomentum ** 2 / r ** 2)
+              : (impactParameter ** 2 * (1 - 1 / r)) / r ** 2;
+          return { r, potential };
+        });
+        const energyLine = mode === "massive" ? energy ** 2 : 1;
+        const maxPotential = Math.max(
+          energyLine * 1.12,
+          ...samples.map((sample) => sample.potential),
+        );
+        const xFor = (r: number) =>
+          plotLeft + ((r - minR) / (maxR - minR)) * plotWidth;
+        const yFor = (value: number) =>
+          plotTop + plotHeight - (value / maxPotential) * plotHeight;
+
+        context.fillStyle = "rgba(1, 9, 6, 0.76)";
+        context.strokeStyle = "rgba(143, 235, 183, 0.23)";
+        context.fillRect(panelX, panelY, panelWidth, panelHeight);
+        context.strokeRect(panelX, panelY, panelWidth, panelHeight);
+        context.fillStyle = "rgba(226, 255, 239, 0.9)";
+        context.font = "600 11px system-ui, sans-serif";
+        context.fillText(
+          mode === "massive"
+            ? "EFFECTIVE POTENTIAL · V²(r)"
+            : "PHOTON POTENTIAL · V²(r)",
+          panelX + 14,
+          panelY + 21,
+        );
+        context.strokeStyle = "rgba(214, 255, 232, 0.38)";
+        context.setLineDash([4, 5]);
+        context.beginPath();
+        context.moveTo(plotLeft, yFor(energyLine));
+        context.lineTo(plotLeft + plotWidth, yFor(energyLine));
+        context.stroke();
+        context.setLineDash([]);
+        context.strokeStyle = "rgba(129, 237, 178, 0.88)";
+        context.lineWidth = 1.4;
+        context.beginPath();
+        samples.forEach((sample, index) => {
+          const x = xFor(sample.r);
+          const y = yFor(sample.potential);
+          if (index === 0) context.moveTo(x, y);
+          else context.lineTo(x, y);
+        });
+        context.stroke();
+        if (animatedPoint) {
+          const markerR = Math.max(minR, Math.min(maxR, animatedPoint.r));
+          const markerPotential =
+            mode === "massive"
+              ? (1 - 1 / markerR) * (1 + angularMomentum ** 2 / markerR ** 2)
+              : (impactParameter ** 2 * (1 - 1 / markerR)) / markerR ** 2;
+          context.fillStyle = "#d8ffe8";
+          context.beginPath();
+          context.arc(
+            xFor(markerR),
+            yFor(markerPotential),
+            3.5,
+            0,
+            Math.PI * 2,
+          );
+          context.fill();
+        }
+      }
+
       if (!reduceMotion) frame = requestAnimationFrame(render);
     };
 
@@ -218,7 +350,17 @@ function GeodesicField({
       cancelAnimationFrame(frame);
       observer.disconnect();
     };
-  }, [bundlePaths, mode, primaryPath, viewRadius]);
+  }, [
+    angularMomentum,
+    bundlePaths,
+    energy,
+    ghostPath,
+    impactParameter,
+    mode,
+    persistentTrails,
+    primaryPath,
+    viewRadius,
+  ]);
 
   return <canvas ref={canvasRef} />;
 }
@@ -235,6 +377,15 @@ export function GeodesicsSimulation() {
   const [semiLatus, setSemiLatus] = useState(12);
   const [eccentricity, setEccentricity] = useState(0.45);
   const [showBundle, setShowBundle] = useState(true);
+  const [showNewtonian, setShowNewtonian] = useState(true);
+  const [showPersistentTrails, setShowPersistentTrails] = useState(true);
+  const [persistentTrails, setPersistentTrails] = useState<GeodesicPoint[][]>(
+    [],
+  );
+  const previousTraceRef = useRef<{
+    key: string;
+    points: GeodesicPoint[];
+  } | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [hudOpen, setHudOpen] = useState(false);
 
@@ -252,10 +403,29 @@ export function GeodesicsSimulation() {
 
   const primaryPath =
     mode === "light" ? nullResult.points : timelikeResult.points;
+  const activeTraceKey =
+    mode === "light"
+      ? `light:${impact.toFixed(4)}`
+      : `massive:${semiLatus.toFixed(3)}:${eccentricity.toFixed(3)}`;
+  const ghostPath = useMemo(
+    () =>
+      mode === "massive" && showNewtonian
+        ? newtonianOrbit(semiLatus, eccentricity)
+        : [],
+    [eccentricity, mode, semiLatus, showNewtonian],
+  );
   const viewRadius =
     mode === "light" ? 25.5 : Math.max(8, timelikeResult.apoapsis * 1.12);
   const status =
     mode === "light" ? outcomeLabel(nullResult.outcome) : "Stable bound orbit";
+
+  useEffect(() => {
+    const previous = previousTraceRef.current;
+    if (previous && previous.key !== activeTraceKey) {
+      setPersistentTrails((current) => [...current, previous.points].slice(-5));
+    }
+    previousTraceRef.current = { key: activeTraceKey, points: primaryPath };
+  }, [activeTraceKey, primaryPath]);
 
   function setPreset(value: "capture" | "critical" | "scatter") {
     setMode("light");
@@ -270,6 +440,10 @@ export function GeodesicsSimulation() {
     setSemiLatus(12);
     setEccentricity(0.45);
     setShowBundle(true);
+    setShowNewtonian(true);
+    setShowPersistentTrails(true);
+    setPersistentTrails([]);
+    previousTraceRef.current = null;
   }
 
   return (
@@ -330,11 +504,10 @@ export function GeodesicsSimulation() {
           <span>
             <b>
               {mode === "light"
-                ? nullResult.closestRadius.toFixed(3)
-                : timelikeResult.periapsis.toFixed(2)}{" "}
-              rₛ
+                ? `${nullResult.closestRadius.toFixed(3)} rₛ`
+                : `${timelikeResult.precessionDegrees === null ? "—" : `+${timelikeResult.precessionDegrees.toFixed(1)}°`}`}
             </b>
-            closest radius
+            {mode === "light" ? "closest radius" : "advance / orbit"}
           </span>
         </div>
 
@@ -453,7 +626,7 @@ export function GeodesicsSimulation() {
                   </span>
                   <input
                     type="range"
-                    min={8}
+                    min={6 + 2 * eccentricity + 0.05}
                     max={24}
                     step={0.1}
                     value={semiLatus}
@@ -472,9 +645,13 @@ export function GeodesicsSimulation() {
                     max={0.7}
                     step={0.01}
                     value={eccentricity}
-                    onChange={(event) =>
-                      setEccentricity(Number(event.target.value))
-                    }
+                    onChange={(event) => {
+                      const next = Number(event.target.value);
+                      setEccentricity(next);
+                      setSemiLatus((current) =>
+                        Math.max(current, 6 + 2 * next + 0.05),
+                      );
+                    }}
                   />
                   <small>The stable region requires p &gt; 6 + 2e.</small>
                 </label>
@@ -502,9 +679,59 @@ export function GeodesicsSimulation() {
                     orbit
                   </b>
                 </div>
+                <p className="physics-note">
+                  The same relativistic effect produces Mercury’s 43″ per
+                  century in the weak-field limit.
+                </p>
               </section>
             </>
           )}
+
+          <section className="black-hole-control-section">
+            <div className="black-hole-control-heading">
+              <span aria-hidden="true">04</span>
+              <div>
+                <h3>Overlays</h3>
+                <p>Keep comparisons visible while exploring parameter space.</p>
+              </div>
+            </div>
+            {mode === "massive" && (
+              <label className="black-hole-switch-row">
+                <span>
+                  <b>Newtonian ghost</b>
+                  <small>Closed Kepler ellipse for the same p and e</small>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={showNewtonian}
+                  onChange={(event) => setShowNewtonian(event.target.checked)}
+                />
+                <i aria-hidden="true" />
+              </label>
+            )}
+            <label className="black-hole-switch-row">
+              <span>
+                <b>Persistent trails</b>
+                <small>Keep the last five flights dimmed underneath</small>
+              </span>
+              <input
+                type="checkbox"
+                checked={showPersistentTrails}
+                onChange={(event) =>
+                  setShowPersistentTrails(event.target.checked)
+                }
+              />
+              <i aria-hidden="true" />
+            </label>
+            <button
+              type="button"
+              className="physics-secondary-action"
+              onClick={() => setPersistentTrails([])}
+              disabled={persistentTrails.length === 0}
+            >
+              Clear trails
+            </button>
+          </section>
         </div>
         <footer className="black-hole-controls-actions spacetime-controls-actions">
           <button type="button" onClick={reset}>
@@ -545,7 +772,12 @@ export function GeodesicsSimulation() {
             {mode === "light" ? "null path" : "timelike path"}
           </span>
           <span>
-            <b>{status}</b>integration outcome
+            <b>
+              {mode === "massive" && timelikeResult.precessionDegrees !== null
+                ? `+${timelikeResult.precessionDegrees.toFixed(1)}° / orbit`
+                : status}
+            </b>
+            {mode === "massive" ? "periapsis advance" : "integration outcome"}
           </span>
         </div>
         <div className="spacetime-instructions">
@@ -572,7 +804,12 @@ export function GeodesicsSimulation() {
           mode={mode}
           primaryPath={primaryPath}
           bundlePaths={bundlePaths}
+          ghostPath={ghostPath}
+          persistentTrails={showPersistentTrails ? persistentTrails : []}
           viewRadius={viewRadius}
+          energy={timelikeResult.energy}
+          angularMomentum={timelikeResult.angularMomentum}
+          impactParameter={impact}
         />
       </section>
       <div className="physics-formula-strip" aria-live="polite">

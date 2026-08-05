@@ -39,6 +39,7 @@ export const SIMULATIONS: SimulationMeta[] = [
       "Watch time slow down near massive objects and speed up in empty space.",
     route: "/time-dilation",
     status: "available",
+    thumbnail: "/time-dilation-preview.jpg",
     gradient: "from-cyan-950 via-teal-900/50 to-black",
   },
   {
@@ -48,6 +49,7 @@ export const SIMULATIONS: SimulationMeta[] = [
       "Follow the paths of particles and light through curved spacetime.",
     route: "/geodesics",
     status: "available",
+    thumbnail: "/geodesics-preview.jpg",
     gradient: "from-emerald-950 via-green-900/50 to-black",
   },
   {
@@ -67,6 +69,7 @@ export const SIMULATIONS: SimulationMeta[] = [
       "Visualize ripples in spacetime created by accelerating masses.",
     route: "/gravitational-waves",
     status: "available",
+    thumbnail: "/gravitational-waves-preview.jpg",
     gradient: "from-rose-950 via-pink-900/50 to-black",
   },
 ];

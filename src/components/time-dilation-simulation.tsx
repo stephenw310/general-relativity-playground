@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   circularOrbitClockRate,
   schwarzschildRadiusKm,
@@ -14,6 +14,8 @@ type DistanceLock = "normalized" | "physical";
 const INITIAL_MASS = 4_000_000;
 const INITIAL_NEAR_RADIUS = 2.2;
 const INITIAL_FAR_RADIUS = 20;
+const EARTH_MASS_SOLAR = 3.003e-6;
+const MILLER_RATE_RATIO = 1 / 61_362;
 const MASS_PRESETS = [
   { mass: 10, label: "10 M☉ · stellar black hole" },
   { mass: 1000, label: "1,000 M☉ · intermediate" },
@@ -31,6 +33,21 @@ function formatDistance(distanceKm: number) {
     return `${(distanceKm / 1_000_000).toFixed(2)} million km`;
   }
   return `${distanceKm.toLocaleString(undefined, { maximumFractionDigits: 0 })} km`;
+}
+
+function formatTimeDelta(seconds: number) {
+  const sign = seconds > 0 ? "+" : seconds < 0 ? "−" : "";
+  const magnitude = Math.abs(seconds);
+  if (magnitude >= 1)
+    return `${sign}${magnitude.toFixed(magnitude < 10 ? 2 : 0)} s`;
+  if (magnitude >= 1e-3) return `${sign}${(magnitude * 1e3).toFixed(2)} ms`;
+  if (magnitude >= 1e-6) return `${sign}${(magnitude * 1e6).toFixed(1)} μs`;
+  if (magnitude >= 1e-9) return `${sign}${(magnitude * 1e9).toFixed(1)} ns`;
+  return `${sign}${(magnitude * 1e12).toFixed(1)} ps`;
+}
+
+function formatClockRate(rate: number, digits = 5) {
+  return rate < 0.0001 ? rate.toExponential(3) : rate.toFixed(digits);
 }
 
 function drawClock(
@@ -103,7 +120,7 @@ function drawClock(
   context.fillText(label, x, labelY);
   context.fillStyle = color;
   context.font = "500 10px ui-monospace, monospace";
-  context.fillText(`${rate.toFixed(5)} × t∞`, x, labelY + 16);
+  context.fillText(`${formatClockRate(rate)} × t∞`, x, labelY + 16);
   context.restore();
 }
 
@@ -112,15 +129,22 @@ function TimeDilationField({
   farRadius,
   nearRate,
   farRate,
-  mode,
+  nearMode,
+  farMode,
+  onNearRadiusChange,
+  onFarRadiusChange,
 }: {
   nearRadius: number;
   farRadius: number;
   nearRate: number;
   farRate: number;
-  mode: ObserverMode;
+  nearMode: ObserverMode;
+  farMode: ObserverMode;
+  onNearRadiusChange: (radius: number) => void;
+  onFarRadiusChange: (radius: number) => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const dragTargetRef = useRef<"near" | "far" | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -134,6 +158,17 @@ function TimeDilationField({
     let width = 0;
     let height = 0;
     let start = performance.now();
+    const clockPositions = {
+      centerX: 0,
+      centerY: 0,
+      horizon: 0,
+      maxRadius: 0,
+      scaleLimit: 1,
+      nearX: 0,
+      nearY: 0,
+      farX: 0,
+      farY: 0,
+    };
 
     const resize = () => {
       const bounds = canvas.getBoundingClientRect();
@@ -235,14 +270,26 @@ function TimeDilationField({
       context.fill();
 
       const nearAngle =
-        mode === "orbit" ? elapsed * 0.23 - 0.7 : -Math.PI * 0.24;
-      const farAngle = Math.PI * 0.76;
+        nearMode === "orbit" ? elapsed * 0.23 - 0.7 : -Math.PI * 0.24;
+      const farAngle =
+        farMode === "orbit" ? -elapsed * 0.14 + Math.PI * 0.76 : Math.PI * 0.76;
       const nearDistance = radialScale(nearRadius);
       const farDistance = radialScale(farRadius);
       const nearX = centerX + Math.cos(nearAngle) * nearDistance;
       const nearY = centerY + Math.sin(nearAngle) * nearDistance;
       const farX = centerX + Math.cos(farAngle) * farDistance;
       const farY = centerY + Math.sin(farAngle) * farDistance;
+      Object.assign(clockPositions, {
+        centerX,
+        centerY,
+        horizon,
+        maxRadius,
+        scaleLimit,
+        nearX,
+        nearY,
+        farX,
+        farY,
+      });
 
       context.strokeStyle = "rgba(116, 213, 255, 0.2)";
       context.beginPath();
@@ -260,7 +307,7 @@ function TimeDilationField({
         clockRadius,
         elapsed * nearRate * 0.16,
         "#77d8ff",
-        mode === "orbit" ? "ORBITING CLOCK" : "NEAR CLOCK",
+        nearMode === "orbit" ? "ORBITING NEAR CLOCK" : "NEAR CLOCK",
         nearRate,
         width < 768 || nearRadius < 3,
       );
@@ -271,7 +318,7 @@ function TimeDilationField({
         clockRadius,
         elapsed * farRate * 0.16,
         "#d8ecff",
-        "REFERENCE CLOCK",
+        farMode === "orbit" ? "ORBITING REFERENCE" : "REFERENCE CLOCK",
         farRate,
       );
 
@@ -284,12 +331,85 @@ function TimeDilationField({
     };
 
     render(start);
+
+    const pointerPosition = (event: PointerEvent) => {
+      const bounds = canvas.getBoundingClientRect();
+      return { x: event.clientX - bounds.left, y: event.clientY - bounds.top };
+    };
+    const hitTarget = (x: number, y: number) => {
+      if (
+        Math.hypot(x - clockPositions.nearX, y - clockPositions.nearY) <= 44
+      ) {
+        return "near" as const;
+      }
+      if (Math.hypot(x - clockPositions.farX, y - clockPositions.farY) <= 44) {
+        return "far" as const;
+      }
+      return null;
+    };
+    const radiusFromPointer = (x: number, y: number) => {
+      const distance = Math.hypot(
+        x - clockPositions.centerX,
+        y - clockPositions.centerY,
+      );
+      const fraction = Math.max(
+        0,
+        Math.min(
+          1,
+          (distance - clockPositions.horizon) /
+            Math.max(clockPositions.maxRadius - clockPositions.horizon, 1),
+        ),
+      );
+      return 1 + fraction ** 2 * (clockPositions.scaleLimit - 1);
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      const { x, y } = pointerPosition(event);
+      const target = hitTarget(x, y);
+      if (!target) return;
+      dragTargetRef.current = target;
+      canvas.setPointerCapture(event.pointerId);
+      canvas.style.cursor = "grabbing";
+    };
+    const onPointerMove = (event: PointerEvent) => {
+      const { x, y } = pointerPosition(event);
+      if (!dragTargetRef.current) {
+        canvas.style.cursor = hitTarget(x, y) ? "grab" : "default";
+        return;
+      }
+      const radius = radiusFromPointer(x, y);
+      if (dragTargetRef.current === "near") onNearRadiusChange(radius);
+      else onFarRadiusChange(radius);
+    };
+    const onPointerUp = (event: PointerEvent) => {
+      dragTargetRef.current = null;
+      if (canvas.hasPointerCapture(event.pointerId)) {
+        canvas.releasePointerCapture(event.pointerId);
+      }
+      canvas.style.cursor = "default";
+    };
+    canvas.addEventListener("pointerdown", onPointerDown);
+    canvas.addEventListener("pointermove", onPointerMove);
+    canvas.addEventListener("pointerup", onPointerUp);
+    canvas.addEventListener("pointercancel", onPointerUp);
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
+      canvas.removeEventListener("pointerdown", onPointerDown);
+      canvas.removeEventListener("pointermove", onPointerMove);
+      canvas.removeEventListener("pointerup", onPointerUp);
+      canvas.removeEventListener("pointercancel", onPointerUp);
       start = 0;
     };
-  }, [farRadius, farRate, mode, nearRadius, nearRate]);
+  }, [
+    farMode,
+    farRadius,
+    farRate,
+    nearMode,
+    nearRadius,
+    nearRate,
+    onFarRadiusChange,
+    onNearRadiusChange,
+  ]);
 
   return <canvas ref={canvasRef} />;
 }
@@ -306,37 +426,55 @@ export function TimeDilationSimulation() {
     INITIAL_FAR_RADIUS * initialHorizonKm,
   );
   const [distanceLock, setDistanceLock] = useState<DistanceLock>("normalized");
-  const [mode, setMode] = useState<ObserverMode>("static");
+  const [nearMode, setNearMode] = useState<ObserverMode>("static");
+  const [farMode, setFarMode] = useState<ObserverMode>("static");
+  const [realityPreset, setRealityPreset] = useState<
+    "gps" | "iss" | "miller" | null
+  >(null);
+  const [ledger, setLedger] = useState({ far: 0, near: 0, reference: 0 });
+  const [ledgerRunning, setLedgerRunning] = useState(false);
+  const [ledgerAnnouncement, setLedgerAnnouncement] = useState("");
+  const ledgerAnimationRef = useRef(0);
   const [panelOpen, setPanelOpen] = useState(false);
   const [hudOpen, setHudOpen] = useState(false);
 
   const horizonKm = schwarzschildRadiusKm(mass);
-  const minimumRadius = mode === "orbit" ? 3 : 1.05;
+  const nearMinimumRadius = nearMode === "orbit" ? 3 : 1 + Number.EPSILON * 4;
+  const farMinimumRadius = farMode === "orbit" ? 3 : 1 + Number.EPSILON * 4;
   const effectiveNearRadius =
     distanceLock === "physical" ? nearDistanceKm / horizonKm : nearRadius;
   const effectiveFarRadius =
     distanceLock === "physical" ? farDistanceKm / horizonKm : farRadius;
-  const safeNearRadius = Math.max(effectiveNearRadius, minimumRadius);
+  const safeNearRadius = Math.max(effectiveNearRadius, nearMinimumRadius);
+  const safeFarRadius = Math.max(effectiveFarRadius, farMinimumRadius);
   const nearRate =
-    mode === "orbit"
+    nearMode === "orbit"
       ? circularOrbitClockRate(safeNearRadius)
       : staticClockRate(safeNearRadius);
-  const farRate = staticClockRate(effectiveFarRadius);
+  const farRate =
+    farMode === "orbit"
+      ? circularOrbitClockRate(safeFarRadius)
+      : staticClockRate(safeFarRadius);
   const relativeRate = nearRate / farRate;
   const lagPerDay = 86_400 * (1 - relativeRate);
   const massLabel = useMemo(
     () =>
-      mass >= 1_000_000
-        ? `${(mass / 1_000_000).toFixed(1)} million`
-        : mass.toLocaleString(),
+      mass < 0.001
+        ? mass.toExponential(3)
+        : mass >= 1_000_000
+          ? `${(mass / 1_000_000).toFixed(1)} million`
+          : mass.toLocaleString(),
     [mass],
   );
-  const nearPhysicalMinimumKm = minimumRadius * horizonKm;
+  const nearPhysicalMinimumKm = nearMinimumRadius * horizonKm;
   const nearPhysicalMaximumKm = Math.max(
     nearPhysicalMinimumKm * 1.1,
     farDistanceKm / 1.1,
   );
-  const farPhysicalMinimumKm = Math.max(nearDistanceKm * 1.1, 1.05 * horizonKm);
+  const farPhysicalMinimumKm = Math.max(
+    nearDistanceKm * 1.001,
+    farMinimumRadius * horizonKm,
+  );
   const farPhysicalMaximumKm = Math.max(
     farPhysicalMinimumKm * 1.1,
     farDistanceKm * 10,
@@ -350,19 +488,28 @@ export function TimeDilationSimulation() {
     Math.ceil(Math.max(1.1, safeNearRadius * 1.1) * 10) / 10;
   const normalizedFarMaximum = Math.max(80, effectiveFarRadius);
 
-  function changeMode(nextMode: ObserverMode) {
-    setMode(nextMode);
-    if (nextMode !== "orbit" || effectiveNearRadius >= 3) return;
-    if (distanceLock === "physical") {
-      setNearDistanceKm(6 * horizonKm);
-      setFarDistanceKm((current) => Math.max(current, 20 * horizonKm));
-    } else {
-      setNearRadius(6);
+  useEffect(() => () => cancelAnimationFrame(ledgerAnimationRef.current), []);
+
+  function changeClockMode(clock: "near" | "far", nextMode: ObserverMode) {
+    setRealityPreset(null);
+    if (clock === "near") {
+      setNearMode(nextMode);
+      if (nextMode === "orbit" && effectiveNearRadius < 3) {
+        if (distanceLock === "physical") setNearDistanceKm(3 * horizonKm);
+        else setNearRadius(3);
+      }
+      return;
+    }
+    setFarMode(nextMode);
+    if (nextMode === "orbit" && effectiveFarRadius < 3) {
+      if (distanceLock === "physical") setFarDistanceKm(3 * horizonKm);
+      else setFarRadius(3);
     }
   }
 
   function changeDistanceLock(nextLock: DistanceLock) {
     if (nextLock === distanceLock) return;
+    setRealityPreset(null);
     if (nextLock === "physical") {
       setNearDistanceKm(safeNearRadius * horizonKm);
       setFarDistanceKm(effectiveFarRadius * horizonKm);
@@ -375,7 +522,98 @@ export function TimeDilationSimulation() {
 
   function massKeepsClockOutside(massSolar: number) {
     if (distanceLock === "normalized") return true;
-    return nearDistanceKm / schwarzschildRadiusKm(massSolar) >= minimumRadius;
+    const radius = schwarzschildRadiusKm(massSolar);
+    return (
+      nearDistanceKm / radius >= nearMinimumRadius &&
+      farDistanceKm / radius >= farMinimumRadius
+    );
+  }
+
+  const setDraggedNearRadius = useCallback(
+    (radius: number) => {
+      const clamped = Math.min(
+        Math.max(radius, nearMinimumRadius),
+        safeFarRadius * 0.98,
+      );
+      setRealityPreset(null);
+      if (distanceLock === "physical") setNearDistanceKm(clamped * horizonKm);
+      else setNearRadius(clamped);
+    },
+    [distanceLock, horizonKm, nearMinimumRadius, safeFarRadius],
+  );
+
+  const setDraggedFarRadius = useCallback(
+    (radius: number) => {
+      const clamped = Math.max(radius, farMinimumRadius, safeNearRadius * 1.02);
+      setRealityPreset(null);
+      if (distanceLock === "physical") setFarDistanceKm(clamped * horizonKm);
+      else setFarRadius(clamped);
+    },
+    [distanceLock, farMinimumRadius, horizonKm, safeNearRadius],
+  );
+
+  function loadRealityPreset(preset: "gps" | "iss" | "miller") {
+    cancelAnimationFrame(ledgerAnimationRef.current);
+    setRealityPreset(preset);
+    if (preset === "gps" || preset === "iss") {
+      setMass(EARTH_MASS_SOLAR);
+      setDistanceLock("physical");
+      setNearMode("static");
+      setFarMode("orbit");
+      setNearDistanceKm(6_371);
+      setFarDistanceKm(preset === "gps" ? 26_561 : 6_791);
+      return;
+    }
+    const far = 1e10;
+    const farRateForPreset = staticClockRate(far);
+    const nearTargetRate = farRateForPreset * MILLER_RATE_RATIO;
+    setMass(100_000_000);
+    setDistanceLock("normalized");
+    setNearMode("static");
+    setFarMode("static");
+    setNearRadius(1 / (1 - nearTargetRate ** 2));
+    setFarRadius(far);
+  }
+
+  function runTenYears() {
+    if (ledgerRunning) return;
+    cancelAnimationFrame(ledgerAnimationRef.current);
+    const from = ledger;
+    const to = {
+      far: from.far + 10,
+      near: from.near + nearRate * 10,
+      reference: from.reference + farRate * 10,
+    };
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduceMotion) {
+      setLedger(to);
+      setLedgerAnnouncement(
+        `Far time ${to.far.toFixed(2)} years. Near clock ${to.near.toFixed(2)} years. Reference clock ${to.reference.toFixed(2)} years.`,
+      );
+      return;
+    }
+    setLedgerRunning(true);
+    const start = performance.now();
+    const animateLedger = (now: number) => {
+      const progress = Math.min(1, (now - start) / 2000);
+      const eased = 1 - (1 - progress) ** 3;
+      setLedger({
+        far: from.far + (to.far - from.far) * eased,
+        near: from.near + (to.near - from.near) * eased,
+        reference: from.reference + (to.reference - from.reference) * eased,
+      });
+      if (progress < 1) {
+        ledgerAnimationRef.current = requestAnimationFrame(animateLedger);
+      } else {
+        setLedgerRunning(false);
+        setLedgerAnnouncement(
+          `Far time ${to.far.toFixed(2)} years. Near clock ${to.near.toFixed(2)} years. Reference clock ${to.reference.toFixed(2)} years.`,
+        );
+      }
+    };
+    ledgerAnimationRef.current = requestAnimationFrame(animateLedger);
   }
 
   function reset() {
@@ -385,7 +623,13 @@ export function TimeDilationSimulation() {
     setNearDistanceKm(INITIAL_NEAR_RADIUS * initialHorizonKm);
     setFarDistanceKm(INITIAL_FAR_RADIUS * initialHorizonKm);
     setDistanceLock("normalized");
-    setMode("static");
+    setNearMode("static");
+    setFarMode("static");
+    setRealityPreset(null);
+    cancelAnimationFrame(ledgerAnimationRef.current);
+    setLedger({ far: 0, near: 0, reference: 0 });
+    setLedgerRunning(false);
+    setLedgerAnnouncement("Proper-time ledger cleared.");
   }
 
   return (
@@ -440,12 +684,12 @@ export function TimeDilationSimulation() {
 
         <div className="spacetime-controls-summary">
           <span>
-            <b>{nearRate.toFixed(5)}</b>
+            <b>{formatClockRate(nearRate)}</b>
             near dτ/dt∞
           </span>
           <span>
-            <b>{lagPerDay.toFixed(lagPerDay < 10 ? 2 : 0)} s</b>
-            lag per far day
+            <b>{formatTimeDelta(lagPerDay)}</b>
+            reference − near / day
           </span>
         </div>
 
@@ -454,33 +698,52 @@ export function TimeDilationSimulation() {
             <div className="black-hole-control-heading">
               <span aria-hidden="true">01</span>
               <div>
-                <h3>Observer</h3>
-                <p>
-                  Compare a supported clock with one in free circular orbit.
-                </p>
+                <h3>Observer worldlines</h3>
+                <p>Give each clock its own motion through spacetime.</p>
               </div>
             </div>
-            <fieldset className="physics-segmented">
-              <legend className="sr-only">Observer motion</legend>
-              <button
-                type="button"
-                className={mode === "static" ? "is-active" : undefined}
-                onClick={() => changeMode("static")}
-              >
-                Static
-              </button>
-              <button
-                type="button"
-                className={mode === "orbit" ? "is-active" : undefined}
-                onClick={() => changeMode("orbit")}
-              >
-                Free orbit
-              </button>
-            </fieldset>
+            <div className="physics-worldline-row">
+              <span>Near</span>
+              <fieldset className="physics-segmented">
+                <legend className="sr-only">Near clock motion</legend>
+                <button
+                  type="button"
+                  className={nearMode === "static" ? "is-active" : undefined}
+                  onClick={() => changeClockMode("near", "static")}
+                >
+                  Static
+                </button>
+                <button
+                  type="button"
+                  className={nearMode === "orbit" ? "is-active" : undefined}
+                  onClick={() => changeClockMode("near", "orbit")}
+                >
+                  Free orbit
+                </button>
+              </fieldset>
+            </div>
+            <div className="physics-worldline-row">
+              <span>Reference</span>
+              <fieldset className="physics-segmented">
+                <legend className="sr-only">Reference clock motion</legend>
+                <button
+                  type="button"
+                  className={farMode === "static" ? "is-active" : undefined}
+                  onClick={() => changeClockMode("far", "static")}
+                >
+                  Static
+                </button>
+                <button
+                  type="button"
+                  className={farMode === "orbit" ? "is-active" : undefined}
+                  onClick={() => changeClockMode("far", "orbit")}
+                >
+                  Free orbit
+                </button>
+              </fieldset>
+            </div>
             <p className="physics-equation">
-              {mode === "static"
-                ? "dτ/dt∞ = √(1 − rₛ/r)"
-                : "dτ/dt∞ = √(1 − 3rₛ/2r)"}
+              static: √(1 − rₛ/r) · orbit: √(1 − 3rₛ/2r)
             </p>
           </section>
 
@@ -528,16 +791,17 @@ export function TimeDilationSimulation() {
                   </span>
                   <input
                     type="range"
-                    min={minimumRadius}
+                    min={nearMinimumRadius}
                     max={normalizedNearMaximum}
-                    step={0.05}
+                    step="any"
                     value={safeNearRadius}
-                    onChange={(event) =>
-                      setNearRadius(Number(event.target.value))
-                    }
+                    onChange={(event) => {
+                      setRealityPreset(null);
+                      setNearRadius(Number(event.target.value));
+                    }}
                   />
                   <small>
-                    {mode === "orbit"
+                    {nearMode === "orbit"
                       ? "Stable circular geodesics begin at the ISCO: 3 rₛ."
                       : "A static observer needs unbounded acceleration at rₛ."}
                   </small>
@@ -545,17 +809,18 @@ export function TimeDilationSimulation() {
                 <label className="black-hole-range-field">
                   <span>
                     Reference radius
-                    <b>{effectiveFarRadius.toFixed(0)} rₛ</b>
+                    <b>{safeFarRadius.toPrecision(5)} rₛ</b>
                   </span>
                   <input
                     type="range"
                     min={normalizedFarMinimum}
                     max={normalizedFarMaximum}
                     step={0.1}
-                    value={effectiveFarRadius}
-                    onChange={(event) =>
-                      setFarRadius(Number(event.target.value))
-                    }
+                    value={safeFarRadius}
+                    onChange={(event) => {
+                      setRealityPreset(null);
+                      setFarRadius(Number(event.target.value));
+                    }}
                   />
                 </label>
               </>
@@ -572,9 +837,10 @@ export function TimeDilationSimulation() {
                     max={Math.log10(nearPhysicalMaximumKm)}
                     step="any"
                     value={Math.log10(nearDistanceKm)}
-                    onChange={(event) =>
-                      setNearDistanceKm(10 ** Number(event.target.value))
-                    }
+                    onChange={(event) => {
+                      setRealityPreset(null);
+                      setNearDistanceKm(10 ** Number(event.target.value));
+                    }}
                   />
                   <small>
                     {safeNearRadius.toFixed(3)} rₛ at the selected mass.
@@ -591,12 +857,13 @@ export function TimeDilationSimulation() {
                     max={Math.log10(farPhysicalMaximumKm)}
                     step="any"
                     value={Math.log10(farDistanceKm)}
-                    onChange={(event) =>
-                      setFarDistanceKm(10 ** Number(event.target.value))
-                    }
+                    onChange={(event) => {
+                      setRealityPreset(null);
+                      setFarDistanceKm(10 ** Number(event.target.value));
+                    }}
                   />
                   <small>
-                    {effectiveFarRadius.toFixed(3)} rₛ at the selected mass.
+                    {safeFarRadius.toFixed(3)} rₛ at the selected mass.
                   </small>
                 </label>
               </>
@@ -607,7 +874,7 @@ export function TimeDilationSimulation() {
             <div className="black-hole-control-heading">
               <span aria-hidden="true">03</span>
               <div>
-                <h3>Central mass</h3>
+                <h3>Central mass &amp; reality checks</h3>
                 <p>
                   {distanceLock === "physical"
                     ? "Change curvature while both clocks remain at fixed distances."
@@ -618,9 +885,19 @@ export function TimeDilationSimulation() {
             <label className="black-hole-select-field">
               <span>Mass preset</span>
               <select
-                value={mass}
-                onChange={(event) => setMass(Number(event.target.value))}
+                value={
+                  MASS_PRESETS.some((preset) => preset.mass === mass)
+                    ? mass
+                    : ""
+                }
+                onChange={(event) => {
+                  setRealityPreset(null);
+                  setMass(Number(event.target.value));
+                }}
               >
+                <option value="" disabled>
+                  Custom / reality preset
+                </option>
                 {MASS_PRESETS.map((preset) => (
                   <option
                     key={preset.mass}
@@ -632,6 +909,32 @@ export function TimeDilationSimulation() {
                 ))}
               </select>
             </label>
+            <fieldset className="physics-preset-grid physics-reality-grid">
+              <legend className="sr-only">
+                Real-world time dilation presets
+              </legend>
+              <button
+                type="button"
+                className={realityPreset === "gps" ? "is-active" : undefined}
+                onClick={() => loadRealityPreset("gps")}
+              >
+                GPS · +38.5 μs/day
+              </button>
+              <button
+                type="button"
+                className={realityPreset === "iss" ? "is-active" : undefined}
+                onClick={() => loadRealityPreset("iss")}
+              >
+                ISS · −24.5 μs/day
+              </button>
+              <button
+                type="button"
+                className={realityPreset === "miller" ? "is-active" : undefined}
+                onClick={() => loadRealityPreset("miller")}
+              >
+                Miller · 1 h = 7 yr
+              </button>
+            </fieldset>
             <p className="physics-note">
               Horizon radius:{" "}
               {horizonKm.toLocaleString(undefined, {
@@ -640,7 +943,27 @@ export function TimeDilationSimulation() {
               km. Near clock: {safeNearRadius.toFixed(3)} rₛ.
               {distanceLock === "physical" &&
                 " Presets inside the clock radius are disabled."}
+              {realityPreset === "miller" &&
+                " As filmed: the movie uses Kerr spacetime; this lab shows the ratio as an extreme static Schwarzschild depth."}
             </p>
+          </section>
+
+          <section className="black-hole-control-section">
+            <div className="black-hole-control-heading">
+              <span aria-hidden="true">04</span>
+              <div>
+                <h3>Mission clock</h3>
+                <p>Fast-forward far time; accumulated proper time persists.</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="physics-primary-action"
+              onClick={runTenYears}
+              disabled={ledgerRunning}
+            >
+              {ledgerRunning ? "Running 10 years…" : "Run 10 years of far time"}
+            </button>
           </section>
         </div>
 
@@ -684,7 +1007,11 @@ export function TimeDilationSimulation() {
             central mass
           </span>
           <span>
-            <b>{(relativeRate * 100).toFixed(2)}%</b>
+            <b>
+              {relativeRate < 0.001
+                ? relativeRate.toExponential(2)
+                : `${(relativeRate * 100).toFixed(2)}%`}
+            </b>
             near vs reference
           </span>
         </div>
@@ -702,6 +1029,15 @@ export function TimeDilationSimulation() {
               <b>Switch worldlines</b>Separate gravitational and orbital effects
             </p>
           </div>
+          <div>
+            <span className="spacetime-instruction-number">3</span>
+            <p>
+              <b>Run the mission clock</b>
+              {realityPreset === "miller"
+                ? "1 hour here = 7 years far away"
+                : "Fill the aging ledger ten far-years at a time"}
+            </p>
+          </div>
         </div>
       </section>
 
@@ -711,16 +1047,70 @@ export function TimeDilationSimulation() {
       >
         <TimeDilationField
           nearRadius={safeNearRadius}
-          farRadius={effectiveFarRadius}
+          farRadius={safeFarRadius}
           nearRate={nearRate}
           farRate={farRate}
-          mode={mode}
+          nearMode={nearMode}
+          farMode={farMode}
+          onNearRadiusChange={setDraggedNearRadius}
+          onFarRadiusChange={setDraggedFarRadius}
         />
+      </section>
+
+      <section
+        className="physics-instrument physics-time-ledger"
+        aria-label="Proper-time ledger"
+      >
+        <header>
+          <b>Proper-time ledger</b>
+          <span className="physics-instrument-meta">
+            far time {ledger.far.toFixed(2)} yr
+          </span>
+        </header>
+        <div className="physics-ledger-row">
+          <span>
+            Reference
+            <small className="physics-ledger-meta">
+              {farMode} · {safeFarRadius.toPrecision(4)} rₛ
+            </small>
+          </span>
+          <i className="physics-ledger-bar">
+            <em
+              className="physics-ledger-fill"
+              style={{
+                width: `${Math.min(100, ledger.far ? (ledger.reference / ledger.far) * 100 : 0)}%`,
+              }}
+            />
+          </i>
+          <b className="physics-ledger-value">
+            {ledger.reference.toFixed(2)} yr
+          </b>
+        </div>
+        <div className="physics-ledger-row">
+          <span>
+            Near clock
+            <small className="physics-ledger-meta">
+              {nearMode} · {safeNearRadius.toPrecision(4)} rₛ
+            </small>
+          </span>
+          <i className="physics-ledger-bar">
+            <em
+              className="physics-ledger-fill"
+              style={{
+                width: `${Math.min(100, ledger.far ? (ledger.near / ledger.far) * 100 : 0)}%`,
+              }}
+            />
+          </i>
+          <b className="physics-ledger-value">{ledger.near.toFixed(2)} yr</b>
+        </div>
+        <p className="sr-only" aria-live="polite">
+          {ledgerAnnouncement}
+        </p>
       </section>
 
       <div className="physics-formula-strip" aria-live="polite">
         <span>Near clock</span>
-        <b>{nearRate.toFixed(6)} s per distant second</b>
+        <b>{formatClockRate(nearRate, 6)} s per distant second</b>
       </div>
       <div className="spacetime-vignette" aria-hidden="true" />
       <div className="spacetime-grain" aria-hidden="true" />

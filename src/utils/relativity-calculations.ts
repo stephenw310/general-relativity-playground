@@ -17,7 +17,7 @@ export function schwarzschildRadiusKm(massSolar: number) {
 
 /** Proper-time rate for a static Schwarzschild observer: dτ/dt. */
 export function staticClockRate(radiusInSchwarzschildRadii: number) {
-  const radius = Math.max(radiusInSchwarzschildRadii, 1.000001);
+  const radius = Math.max(radiusInSchwarzschildRadii, 1 + Number.EPSILON * 4);
   return Math.sqrt(1 - 1 / radius);
 }
 
@@ -247,6 +247,26 @@ export interface BinaryParameters {
   separationKm: number;
 }
 
+export interface InspiralWaveform {
+  /** Physical source-frame time in seconds from release. */
+  t: number[];
+  /** Deliberately slowed display time used by the synchronized UI and audio. */
+  playbackTime: number[];
+  hPlus: number[];
+  hCross: number[];
+  amplitude: number[];
+  fGW: number[];
+  separation: number[];
+  orbitalPhase: number[];
+  mergerIndex: number;
+  mergerPlaybackTime: number;
+  duration: number;
+  physicalInspiralDuration: number;
+  finalMass: number;
+  radiatedMass: number;
+  ringdownFrequencyHz: number;
+}
+
 /** Leading-order, quasi-circular binary parameters (quadrupole + Peters). */
 export function getBinaryParameters(
   massOneSolar: number,
@@ -296,4 +316,166 @@ export function inspiralSeparation(
     initialSeparation ** 4 -
     (256 / 5) * symmetricMassRatio * elapsedInTotalMassTimes;
   return remaining <= 0 ? 0 : remaining ** 0.25;
+}
+
+/**
+ * A compact inspiral-merger-ringdown teaching waveform. The inspiral is the
+ * leading-order Peters/quadrupole solution already used by the lab. It stops
+ * at a = 3 GM/c², where that approximation ceases to be trustworthy, and is
+ * joined continuously to a phenomenological damped ringdown calibrated to
+ * GW150914. This is not a numerical-relativity merger model.
+ */
+export function buildInspiralWaveform(
+  massOneSolar: number,
+  massTwoSolar: number,
+  initialSeparation: number,
+  distanceMegaparsecs: number,
+  inclinationDegrees: number,
+): InspiralWaveform {
+  const totalMass = massOneSolar + massTwoSolar;
+  const eta = (massOneSolar * massTwoSolar) / totalMass ** 2;
+  const totalMassSeconds = totalMass * SOLAR_MASS_TIME_SECONDS;
+  const mergerSeparation = Math.min(3, initialSeparation * 0.9);
+  const physicalInspiralDuration = Math.max(
+    0,
+    ((5 / 256) *
+      totalMassSeconds *
+      (initialSeparation ** 4 - mergerSeparation ** 4)) /
+      eta,
+  );
+  const finalMass = totalMass * 0.954;
+  const radiatedMass = totalMass - finalMass;
+  const ringdownFrequencyHz = 250 * (62 / finalMass);
+  const ringdownTau = 0.004 * (finalMass / 62);
+  const ringdownPhysicalDuration = Math.max(0.02, ringdownTau * 5);
+  const inspiralPlaybackDuration = 9.5;
+  const ringdownPlaybackDuration = 1.5;
+  const inspiralSamples = 1200;
+  const ringdownSamples = 180;
+  const finalSlowWindow = Math.min(0.1, physicalInspiralDuration * 0.45);
+  const slowWindowStart = Math.max(
+    0,
+    physicalInspiralDuration - finalSlowWindow,
+  );
+  const slowPlaybackStart = inspiralPlaybackDuration * 0.68;
+  const cosInclination = Math.cos((inclinationDegrees * Math.PI) / 180);
+  const plusProjection = (1 + cosInclination ** 2) / 2;
+
+  const t: number[] = [];
+  const playbackTime: number[] = [];
+  const fGW: number[] = [];
+  const separation: number[] = [];
+  const amplitude: number[] = [];
+  const rawWavePhase: number[] = [];
+  let phase = 0;
+  let previousPhysicalTime = 0;
+
+  for (let index = 0; index < inspiralSamples; index += 1) {
+    const progress = index / (inspiralSamples - 1);
+    const displayTime = progress * inspiralPlaybackDuration;
+    const physicalTime =
+      displayTime <= slowPlaybackStart || finalSlowWindow === 0
+        ? (displayTime / slowPlaybackStart) * slowWindowStart
+        : slowWindowStart +
+          ((displayTime - slowPlaybackStart) /
+            (inspiralPlaybackDuration - slowPlaybackStart)) *
+            finalSlowWindow;
+    const currentSeparation = Math.max(
+      mergerSeparation,
+      inspiralSeparation(
+        initialSeparation,
+        eta,
+        physicalTime / totalMassSeconds,
+      ),
+    );
+    const binary = getBinaryParameters(
+      massOneSolar,
+      massTwoSolar,
+      currentSeparation,
+      distanceMegaparsecs,
+    );
+    if (index > 0) {
+      const dt = physicalTime - previousPhysicalTime;
+      const previousFrequency =
+        fGW[index - 1] ?? binary.gravitationalWaveFrequencyHz;
+      phase +=
+        Math.PI *
+        (previousFrequency + binary.gravitationalWaveFrequencyHz) *
+        dt;
+    }
+    previousPhysicalTime = physicalTime;
+    t.push(physicalTime);
+    playbackTime.push(displayTime);
+    fGW.push(binary.gravitationalWaveFrequencyHz);
+    separation.push(currentSeparation);
+    amplitude.push(binary.strainAmplitude);
+    rawWavePhase.push(phase);
+  }
+
+  // Choose an arbitrary global phase that places a strain crest at merger.
+  // Only phase differences are observable here, and this makes the analytic
+  // inspiral and ringdown value-continuous at their join.
+  const mergerPhaseOffset = rawWavePhase.at(-1) ?? 0;
+  const hPlus = rawWavePhase.map(
+    (value, index) =>
+      (amplitude[index] ?? 0) *
+      plusProjection *
+      Math.cos(value - mergerPhaseOffset),
+  );
+  const hCross = rawWavePhase.map(
+    (value, index) =>
+      (amplitude[index] ?? 0) *
+      cosInclination *
+      Math.sin(value - mergerPhaseOffset),
+  );
+  const orbitalPhase = rawWavePhase.map(
+    (value) => (value - mergerPhaseOffset) / 2,
+  );
+  const mergerIndex = hPlus.length - 1;
+  const mergerAmplitude = amplitude[mergerIndex] ?? 0;
+  const mergerFrequency = fGW[mergerIndex] ?? ringdownFrequencyHz;
+  let ringdownPhase = 0;
+  let previousRingdownTime = 0;
+
+  for (let index = 1; index <= ringdownSamples; index += 1) {
+    const progress = index / ringdownSamples;
+    const ringdownTime = progress * ringdownPhysicalDuration;
+    const displayTime =
+      inspiralPlaybackDuration + progress * ringdownPlaybackDuration;
+    const frequency =
+      mergerFrequency +
+      (ringdownFrequencyHz - mergerFrequency) *
+        (1 - Math.exp(-ringdownTime / Math.max(ringdownTau * 0.45, 1e-6)));
+    const dt = ringdownTime - previousRingdownTime;
+    const previousFrequency = fGW.at(-1) ?? mergerFrequency;
+    ringdownPhase += Math.PI * (previousFrequency + frequency) * dt;
+    previousRingdownTime = ringdownTime;
+    const envelope = mergerAmplitude * Math.exp(-ringdownTime / ringdownTau);
+    t.push(physicalInspiralDuration + ringdownTime);
+    playbackTime.push(displayTime);
+    fGW.push(frequency);
+    separation.push(0);
+    amplitude.push(envelope);
+    hPlus.push(envelope * plusProjection * Math.cos(ringdownPhase));
+    hCross.push(envelope * cosInclination * Math.sin(ringdownPhase));
+    orbitalPhase.push(ringdownPhase / 2);
+  }
+
+  return {
+    t,
+    playbackTime,
+    hPlus,
+    hCross,
+    amplitude,
+    fGW,
+    separation,
+    orbitalPhase,
+    mergerIndex,
+    mergerPlaybackTime: inspiralPlaybackDuration,
+    duration: inspiralPlaybackDuration + ringdownPlaybackDuration,
+    physicalInspiralDuration,
+    finalMass,
+    radiatedMass,
+    ringdownFrequencyHz,
+  };
 }

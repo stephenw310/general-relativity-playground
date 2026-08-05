@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Iteration briefs — missions 04–06 on PR #15</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/shell.css" />
+<link rel="stylesheet" href="iter.css" />
+<style>
+  body { background: #030509; }
+
+  .ihub {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+
+  .ihub-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 26px 0 22px;
+    border-bottom: 1px solid rgba(193, 207, 239, 0.14);
+  }
+
+  .ihub-top a {
+    color: #d8deeb;
+    font-size: 12.5px;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(216, 222, 235, 0.3);
+    padding-bottom: 1px;
+  }
+
+  .ihub-top span {
+    color: #75839a;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 11px;
+  }
+
+  .ihub h1 {
+    margin: 46px 0 0;
+    font-size: clamp(30px, 4vw, 44px);
+    font-weight: 560;
+    letter-spacing: -0.045em;
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+
+  .ihub-intro {
+    max-width: 640px;
+    margin: 16px 0 0;
+    color: #b7c1d2;
+    font-size: 14.5px;
+    line-height: 1.65;
+  }
+
+  .ihub-intro code,
+  .ihub td code {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 12.5px;
+    color: #d7e3f4;
+    background: rgba(157, 181, 255, 0.09);
+    padding: 1px 5px;
+  }
+
+  .ihub-links {
+    margin-top: 26px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .ihub-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 15px;
+    border: 1px solid rgba(var(--c, 157, 181, 255), 0.5);
+    background: rgba(var(--c, 157, 181, 255), 0.09);
+    color: #edf2fb;
+    font-size: 12.5px;
+    font-weight: 560;
+    text-decoration: none;
+  }
+
+  .ihub-links a b {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    color: rgb(var(--c, 157, 181, 255));
+  }
+
+  .ihub table {
+    width: 100%;
+    margin-top: 40px;
+    border-collapse: collapse;
+  }
+
+  .ihub th {
+    padding: 9px 10px;
+    border-bottom: 1px solid rgba(193, 207, 239, 0.25);
+    color: #9db5ff;
+    font-size: 11px;
+    font-weight: 560;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    text-align: left;
+  }
+
+  .ihub td {
+    padding: 10px;
+    border-bottom: 1px solid rgba(193, 207, 239, 0.1);
+    color: #b6c0d0;
+    font-size: 13px;
+    vertical-align: top;
+  }
+
+  .ihub td:first-child {
+    white-space: nowrap;
+  }
+
+  .ihub td b {
+    color: #e8edf6;
+    font-weight: 570;
+  }
+
+  .ihub-note {
+    margin-top: 34px;
+    padding: 16px 18px;
+    border: 1px solid rgba(240, 196, 108, 0.35);
+    background: rgba(240, 196, 108, 0.06);
+    color: #cdc4ae;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .ihub-note b { color: #ffe3ae; font-weight: 570; }
+</style>
+</head>
+<body>
+<div class="ihub">
+  <header class="ihub-top">
+    <a href="../index.html">← Original mission briefs (pre-PR)</a>
+    <span>iteration briefs · PR #15 · missions 04–06</span>
+  </header>
+
+  <h1>Keep the PR's physics. Add the signature moments.</h1>
+  <p class="ihub-intro">
+    PR #15 lands correct Schwarzschild/quadrupole engines for all three missions —
+    the decision is to iterate on it, not rebuild. Each mock below shows that
+    PR's actual screen with amber flags on every addition; each flag ID matches
+    a ticket-ready item in <code>mockups/ITERATIONS.md</code> with what / why /
+    how / acceptance criteria.
+  </p>
+
+  <div class="ihub-links">
+    <a href="time-dilation-v2.html" style="--c: 119, 216, 255"><b>04</b> Time Dilation v2</a>
+    <a href="geodesics-v2.html" style="--c: 124, 231, 169"><b>05</b> Geodesics v2</a>
+    <a href="gravitational-waves-v2.html" style="--c: 255, 143, 168"><b>06</b> Gravitational Waves v2</a>
+    <a href="../ITERATIONS.md" style="--c: 240, 196, 108"><b>MD</b> Full spec — ITERATIONS.md</a>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Flag</th><th>Item</th><th>Priority · size</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><b>W1</b></td><td><b>Chirp timeline</b> — release → inspiral → merger → ringdown, playhead + replay</td><td>P0 · L</td></tr>
+      <tr><td><b>W2</b></td><td><b>Chirp audio</b> — synthesized from the same waveform arrays, pitch ×2</td><td>P0 · M</td></tr>
+      <tr><td><b>T1</b></td><td><b>Proper-time ledger</b> + Run 10 years of far time</td><td>P0 · M</td></tr>
+      <tr><td><b>G1</b></td><td><b>Newtonian ghost orbit</b> under the GR rosette</td><td>P0 · S</td></tr>
+      <tr><td><b>G2</b></td><td><b>Periapsis-advance readout</b> (already computed, never shown)</td><td>P0 · S</td></tr>
+      <tr><td><b>W3</b></td><td><b>Detector test-mass ring</b>, inclination-projected</td><td>P1 · M</td></tr>
+      <tr><td><b>W4</b></td><td><b>Spiral wavefield</b> replacing concentric rings, λ ∝ 1/f</td><td>P1 · S–M</td></tr>
+      <tr><td><b>T2</b></td><td><b>GPS · ISS · Miller presets</b> + adaptive lag formatting</td><td>P1 · M</td></tr>
+      <tr><td><b>T3</b></td><td><b>Per-clock worldline modes</b> (prerequisite for T2)</td><td>P1 · S–M</td></tr>
+      <tr><td><b>G3</b></td><td><b>Persistent trail gallery</b> + Clear trails</td><td>P1 · S</td></tr>
+      <tr><td><b>X1</b></td><td><b>Landing thumbnails</b> for missions 04–06 in <code>public/</code></td><td>P1 · S</td></tr>
+      <tr><td><b>G4</b></td><td><b>Effective-potential inset</b> with live marker</td><td>P2 · M</td></tr>
+      <tr><td><b>T4</b></td><td><b>Drag clocks on canvas</b></td><td>P2 · S–M</td></tr>
+      <tr><td><b>W5</b></td><td><b>Real GW150914 ghost trace</b></td><td>P2 · M</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ihub-note">
+    <b>Separate decision, not in this list:</b> PR #15 also bundles the
+    Universe Lab rebrand (README, metadata, landing copy) and removes the
+    availability badges. If the rename isn't settled, ask for those hunks in
+    their own PR — none of the items above depend on them.
+  </div>
+</div>
+</body>
+</html>

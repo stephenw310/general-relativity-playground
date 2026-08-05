@@ -105,11 +105,6 @@ function MissionCard({
           <b>{String(index + 1).padStart(2, "0")}</b>
           {mission.category}
         </span>
-        <span
-          className={`landing-availability${available ? "" : " is-locked"}`}
-        >
-          {available ? "Online" : "In development"}
-        </span>
       </span>
       <span className="landing-mission-copy">
         <h2>{mission.title}</h2>
@@ -127,7 +122,9 @@ function MissionCard({
     return (
       <Link
         href={mission.route}
-        className={`landing-mission is-live${selected ? " is-selected" : ""}`}
+        className={["landing-mission", "is-live", selected && "is-selected"]
+          .filter(Boolean)
+          .join(" ")}
         data-mission={mission.id}
         onMouseEnter={onPreview}
         onMouseLeave={onPreviewEnd}
@@ -141,7 +138,9 @@ function MissionCard({
 
   return (
     <article
-      className={`landing-mission${selected ? " is-selected" : ""}`}
+      className={["landing-mission", selected && "is-selected"]
+        .filter(Boolean)
+        .join(" ")}
       data-mission={mission.id}
       aria-disabled="true"
       onMouseEnter={onPreview}
@@ -166,9 +165,6 @@ export default function Home() {
   );
   const [activeMission, setActiveMission] = useState(0);
   const [rotationPaused, setRotationPaused] = useState(false);
-  const availableMissionCount = missions.filter(
-    (mission) => mission.status === "available",
-  ).length;
 
   useEffect(() => {
     if (rotationPaused) return;
@@ -193,9 +189,13 @@ export default function Home() {
           {missions.map((mission, index) => (
             <div
               key={mission.id}
-              className={`landing-hero-slide${
-                activeMission === index ? " is-active" : ""
-              }${mission.id === "black-hole" ? " is-black-hole" : ""}`}
+              className={[
+                "landing-hero-slide",
+                activeMission === index && "is-active",
+                mission.id === "black-hole" && "is-black-hole",
+              ]
+                .filter(Boolean)
+                .join(" ")}
             >
               <MissionArtwork mission={mission} priority={index < 2} />
             </div>
@@ -204,7 +204,7 @@ export default function Home() {
 
         <Link className="landing-brand" href="/">
           <Image src="/favicon.ico" alt="" width={28} height={28} />
-          <span>Relativity Playground</span>
+          <span>Universe Lab</span>
         </Link>
 
         <a
@@ -212,15 +212,13 @@ export default function Home() {
           href="https://github.com/stephenw310/general-relativity-playground"
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="View Relativity Playground on GitHub"
+          aria-label="View Universe Lab on GitHub"
         >
           <span className="sr-only">GitHub</span>
         </a>
 
         <div className="landing-stage-copy">
-          <p className="landing-context">
-            An interactive relativity playground
-          </p>
+          <p className="landing-context">An interactive universe laboratory</p>
           <h1>Play with spacetime.</h1>
           <p className="landing-intro">
             Choose a simulation, change the conditions, and see how space, time,
@@ -232,10 +230,6 @@ export default function Home() {
       <main className="landing-mission-select">
         <div className="landing-mission-bar">
           <strong>Mission select</strong>
-          <span className="landing-mission-count">
-            {availableMissionCount}{" "}
-            {availableMissionCount === 1 ? "mission" : "missions"} available
-          </span>
         </div>
 
         <div className="landing-mission-grid">

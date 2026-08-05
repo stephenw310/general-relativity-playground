@@ -116,11 +116,6 @@ export function LensingSimulation() {
             <span>03</span>
             <b>Light</b>
           </div>
-
-          <div className="spacetime-status">
-            <span aria-hidden="true" />
-            Online
-          </div>
         </nav>
 
         <LensingControls />

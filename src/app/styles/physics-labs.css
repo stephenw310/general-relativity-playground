@@ -1,0 +1,723 @@
+/* Time dilation, geodesic, and gravitational-wave missions */
+
+.physics-shell {
+  --sim-line: rgba(150, 213, 234, 0.18);
+  --sim-line-strong: rgba(169, 225, 245, 0.32);
+  --sim-panel: rgba(3, 10, 17, 0.82);
+  --sim-panel-solid: #061019;
+  --sim-muted: #91aebc;
+  --black-hole-accent: #6fd5f3;
+  --black-hole-accent-bright: #b8eeff;
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  min-height: 520px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #010407;
+  color: #f3fbff;
+}
+
+.physics-canvas {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+}
+
+.physics-canvas canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.physics-shell .spacetime-topbar {
+  background: linear-gradient(
+    180deg,
+    rgba(2, 7, 12, 0.95),
+    rgba(2, 7, 12, 0.68)
+  );
+}
+
+.physics-shell .spacetime-eyebrow,
+.physics-shell .spacetime-panel-kicker {
+  color: var(--lab-accent, #8eddf6);
+}
+
+.physics-shell .spacetime-back:hover > span:first-child,
+.physics-shell .spacetime-back:focus-visible > span:first-child {
+  border-color: color-mix(in srgb, var(--lab-accent, #8eddf6) 66%, transparent);
+  background: color-mix(in srgb, var(--lab-accent, #8eddf6) 13%, transparent);
+}
+
+.physics-brief {
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--lab-accent, #8eddf6) 8%, transparent),
+      transparent 42%
+    ),
+    var(--sim-panel);
+}
+
+.physics-brief h1 {
+  max-width: 310px;
+}
+
+.physics-controls {
+  background:
+    linear-gradient(
+      155deg,
+      color-mix(in srgb, var(--lab-accent, #8eddf6) 6%, transparent),
+      transparent 34%
+    ),
+    var(--sim-panel);
+}
+
+.physics-controls .black-hole-control-list {
+  scrollbar-color: color-mix(
+      in srgb,
+      var(--lab-accent, #8eddf6) 38%,
+      transparent
+    )
+    transparent;
+}
+
+.physics-controls .black-hole-control-heading > span {
+  color: var(--lab-accent-muted, #67b5ce);
+}
+
+.physics-controls .black-hole-control-heading h3 {
+  color: #edfaff;
+}
+
+.physics-controls .black-hole-control-heading p,
+.physics-controls .black-hole-range-field small,
+.physics-controls .black-hole-switch-row small {
+  color: #849eaa;
+}
+
+.physics-controls .black-hole-range-field,
+.physics-controls .black-hole-switch-row b,
+.physics-controls .black-hole-select-field {
+  color: #bfd1d8;
+}
+
+.physics-controls .black-hole-range-field b {
+  color: #f1fcff;
+}
+
+.physics-controls .black-hole-range-field input::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    90deg,
+    var(--lab-accent, #8eddf6),
+    rgba(255, 255, 255, 0.16)
+  );
+}
+
+.physics-controls .black-hole-range-field input::-webkit-slider-thumb {
+  border-color: #071217;
+  background: var(--black-hole-accent-bright);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--lab-accent, #8eddf6) 62%, white),
+    0 0 16px color-mix(in srgb, var(--lab-accent, #8eddf6) 30%, transparent);
+}
+
+.physics-controls .black-hole-range-field input::-moz-range-progress {
+  background: var(--lab-accent, #8eddf6);
+}
+
+.physics-controls .black-hole-range-field input::-moz-range-thumb {
+  border-color: #071217;
+  background: var(--black-hole-accent-bright);
+}
+
+.physics-controls .black-hole-switch-row input:checked + i {
+  border-color: color-mix(in srgb, var(--lab-accent, #8eddf6) 62%, transparent);
+  background: color-mix(in srgb, var(--lab-accent, #8eddf6) 20%, transparent);
+}
+
+.physics-controls .black-hole-switch-row input:checked + i::after {
+  background: var(--black-hole-accent-bright);
+}
+
+.physics-controls .black-hole-select-field select:hover,
+.physics-controls .black-hole-select-field select:focus {
+  border-color: color-mix(in srgb, var(--lab-accent, #8eddf6) 54%, transparent);
+  background: color-mix(in srgb, var(--lab-accent, #8eddf6) 8%, transparent);
+}
+
+.physics-segmented,
+.physics-preset-grid {
+  min-width: 0;
+  margin: 17px 0 0;
+  padding: 0;
+  display: grid;
+  border: 0;
+}
+
+.physics-segmented {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.physics-preset-grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+}
+
+.physics-segmented button,
+.physics-preset-grid button {
+  height: 39px;
+  border: 1px solid var(--sim-line);
+  background: rgba(255, 255, 255, 0.025);
+  color: #9fb4bd;
+  cursor: pointer;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: 12px;
+  font-weight: 570;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.physics-segmented button + button {
+  border-left: 0;
+}
+
+.physics-segmented button:hover,
+.physics-segmented button:focus-visible,
+.physics-segmented button.is-active,
+.physics-preset-grid button:hover,
+.physics-preset-grid button:focus-visible {
+  border-color: color-mix(in srgb, var(--lab-accent, #8eddf6) 54%, transparent);
+  outline: none;
+  background: color-mix(in srgb, var(--lab-accent, #8eddf6) 12%, transparent);
+  color: #effcff;
+}
+
+.physics-segmented button.is-active {
+  box-shadow: inset 0 -2px 0 var(--lab-accent, #8eddf6);
+}
+
+.physics-equation {
+  margin: 16px 0 0;
+  padding: 11px 12px;
+  overflow-x: auto;
+  border: 1px solid var(--sim-line);
+  background: rgba(0, 0, 0, 0.2);
+  color: #d9f6ff;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.physics-note {
+  margin: 14px 0 0;
+  color: #8ca4ae;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.physics-data-row {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--sim-line);
+  color: #91a6af;
+  font-size: 11px;
+}
+
+.physics-data-row:first-of-type {
+  margin-top: 13px;
+}
+
+.physics-shell .physics-data-row b {
+  color: #ecfaff;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11px;
+  font-weight: 550;
+  text-align: right;
+}
+
+.physics-worldline-row {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  align-items: center;
+  gap: 10px;
+  color: #91a9b4;
+  font-size: 11px;
+}
+
+.physics-worldline-row .physics-segmented {
+  margin: 0;
+}
+
+.physics-reality-grid {
+  grid-template-columns: 1fr;
+}
+
+.physics-preset-grid button.is-active {
+  border-color: color-mix(in srgb, var(--lab-accent, #8eddf6) 58%, transparent);
+  background: color-mix(in srgb, var(--lab-accent, #8eddf6) 14%, transparent);
+  color: #f4fdff;
+  box-shadow: inset 0 -2px 0 var(--lab-accent, #8eddf6);
+}
+
+.physics-primary-action,
+.physics-secondary-action {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 16px;
+  border: 1px solid
+    color-mix(in srgb, var(--lab-accent, #8eddf6) 62%, transparent);
+  background: color-mix(in srgb, var(--lab-accent, #8eddf6) 13%, transparent);
+  color: #f5fdff;
+  cursor: pointer;
+  font:
+    600 12px var(--font-geist-sans),
+    sans-serif;
+}
+
+.physics-secondary-action {
+  width: auto;
+  min-height: 34px;
+  padding: 0 12px;
+  border-color: var(--sim-line-strong);
+  background: rgba(255, 255, 255, 0.025);
+  color: #b7c9cf;
+  font-size: 11px;
+}
+
+.physics-primary-action:hover,
+.physics-primary-action:focus-visible,
+.physics-secondary-action:hover,
+.physics-secondary-action:focus-visible {
+  outline: none;
+  background: color-mix(in srgb, var(--lab-accent, #8eddf6) 22%, transparent);
+}
+
+.physics-primary-action:disabled,
+.physics-secondary-action:disabled {
+  cursor: default;
+  opacity: 0.48;
+}
+
+.physics-instrument {
+  position: absolute;
+  z-index: 11;
+  border: 1px solid var(--sim-line);
+  background: rgba(2, 8, 13, 0.78);
+  backdrop-filter: blur(14px);
+}
+
+.physics-time-ledger {
+  bottom: 24px;
+  left: 24px;
+  width: min(405px, calc(100vw - 500px));
+  min-width: 330px;
+  padding: 15px;
+  pointer-events: none;
+}
+
+.physics-time-ledger header,
+.physics-wave-timeline header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: #e8f8ff;
+  font-size: 11px;
+}
+
+.physics-instrument-meta {
+  color: #88a3ae;
+  font:
+    500 9px var(--font-geist-mono),
+    monospace;
+}
+
+.physics-ledger-row {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 100px 1fr 56px;
+  align-items: center;
+  gap: 10px;
+  color: #d9edf5;
+  font-size: 10px;
+}
+
+.physics-ledger-meta {
+  margin-top: 3px;
+  display: block;
+  color: #718d99;
+  font:
+    500 8px var(--font-geist-mono),
+    monospace;
+}
+
+.physics-ledger-bar {
+  height: 7px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.physics-ledger-fill {
+  height: 100%;
+  display: block;
+  background: linear-gradient(90deg, #4f91aa, var(--lab-accent));
+}
+
+.physics-ledger-value {
+  color: #effaff;
+  font:
+    550 11px var(--font-geist-mono),
+    monospace;
+  text-align: right;
+}
+
+.physics-wave-timeline {
+  position: absolute;
+  z-index: 11;
+  right: 428px;
+  bottom: 24px;
+  left: 24px;
+  min-height: 176px;
+  padding: 14px 16px 12px;
+  border: 1px solid var(--sim-line);
+  background: rgba(12, 2, 9, 0.8);
+  backdrop-filter: blur(16px);
+}
+
+.physics-wave-timeline-body {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: 105px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.physics-detector-ring {
+  color: rgba(255, 210, 231, 0.92);
+  text-align: center;
+}
+
+.physics-detector-ring svg {
+  width: 86px;
+  height: 86px;
+  overflow: visible;
+  fill: currentColor;
+}
+
+.physics-detector-ring .physics-detector-guide {
+  fill: none;
+  stroke: rgba(255, 160, 204, 0.25);
+  stroke-dasharray: 2 4;
+}
+
+.physics-detector-caption {
+  display: block;
+  color: #896b79;
+  font:
+    500 7px var(--font-geist-mono),
+    monospace;
+  white-space: nowrap;
+}
+
+.physics-wave-chart svg {
+  width: 100%;
+  height: 78px;
+  display: block;
+  overflow: visible;
+}
+
+.physics-wave-chart polyline,
+.physics-wave-chart line {
+  vector-effect: non-scaling-stroke;
+}
+
+.physics-wave-axis {
+  stroke: rgba(255, 255, 255, 0.09);
+}
+
+.physics-wave-plus,
+.physics-wave-cross,
+.physics-wave-ghost {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.physics-wave-plus {
+  stroke: rgba(255, 222, 237, 0.92);
+  stroke-width: 1.4;
+}
+
+.physics-wave-cross {
+  stroke: rgba(255, 87, 164, 0.52);
+  stroke-width: 1;
+}
+
+.physics-wave-ghost {
+  stroke: rgba(255, 255, 255, 0.14);
+  stroke-width: 1;
+}
+
+.physics-wave-merger {
+  stroke: rgba(255, 131, 188, 0.45);
+  stroke-dasharray: 3 4;
+}
+
+.physics-wave-playhead {
+  stroke: rgba(255, 244, 249, 0.88);
+  stroke-width: 1.4;
+}
+
+.physics-wave-labels,
+.physics-wave-scrub {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  color: #8e707f;
+  font:
+    500 8px var(--font-geist-mono),
+    monospace;
+}
+
+.physics-wave-merger-label {
+  color: #e9bfd2;
+  font-weight: 550;
+}
+
+.physics-wave-ringdown-label,
+.physics-wave-time {
+  text-align: right;
+}
+
+.physics-wave-scrub {
+  margin-top: 8px;
+  grid-template-columns: auto 1fr auto;
+}
+
+.physics-wave-scrub button {
+  height: 25px;
+  border: 1px solid rgba(255, 143, 195, 0.35);
+  background: rgba(255, 143, 195, 0.08);
+  color: #f4cedf;
+  cursor: pointer;
+  font-size: 9px;
+}
+
+.physics-wave-scrub progress {
+  width: 100%;
+  height: 3px;
+  border: 0;
+  accent-color: var(--lab-accent);
+}
+
+.physics-wave-credit {
+  margin-top: 5px;
+  display: block;
+  color: #684f5b;
+  font:
+    500 7px var(--font-geist-mono),
+    monospace;
+}
+
+.physics-formula-strip {
+  position: absolute;
+  z-index: 12;
+  right: 428px;
+  bottom: 24px;
+  min-width: 210px;
+  padding: 10px 13px;
+  border: 1px solid var(--sim-line);
+  background: rgba(2, 8, 13, 0.69);
+  pointer-events: none;
+  backdrop-filter: blur(14px);
+}
+
+.physics-shell .physics-formula-strip span,
+.physics-shell .physics-formula-strip b {
+  display: block;
+}
+
+.waves-shell .physics-formula-strip {
+  bottom: 220px;
+}
+
+.physics-shell .physics-formula-strip span {
+  color: #7d99a5;
+  font-size: 9px;
+}
+
+.physics-shell .physics-formula-strip b {
+  margin-top: 3px;
+  color: #dbf5ff;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11px;
+  font-weight: 550;
+}
+
+.time-dilation-shell {
+  --lab-accent: #78d9ff;
+  --lab-accent-muted: #59a9c8;
+  --black-hole-accent-bright: #bdecff;
+}
+
+.geodesics-shell {
+  --sim-line: rgba(147, 231, 184, 0.17);
+  --sim-line-strong: rgba(169, 242, 201, 0.3);
+  --sim-panel: rgba(2, 12, 8, 0.82);
+  --lab-accent: #81edb2;
+  --lab-accent-muted: #55b782;
+  --black-hole-accent-bright: #baffd8;
+}
+
+.waves-shell {
+  --sim-line: rgba(255, 143, 195, 0.17);
+  --sim-line-strong: rgba(255, 166, 208, 0.3);
+  --sim-panel: rgba(14, 3, 11, 0.82);
+  --lab-accent: #ff8fc4;
+  --lab-accent-muted: #d15c93;
+  --black-hole-accent-bright: #ffd0e5;
+}
+
+.geodesics-shell .spacetime-grain {
+  opacity: 0.03;
+  filter: hue-rotate(85deg);
+}
+
+.waves-shell .spacetime-grain {
+  opacity: 0.035;
+  filter: hue-rotate(255deg);
+}
+
+@media (max-width: 1080px) and (min-width: 768px) {
+  .physics-formula-strip {
+    right: 388px;
+  }
+
+  .physics-wave-timeline {
+    right: 388px;
+  }
+
+  .physics-time-ledger {
+    width: min(360px, calc(100vw - 450px));
+  }
+}
+
+@media (max-height: 760px) and (min-width: 768px) {
+  .physics-controls .black-hole-control-section {
+    padding-top: 14px;
+    padding-bottom: 15px;
+  }
+
+  .physics-controls .black-hole-control-heading p,
+  .physics-controls .black-hole-range-field small,
+  .physics-controls .black-hole-switch-row small,
+  .physics-note {
+    display: none;
+  }
+
+  .physics-controls .black-hole-range-field,
+  .physics-controls .black-hole-switch-row,
+  .physics-segmented,
+  .physics-preset-grid {
+    margin-top: 11px;
+  }
+}
+
+@media (max-width: 767px) {
+  .physics-shell {
+    min-height: 480px;
+  }
+
+  .physics-shell .spacetime-objects-toggle b {
+    background: color-mix(in srgb, var(--lab-accent, #8eddf6) 15%, transparent);
+    color: var(--lab-accent, #8eddf6);
+  }
+
+  .physics-formula-strip {
+    top: 70px;
+    right: 12px;
+    bottom: auto;
+    min-width: 180px;
+  }
+
+  .physics-time-ledger {
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    width: auto;
+    min-width: 0;
+  }
+
+  .physics-wave-timeline {
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    min-height: 148px;
+    padding: 11px;
+  }
+
+  .physics-wave-timeline-body {
+    grid-template-columns: 76px 1fr;
+  }
+
+  .physics-detector-ring svg {
+    width: 68px;
+    height: 68px;
+  }
+
+  .physics-wave-chart svg {
+    height: 62px;
+  }
+
+  .waves-shell .physics-formula-strip {
+    display: none;
+  }
+
+  .time-dilation-shell .spacetime-objects-toggle,
+  .waves-shell .spacetime-objects-toggle {
+    bottom: 166px;
+  }
+}
+
+@media (max-width: 520px) {
+  .physics-formula-strip {
+    display: none;
+  }
+
+  .physics-wave-timeline {
+    min-height: 136px;
+  }
+
+  .physics-instrument-meta,
+  .physics-wave-labels,
+  .physics-wave-credit,
+  .physics-detector-caption {
+    display: none;
+  }
+
+  .physics-wave-timeline-body {
+    grid-template-columns: 58px 1fr;
+    gap: 7px;
+  }
+
+  .physics-detector-ring svg {
+    width: 52px;
+    height: 52px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .physics-segmented button,
+  .physics-preset-grid button {
+    transition: none;
+  }
+}

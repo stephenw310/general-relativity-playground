@@ -38,11 +38,6 @@ export function SpacetimeSimulation() {
             <span>01</span>
             <b>Geometry</b>
           </div>
-
-          <div className="spacetime-status">
-            <span aria-hidden="true" />
-            Online
-          </div>
         </nav>
 
         <Controls />

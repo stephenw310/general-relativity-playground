@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Time Dilation v2 — iterations on PR #15</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/shell.css" />
+<link rel="stylesheet" href="iter.css" />
+<style>
+  .mk-shell {
+    --mk-accent: #77d8ff;
+    --mk-accent-bright: #d3f1ff;
+    --mk-accent-rgb: 119, 216, 255;
+    background:
+      radial-gradient(80% 65% at 50% 48%, rgba(13, 40, 66, 0.4), transparent 64%),
+      #02050a;
+  }
+
+  /* proper-time ledger (T1) */
+  .td-ledger {
+    position: absolute;
+    z-index: 15;
+    left: 24px;
+    bottom: 24px;
+    width: min(404px, calc(100vw - 470px));
+    padding: 13px 15px 15px;
+  }
+
+  .td-ledger-rows {
+    margin-top: 11px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .td-row {
+    display: grid;
+    grid-template-columns: 104px 1fr 58px;
+    gap: 11px;
+    align-items: center;
+  }
+
+  .td-row-name b {
+    display: block;
+    color: #e9f5fd;
+    font-size: 11.5px;
+    font-weight: 580;
+  }
+
+  .td-row-name small {
+    color: #7e93a8;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 9.5px;
+    white-space: nowrap;
+  }
+
+  .td-bar {
+    position: relative;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.09);
+  }
+
+  .td-bar > span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--w);
+    background: linear-gradient(90deg, rgba(119, 216, 255, 0.35), rgba(119, 216, 255, 0.92));
+  }
+
+  .td-row > b {
+    color: #eefaff;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 560;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* bottom rate chip, as in the PR */
+  .td-chip {
+    position: absolute;
+    z-index: 14;
+    right: 420px;
+    bottom: 24px;
+    padding: 10px 14px;
+  }
+
+  .td-chip small {
+    display: block;
+    color: #8297b0;
+    font-size: 10px;
+  }
+
+  .td-chip b {
+    color: #ecf7ff;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 12.5px;
+    font-weight: 560;
+  }
+
+  .td-seg {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: 86px 1fr 1fr;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .td-seg > small {
+    color: #9fb2c6;
+    font-size: 11px;
+  }
+
+  .td-seg > span {
+    padding: 8px 0;
+    border: 1px solid var(--mk-line-strong);
+    color: #c3cddd;
+    font-size: 11.5px;
+    text-align: center;
+  }
+
+  .td-seg > span.is-active {
+    border-color: rgba(119, 216, 255, 0.75);
+    background: rgba(119, 216, 255, 0.13);
+    color: #d3f1ff;
+  }
+
+  @media (max-width: 1120px) {
+    .td-ledger,
+    .td-chip {
+      position: relative;
+      inset: auto;
+      width: auto;
+      max-width: 560px;
+      margin: 18px 24px 0;
+    }
+  }
+</style>
+</head>
+<body>
+<main class="mk-shell">
+  <svg class="mk-canvas" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-label="Top-down view of a black hole with a near clock and a reference clock">
+    <defs>
+      <radialGradient id="bh-rim" cx="50%" cy="50%" r="50%">
+        <stop offset="55%" stop-color="#000" />
+        <stop offset="74%" stop-color="#000" />
+        <stop offset="88%" stop-color="rgba(65,152,222,0.24)" />
+        <stop offset="100%" stop-color="rgba(28,88,138,0)" />
+      </radialGradient>
+    </defs>
+
+    <g><circle cx="724" cy="817" r="1.1" fill="#cfe1ff" opacity="0.36"/><circle cx="1231" cy="806" r="0.9" fill="#cfe1ff" opacity="0.36"/><circle cx="910" cy="154" r="1.4" fill="#cfe1ff" opacity="0.19"/><circle cx="1273" cy="160" r="1.3" fill="#cfe1ff" opacity="0.34"/><circle cx="569" cy="387" r="1.6" fill="#cfe1ff" opacity="0.20"/><circle cx="1237" cy="737" r="1.2" fill="#cfe1ff" opacity="0.31"/><circle cx="715" cy="825" r="1.3" fill="#cfe1ff" opacity="0.41"/><circle cx="1141" cy="787" r="1.1" fill="#cfe1ff" opacity="0.39"/><circle cx="922" cy="848" r="0.9" fill="#cfe1ff" opacity="0.17"/><circle cx="731" cy="83" r="1.2" fill="#cfe1ff" opacity="0.20"/><circle cx="753" cy="772" r="1.4" fill="#cfe1ff" opacity="0.22"/><circle cx="1011" cy="286" r="1.2" fill="#cfe1ff" opacity="0.14"/><circle cx="232" cy="129" r="1.2" fill="#cfe1ff" opacity="0.20"/><circle cx="351" cy="50" r="1.5" fill="#cfe1ff" opacity="0.17"/><circle cx="278" cy="150" r="1.5" fill="#cfe1ff" opacity="0.21"/><circle cx="1234" cy="112" r="1.4" fill="#cfe1ff" opacity="0.30"/><circle cx="1312" cy="566" r="1.4" fill="#cfe1ff" opacity="0.20"/><circle cx="70" cy="301" r="1.0" fill="#cfe1ff" opacity="0.38"/><circle cx="285" cy="274" r="1.2" fill="#cfe1ff" opacity="0.25"/><circle cx="1161" cy="694" r="0.8" fill="#cfe1ff" opacity="0.19"/><circle cx="397" cy="49" r="1.1" fill="#cfe1ff" opacity="0.29"/><circle cx="942" cy="766" r="1.0" fill="#cfe1ff" opacity="0.31"/><circle cx="691" cy="158" r="1.4" fill="#cfe1ff" opacity="0.39"/><circle cx="89" cy="214" r="1.2" fill="#cfe1ff" opacity="0.35"/><circle cx="1017" cy="364" r="1.3" fill="#cfe1ff" opacity="0.24"/><circle cx="651" cy="766" r="0.8" fill="#cfe1ff" opacity="0.21"/><circle cx="370" cy="808" r="1.2" fill="#cfe1ff" opacity="0.22"/><circle cx="125" cy="440" r="0.8" fill="#cfe1ff" opacity="0.16"/><circle cx="999" cy="625" r="1.6" fill="#cfe1ff" opacity="0.32"/><circle cx="693" cy="71" r="0.8" fill="#cfe1ff" opacity="0.35"/><circle cx="363" cy="462" r="1.1" fill="#cfe1ff" opacity="0.21"/><circle cx="1271" cy="135" r="0.9" fill="#cfe1ff" opacity="0.35"/><circle cx="290" cy="540" r="1.4" fill="#cfe1ff" opacity="0.16"/><circle cx="547" cy="474" r="0.8" fill="#cfe1ff" opacity="0.30"/></g>
+
+    <!-- guide rings: 1.5, 3, 5, 10, 20 rs -->
+    <circle cx="800" cy="470" r="88" fill="none" stroke="rgba(244,181,104,0.32)" stroke-width="1" stroke-dasharray="5 7" />
+    <circle cx="800" cy="470" r="118" fill="none" stroke="rgba(120,211,255,0.3)" stroke-width="1" stroke-dasharray="5 7" />
+    <circle cx="800" cy="470" r="170" fill="none" stroke="rgba(137,187,224,0.12)" stroke-width="1" />
+    <circle cx="800" cy="470" r="240" fill="none" stroke="rgba(137,187,224,0.12)" stroke-width="1" />
+    <circle cx="800" cy="470" r="330" fill="none" stroke="rgba(137,187,224,0.12)" stroke-width="1" />
+
+    <!-- radial guides to each clock -->
+    <line x1="800" y1="470" x2="886" y2="530" stroke="rgba(116,213,255,0.2)" />
+    <line x1="800" y1="470" x2="635" y2="184" stroke="rgba(116,213,255,0.2)" />
+
+    <!-- the hole -->
+    <circle cx="800" cy="470" r="95" fill="url(#bh-rim)" />
+    <circle cx="800" cy="470" r="58" fill="#000" />
+    <text x="800" y="474" text-anchor="middle" class="mk-svg-tag" fill="#7d95ab" font-size="10">EVENT HORIZON · rₛ</text>
+
+    <!-- near clock · 2.2 rs · rate 0.73855 -->
+    <g transform="translate(886,530)">
+      <circle r="30" fill="none" stroke="rgba(211,241,255,0.55)" stroke-width="1.2">
+        <animate attributeName="r" values="30;46" dur="2.71s" repeatCount="indefinite" />
+        <animate attributeName="opacity" values="0.5;0" dur="2.71s" repeatCount="indefinite" />
+      </circle>
+      <circle r="30" fill="rgba(4,9,18,0.9)" stroke="#77d8ff" stroke-width="1.6" />
+      <circle r="23" fill="none" stroke="rgba(211,241,255,0.35)" stroke-width="4" stroke-dasharray="1 11" />
+      <line x1="0" y1="0" x2="0" y2="-20" stroke="#f6fbff" stroke-width="2.2" stroke-linecap="round">
+        <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="2.71s" repeatCount="indefinite" />
+      </line>
+      <circle r="2.6" fill="#f6fbff" />
+      <text y="52" text-anchor="middle" class="mk-svg-tag" fill="#d9ecf7">NEAR CLOCK · <tspan fill="#a5e2ff">0.73855 × t∞</tspan></text>
+      <text y="67" text-anchor="middle" class="mk-svg-tag" fill="#7e93a8" font-size="9.5">static · r = 2.20 rₛ</text>
+    </g>
+    <!-- T4: drag affordance -->
+    <path d="M906,612 l32,22 M925,617 l13,17 l-21,3" fill="none" stroke="rgba(240,196,108,0.6)" stroke-width="1.4" />
+    <g class="svgflag" transform="translate(965,606)"><circle r="14" /><text>T4</text></g>
+
+    <!-- reference clock · 20 rs · rate 0.97468 -->
+    <g transform="translate(635,184)">
+      <circle r="30" fill="none" stroke="rgba(216,236,255,0.55)" stroke-width="1.2">
+        <animate attributeName="r" values="30;46" dur="2.05s" repeatCount="indefinite" />
+        <animate attributeName="opacity" values="0.5;0" dur="2.05s" repeatCount="indefinite" />
+      </circle>
+      <circle r="30" fill="rgba(4,9,18,0.9)" stroke="#d8ecff" stroke-width="1.4" />
+      <circle r="23" fill="none" stroke="rgba(216,236,255,0.32)" stroke-width="4" stroke-dasharray="1 11" />
+      <line x1="0" y1="0" x2="0" y2="-20" stroke="#f6fbff" stroke-width="2.2" stroke-linecap="round">
+        <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="2.05s" repeatCount="indefinite" />
+      </line>
+      <circle r="2.6" fill="#f6fbff" />
+      <text y="52" text-anchor="middle" class="mk-svg-tag" fill="#d9e6f2">REFERENCE CLOCK · <tspan fill="#e6f3ff">0.97468 × t∞</tspan></text>
+      <text y="67" text-anchor="middle" class="mk-svg-tag" fill="#7e93a8" font-size="9.5">static · r = 20 rₛ</text>
+    </g>
+  </svg>
+
+  <nav class="mk-topbar" aria-label="Simulation navigation">
+    <a href="index.html" class="mk-back"><span aria-hidden="true">←</span><span>Iteration briefs</span></a>
+    <div class="mk-mission-id"><span>04</span><b>Time · v2</b></div>
+    <div class="mk-status"><span aria-hidden="true"></span>Iteration mock on PR #15</div>
+  </nav>
+
+  <section class="mk-brief" aria-label="Simulation brief">
+    <p class="mk-eyebrow">Schwarzschild clock laboratory</p>
+    <h1>Time Dilation</h1>
+    <p class="mk-copy">
+      The clocks share one distant coordinate time. Their hands advance by the
+      proper time measured along each worldline.
+    </p>
+    <div class="mk-readout">
+      <span><b>4.0 million M☉</b>central mass</span>
+      <span><b>75.77%</b>near vs reference</span>
+    </div>
+    <div class="mk-steps">
+      <div><span>1</span><p><b>Move the near clock</b>Approach the horizon; watch it fall behind</p></div>
+      <div><span>2</span><p><b>Switch worldlines</b>Separate gravity from orbital speed</p></div>
+      <div><span>3</span><p><b>Run the mission clock</b>Fill the aging ledger, ten years at a time</p></div>
+    </div>
+  </section>
+
+  <aside class="mk-controls" aria-label="Simulation controls (static mock)">
+    <div class="mk-controls-head">
+      <small>Change the conditions</small>
+      <strong>Clock setup</strong>
+    </div>
+    <div class="mk-controls-body">
+      <div class="mk-group">
+        <div class="mk-group-head">
+          <span>01</span>
+          <div>
+            <h3>Observer worldlines <span class="mk-flag">T3</span></h3>
+            <p>Each clock gets its own motion — required for GPS and ISS.</p>
+          </div>
+        </div>
+        <div class="td-seg"><small>Near</small><span class="is-active">Static</span><span>Free orbit</span></div>
+        <div class="td-seg"><small>Reference</small><span class="is-active">Static</span><span>Free orbit</span></div>
+      </div>
+
+      <div class="mk-group">
+        <div class="mk-group-head">
+          <span>02</span>
+          <div>
+            <h3>Clock positions</h3>
+            <p>Choose what stays fixed when the mass changes.</p>
+          </div>
+        </div>
+        <div class="mk-range">
+          <div class="mk-range-label"><span>Near clock radius</span><b>2.20 rₛ</b></div>
+          <div class="mk-track" style="--fill: 11%"><span></span><i></i></div>
+        </div>
+        <div class="mk-range">
+          <div class="mk-range-label"><span>Reference radius</span><b>20 rₛ</b></div>
+          <div class="mk-track" style="--fill: 24%"><span></span><i></i></div>
+        </div>
+        <div class="mk-chiprow">
+          <span class="mk-chip is-active">Hold r / rₛ</span>
+          <span class="mk-chip">Hold kilometres</span>
+        </div>
+      </div>
+
+      <div class="mk-group">
+        <div class="mk-group-head">
+          <span>03</span>
+          <div>
+            <h3>Central mass &amp; reality checks <span class="mk-flag">T2</span></h3>
+            <p>Black holes set the scale; Earth presets anchor it to measurement.</p>
+          </div>
+        </div>
+        <div class="mk-chiprow">
+          <span class="mk-chip">10 M☉</span>
+          <span class="mk-chip is-active">Sgr A*</span>
+          <span class="mk-chip">M87*</span>
+        </div>
+        <div class="mk-chiprow">
+          <span class="mk-chip">GPS · +38.5 μs/day</span>
+          <span class="mk-chip">ISS · −27 μs/day</span>
+          <span class="mk-chip">Miller's planet · 1 h = 7 yr</span>
+        </div>
+        <small style="display:block;margin-top:9px;color:#8297b0;font-size:11px;line-height:1.4">Lag readout formats adaptively: s → ms → μs.</small>
+      </div>
+
+      <div class="mk-group">
+        <div class="mk-group-head">
+          <span>04</span>
+          <div>
+            <h3>Mission clock <span class="mk-flag">T1</span></h3>
+            <p>Fast-forward far time; the ledger accumulates.</p>
+          </div>
+        </div>
+        <span class="mk-primary">Run 10 years of far time</span>
+      </div>
+    </div>
+  </aside>
+
+  <section class="mk-inset td-ledger" aria-label="Proper time ledger (new)">
+    <div class="mk-inset-head">
+      <strong>Proper-time ledger <span class="mk-flag">T1</span></strong>
+      <span>far time 10.00 yr</span>
+    </div>
+    <div class="td-ledger-rows">
+      <div class="td-row">
+        <div class="td-row-name"><b>Reference</b><small>static · 20 rₛ</small></div>
+        <div class="td-bar"><span style="--w: 97.5%"></span></div>
+        <b>9.75 yr</b>
+      </div>
+      <div class="td-row">
+        <div class="td-row-name"><b>Near clock</b><small>static · 2.2 rₛ</small></div>
+        <div class="td-bar"><span style="--w: 73.9%"></span></div>
+        <b>7.39 yr</b>
+      </div>
+    </div>
+  </section>
+
+  <div class="mk-inset td-chip" aria-hidden="true">
+    <small>Near clock</small>
+    <b>0.738549 s per distant second</b>
+  </div>
+
+  <div class="mk-vignette" aria-hidden="true"></div>
+</main>
+
+<section class="mk-notes" style="--mk-accent: #77d8ff">
+  <div class="mk-notes-inner">
+    <p class="mk-notes-kicker">Iteration mock — mission 04 on PR #15</p>
+    <h2>Keep the PR's clock lab; add the payoff</h2>
+    <p class="mk-notes-intro">
+      The scene, per-mass presets, and Hold r/rₛ ⇄ Hold kilometres control all
+      stay exactly as PR #15 built them. Amber flags mark the additions; full
+      instructions with formulas live in <code>mockups/ITERATIONS.md</code>.
+    </p>
+
+    <div class="iter-legend">
+      <div>
+        <span class="mk-flag">T1</span>
+        <div>
+          <b>Proper-time ledger + Run 10 years <span class="iter-priority">P0 · M</span></b>
+          <p>Accumulated aging per clock against a far-time header; the Run button fast-forwards and the totals persist until reset.</p>
+          <p class="accept">defaults show 7.39 / 9.75 / 10.00 yr after one run; a second run doubles all three.</p>
+        </div>
+      </div>
+      <div>
+        <span class="mk-flag">T3</span>
+        <div>
+          <b>Per-clock worldline modes <span class="iter-priority">P1 · S–M</span></b>
+          <p>Static | orbit per clock (today one global mode covers the near clock only). Prerequisite for GPS/ISS, where the outer clock is the orbiting one.</p>
+          <p class="accept">reference-in-orbit uses circularOrbitClockRate and visibly circles.</p>
+        </div>
+      </div>
+      <div>
+        <span class="mk-flag">T2</span>
+        <div>
+          <b>Reality-check presets <span class="iter-priority">P1 · M</span></b>
+          <p>GPS (ground static vs orbit at 26,561 km → +38.5 μs/day), ISS (→ ≈ −27 μs/day), Miller's planet (rate 1/61,362). Lag readout formats s → ms → μs.</p>
+          <p class="accept">GPS within ±0.5 μs/day; ISS in −25…−28; Miller shows "1 hour here = 7 years far away".</p>
+        </div>
+      </div>
+      <div>
+        <span class="mk-flag">T4</span>
+        <div>
+          <b>Drag clocks on the canvas <span class="iter-priority">P2 · S–M</span></b>
+          <p>Radial drag on either clock maps to its radius state; sliders remain the precise, accessible path.</p>
+          <p class="accept">drag respects each mode's minimum radius (1.05 / 3 rₛ).</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mk-notes-footer">
+      <a href="index.html">← Iteration briefs</a>
+      <span>Static mock — controls are props. Spec: mockups/ITERATIONS.md</span>
+      <a href="geodesics-v2.html">Next: Geodesics v2 →</a>
+    </div>
+  </div>
+</section>
+</body>
+</html>

@@ -3,13 +3,13 @@
 @import "./styles/spacetime.css";
 @import "./styles/black-hole.css";
 @import "./styles/lensing.css";
+@import "./styles/physics-labs.css";
 
 :root {
   --background: #04060b;
   --foreground: #f4f6fa;
   --landing-line: rgba(255, 255, 255, 0.16);
   --landing-accent: #9cb5ff;
-  --landing-online: #a9f37d;
 }
 
 @theme inline {

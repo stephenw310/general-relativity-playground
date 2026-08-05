@@ -106,24 +106,6 @@
   font-weight: 560;
 }
 
-.spacetime-status {
-  justify-self: end;
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  color: #b8c1d0;
-  font-size: 11px;
-  letter-spacing: 0;
-}
-
-.spacetime-status > span {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--landing-online);
-  box-shadow: 0 0 11px rgba(169, 243, 125, 0.78);
-}
-
 .spacetime-brief {
   position: absolute;
   z-index: 16;
@@ -635,10 +617,6 @@
 
   .spacetime-mission-id {
     display: none;
-  }
-
-  .spacetime-status {
-    font-size: 0;
   }
 
   .spacetime-back {

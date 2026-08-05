@@ -1,8 +1,9 @@
-# General Relativity Playground
+# Universe Lab
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black) ![Three.js](https://img.shields.io/badge/Three.js-WebGL-red) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 
-A browser-based interactive visualization of various general relativity concepts.
+Universe Lab is a browser-based collection of interactive visualizations for
+exploring general relativity.
 
 ## Simulations
 
@@ -15,6 +16,15 @@ A browser-based interactive visualization of various general relativity concepts
   foreground galaxy to form multiple images, luminous arcs, and Einstein rings
   with GPU inverse ray shooting through stars, dark matter, tidal shear, and
   satellite substructure.
+- **Time Dilation** (`/time-dilation`): Compare Schwarzschild proper time for
+  independently static or orbiting clocks, accumulate proper time over ten-year
+  runs, and load GPS, ISS, or cinematic extreme-gravity comparisons.
+- **Geodesics** (`/geodesics`): Ray-trace null and timelike Schwarzschild
+  geodesics with Newtonian ghost orbits, persistent trail galleries, live
+  effective potentials, photon capture, strong deflection, and periapsis advance.
+- **Gravitational Waves** (`/gravitational-waves`): Build a compact binary and
+  release a one-shot Peters inspiral into a phenomenological merger/ringdown,
+  hear its pitch-shifted chirp, and watch the same strain deform a detector ring.
 
 ## Features
 
@@ -24,6 +34,17 @@ A browser-based interactive visualization of various general relativity concepts
 - **Collision Detection**: Prevents mass overlap with dynamic radius calculation
 - **Responsive Design**: Works on desktop and mobile devices, with device-adaptive quality
 - **Natural Units**: Uses G=1, c=1 scaling standard in theoretical physics
+
+## Data and model notes
+
+- The gravitational-wave inspiral uses the leading-order Peters/quadrupole
+  solution through `a = 3 GM/c²`, then joins continuously to a damped ringdown
+  calibrated to GW150914. It is an educational approximation, not a
+  numerical-relativity merger waveform.
+- The dim GW150914 comparison trace is derived from the corrected 4,096 Hz H1
+  open strain release from the [Gravitational Wave Open Science
+  Center](https://gwosc.org/eventapi/html/O1_O2-Preliminary/GW150914/v2/),
+  released under CC BY 4.0.
 
 ## Tech Stack
 

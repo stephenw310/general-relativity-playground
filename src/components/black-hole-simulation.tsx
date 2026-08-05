@@ -55,11 +55,6 @@ export function BlackHoleSimulation() {
             <span>02</span>
             <b>Extreme gravity</b>
           </div>
-
-          <div className="spacetime-status">
-            <span aria-hidden="true" />
-            Online
-          </div>
         </nav>
 
         <BlackHoleControls />

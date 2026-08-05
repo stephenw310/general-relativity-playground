@@ -13,12 +13,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://universelab.org"),
   title: {
-    default: "Relativity Playground",
-    template: "%s | Relativity Playground",
+    default: "Universe Lab",
+    template: "%s | Universe Lab",
   },
   description:
     "Play with spacetime through interactive simulations of gravity, light, time, motion, black holes, and gravitational waves.",
+  openGraph: {
+    type: "website",
+    url: "https://universelab.org",
+    siteName: "Universe Lab",
+    title: "Universe Lab",
+    description:
+      "Play with spacetime through interactive simulations of gravity, light, time, motion, black holes, and gravitational waves.",
+  },
 };
 
 export default function RootLayout({

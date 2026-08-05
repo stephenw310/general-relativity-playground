@@ -1,8 +1,9 @@
-# General Relativity Playground
+# Universe Lab
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black) ![Three.js](https://img.shields.io/badge/Three.js-WebGL-red) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 
-A browser-based interactive visualization of various general relativity concepts.
+Universe Lab is a browser-based collection of interactive visualizations for
+exploring general relativity.
 
 ## Simulations
 
@@ -15,6 +16,12 @@ A browser-based interactive visualization of various general relativity concepts
   foreground galaxy to form multiple images, luminous arcs, and Einstein rings
   with GPU inverse ray shooting through stars, dark matter, tidal shear, and
   satellite substructure.
+- **Time Dilation** (`/time-dilation`): Compare Schwarzschild proper time for
+  supported static clocks and freely orbiting clocks at different radii.
+- **Geodesics** (`/geodesics`): Ray-trace null and timelike Schwarzschild
+  geodesics, including photon capture, strong deflection, and periapsis advance.
+- **Gravitational Waves** (`/gravitational-waves`): Build a compact binary and
+  inspect its leading-order quadrupole strain, polarization, and Peters inspiral.
 
 ## Features
 

@@ -1,0 +1,120 @@
+/* Flag badges + handoff legend for the PR-iteration mocks.
+   Loads after ../assets/shell.css. */
+
+.mk-flag {
+  display: inline-grid;
+  place-items: center;
+  min-width: 23px;
+  height: 23px;
+  padding: 0 5px;
+  margin-left: 9px;
+  border: 1px solid rgba(240, 196, 108, 0.75);
+  background: rgba(240, 196, 108, 0.14);
+  color: #ffe3ae;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+  box-shadow: 0 0 12px rgba(240, 196, 108, 0.22);
+}
+
+/* flags drawn inside the scene SVG */
+.svgflag circle {
+  fill: rgba(20, 14, 4, 0.85);
+  stroke: rgba(240, 196, 108, 0.85);
+  stroke-width: 1.4;
+}
+
+.svgflag text {
+  fill: #ffe3ae;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 11.5px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* handoff legend below the fold */
+.iter-legend {
+  margin-top: 30px;
+  display: grid;
+  gap: 12px;
+}
+
+.iter-legend > div {
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 14px 16px;
+  border: 1px solid rgba(193, 207, 239, 0.13);
+  background: rgba(9, 13, 22, 0.6);
+}
+
+.iter-legend .mk-flag {
+  margin: 2px 0 0;
+}
+
+.iter-legend b {
+  display: block;
+  color: #e8edf6;
+  font-size: 13px;
+  font-weight: 580;
+}
+
+.iter-legend p {
+  margin: 5px 0 0;
+  color: #a9b4c5;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.iter-legend p.accept {
+  color: #8fa886;
+  font-size: 11.5px;
+}
+
+.iter-legend p.accept::before {
+  content: "Accept: ";
+  color: #b7d9a8;
+  font-weight: 570;
+}
+
+.iter-priority {
+  margin-left: 8px;
+  color: #93a0b4;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 10px;
+}
+
+/* small mock chrome bits */
+.iter-scrub {
+  position: relative;
+  margin-top: 7px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.iter-scrub > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 46%;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--mk-accent-rgb), 0.4),
+    var(--mk-accent)
+  );
+}
+
+.iter-scrub > i {
+  position: absolute;
+  top: 50%;
+  left: 46%;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid #0a0508;
+  background: var(--mk-accent-bright);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px rgba(var(--mk-accent-rgb), 0.6);
+}

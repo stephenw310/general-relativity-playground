@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Relativity Playground — next three missions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/shell.css" />
+<style>
+  body {
+    background: #030509;
+  }
+
+  .hub {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+
+  .hub-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 26px 0 22px;
+    border-bottom: 1px solid rgba(193, 207, 239, 0.14);
+  }
+
+  .hub-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #e8edf7;
+    font-size: 13px;
+    font-weight: 570;
+  }
+
+  .hub-brand i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #9db5ff;
+    box-shadow: 0 0 12px rgba(157, 181, 255, 0.9);
+  }
+
+  .hub-topbar span {
+    color: #75839a;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 11px;
+  }
+
+  .hub-hero {
+    padding: 58px 0 14px;
+  }
+
+  .hub-hero .mk-eyebrow {
+    color: #9db5ff;
+  }
+
+  .hub-hero h1 {
+    max-width: 720px;
+    margin: 16px 0 0;
+    font-size: clamp(34px, 4.6vw, 56px);
+    font-weight: 560;
+    letter-spacing: -0.05em;
+    line-height: 1.0;
+    text-wrap: balance;
+  }
+
+  .hub-hero h1 em {
+    font-style: normal;
+  }
+
+  .hub-hero h1 .h-time { color: #6fe3d2; }
+  .hub-hero h1 .h-motion { color: #7ce7a9; }
+  .hub-hero h1 .h-waves { color: #ff8fa8; }
+
+  .hub-hero p {
+    max-width: 640px;
+    margin: 18px 0 0;
+    color: #b7c1d2;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  /* mission cards */
+
+  .hub-cards {
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .hub-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(193, 207, 239, 0.15);
+    background: rgba(7, 10, 18, 0.72);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  }
+
+  .hub-card:hover {
+    border-color: rgba(var(--c), 0.55);
+    background: rgba(9, 13, 22, 0.9);
+    transform: translateY(-3px);
+  }
+
+  .hub-card-art {
+    position: relative;
+    height: 190px;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(193, 207, 239, 0.12);
+    background: radial-gradient(90% 90% at 50% 60%, rgba(var(--c), 0.1), transparent 68%), #02050a;
+  }
+
+  .hub-card-art svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hub-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 18px 0;
+    color: #94a1b6;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+  }
+
+  .hub-card-meta b {
+    color: rgb(var(--c));
+    font-weight: 500;
+  }
+
+  .hub-card h2 {
+    margin: 9px 18px 0;
+    font-size: 21px;
+    font-weight: 570;
+    letter-spacing: -0.03em;
+  }
+
+  .hub-card > p {
+    margin: 9px 18px 0;
+    color: #a9b3c4;
+    font-size: 12.5px;
+    line-height: 1.55;
+    flex: 1;
+  }
+
+  .hub-card-sig {
+    margin: 13px 18px 0;
+    padding: 10px 12px;
+    border-left: 2px solid rgba(var(--c), 0.65);
+    background: rgba(var(--c), 0.07);
+    color: #cdd6e3;
+    font-size: 11.5px;
+    line-height: 1.5;
+  }
+
+  .hub-card-sig b {
+    color: #f0f4fb;
+    font-weight: 570;
+  }
+
+  .hub-card-cta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding: 12px 18px;
+    border-top: 1px solid rgba(193, 207, 239, 0.12);
+    color: #dbe2ee;
+    font-size: 12px;
+    font-weight: 560;
+  }
+
+  .hub-card-cta em {
+    font-style: normal;
+    color: rgb(var(--c));
+  }
+
+  /* prose sections */
+
+  .hub-section {
+    margin-top: 64px;
+  }
+
+  .hub-section > h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 560;
+    letter-spacing: -0.03em;
+  }
+
+  .hub-section > p {
+    max-width: 680px;
+    margin: 13px 0 0;
+    color: #b0bac9;
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .hub-why {
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+  }
+
+  .hub-why div {
+    padding: 17px 18px;
+    border: 1px solid rgba(193, 207, 239, 0.13);
+    background: rgba(8, 11, 19, 0.6);
+  }
+
+  .hub-why h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 580;
+    color: #e6ebf4;
+  }
+
+  .hub-why p {
+    margin: 8px 0 0;
+    color: #a3aebf;
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+
+  .hub-parked {
+    margin-top: 22px;
+    border-top: 1px solid rgba(193, 207, 239, 0.13);
+  }
+
+  .hub-parked > div {
+    display: grid;
+    grid-template-columns: minmax(180px, 260px) 1fr;
+    gap: 18px;
+    padding: 14px 2px;
+    border-bottom: 1px solid rgba(193, 207, 239, 0.1);
+  }
+
+  .hub-parked b {
+    color: #dee4ef;
+    font-size: 13px;
+    font-weight: 570;
+  }
+
+  .hub-parked span {
+    color: #93a0b4;
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+
+  .hub-build ul {
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 10px;
+    max-width: 760px;
+  }
+
+  .hub-build li {
+    color: #adb8c8;
+    font-size: 13px;
+    line-height: 1.55;
+    padding-left: 18px;
+    position: relative;
+  }
+
+  .hub-build li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 6px;
+    height: 6px;
+    background: rgba(157, 181, 255, 0.7);
+  }
+
+  .hub-build code {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 12px;
+    color: #d7e3f4;
+    background: rgba(157, 181, 255, 0.09);
+    padding: 1px 5px;
+  }
+
+  .hub-footer {
+    margin-top: 64px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(193, 207, 239, 0.13);
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    color: #75839a;
+    font-size: 11.5px;
+  }
+</style>
+</head>
+<body>
+<div class="hub">
+  <header class="hub-topbar">
+    <div class="hub-brand"><i aria-hidden="true"></i>Relativity Playground — design lab</div>
+    <span>expansion brief · missions 04–06</span>
+  </header>
+
+  <section class="hub-hero">
+    <p class="mk-eyebrow">The first three missions bent space. The next three finish the story.</p>
+    <h1>Three new missions:
+      <em class="h-time">Time</em>,
+      <em class="h-motion">Motion</em>,
+      <em class="h-waves">Waves</em>.</h1>
+    <p>
+      Spacetime Curvature, Black Holes, and Gravitational Lensing show how mass
+      shapes space and light. The landing page already reserves three more
+      slots — these mocks fill them: what curvature does to <b>time</b>, how
+      things <b>move</b> through it with no forces at all, and how changes in
+      curvature <b>travel</b>. Each mock is a full mission screen in the
+      existing console language, with design notes below the fold.
+    </p>
+  </section>
+
+  <div class="hub-cards">
+    <a class="hub-card" href="time-dilation.html" style="--c: 111, 227, 210">
+      <span class="hub-card-art" aria-hidden="true">
+        <svg viewBox="480 400 700 420" preserveAspectRatio="xMidYMid slice">
+          <path d="M120.0,387.6 L132.0,387.9 L144.0,388.1 L156.0,388.4 L168.0,388.8 L180.0,389.1 L192.0,389.4 L204.0,389.8 L216.0,390.2 L228.0,390.6 L240.0,391.1 L252.0,391.5 L264.0,392.0 L276.0,392.5 L288.0,393.1 L300.0,393.7 L312.0,394.4 L324.0,395.1 L336.0,395.8 L348.0,396.6 L360.0,397.4 L372.0,398.4 L384.0,399.4 L396.0,400.4 L408.0,401.6 L420.0,402.9 L432.0,404.2 L444.0,405.7 L456.0,407.4 L468.0,409.2 L480.0,411.1 L492.0,413.3 L504.0,415.7 L516.0,418.3 L528.0,421.2 L540.0,424.4 L552.0,428.0 L564.0,432.0 L576.0,436.5 L588.0,441.5 L600.0,447.1 L612.0,453.5 L624.0,460.6 L636.0,468.7 L648.0,477.8 L660.0,488.0 L672.0,499.4 L684.0,512.2 L696.0,526.3 L708.0,541.7 L720.0,558.1 L732.0,575.2 L744.0,592.2 L756.0,608.3 L768.0,622.2 L780.0,632.7 L792.0,638.8 L804.0,639.7 L816.0,635.3 L828.0,626.1 L840.0,613.2 L852.0,597.7 L864.0,580.9 L876.0,563.8 L888.0,547.1 L900.0,531.3 L912.0,516.8 L924.0,503.6 L936.0,491.7 L948.0,481.0 L960.0,471.6 L972.0,463.2 L984.0,455.8 L996.0,449.2 L1008.0,443.3 L1020.0,438.1 L1032.0,433.4 L1044.0,429.3 L1056.0,425.6 L1068.0,422.2 L1080.0,419.2 L1092.0,416.5 L1104.0,414.0 L1116.0,411.8 L1128.0,409.8 L1140.0,408.0 L1152.0,406.3 L1164.0,404.7 L1176.0,403.3 L1188.0,402.0 L1200.0,400.8 L1212.0,399.7 L1224.0,398.7 L1236.0,397.7 L1248.0,396.9 L1260.0,396.1 L1272.0,395.3 L1284.0,394.6 L1296.0,393.9 L1308.0,393.3 L1320.0,392.7 L1332.0,392.2 L1344.0,391.7 L1356.0,391.2 L1368.0,390.8 L1380.0,390.3 L1392.0,389.9 L1404.0,389.6 L1416.0,389.2 L1428.0,388.9 L1440.0,388.5 L1452.0,388.2 L1464.0,388.0 L1476.0,387.7" fill="none" stroke="rgba(126,214,222,0.22)" stroke-width="2" />
+          <path d="M120.0,434.5 L132.0,434.7 L144.0,434.9 L156.0,435.2 L168.0,435.4 L180.0,435.7 L192.0,436.0 L204.0,436.3 L216.0,436.7 L228.0,437.0 L240.0,437.4 L252.0,437.8 L264.0,438.2 L276.0,438.7 L288.0,439.2 L300.0,439.7 L312.0,440.3 L324.0,440.9 L336.0,441.5 L348.0,442.2 L360.0,442.9 L372.0,443.7 L384.0,444.6 L396.0,445.5 L408.0,446.5 L420.0,447.6 L432.0,448.8 L444.0,450.2 L456.0,451.6 L468.0,453.2 L480.0,454.9 L492.0,456.8 L504.0,458.9 L516.0,461.3 L528.0,463.9 L540.0,466.8 L552.0,470.0 L564.0,473.7 L576.0,477.8 L588.0,482.4 L600.0,487.6 L612.0,493.6 L624.0,500.4 L636.0,508.1 L648.0,517.0 L660.0,527.1 L672.0,538.7 L684.0,551.8 L696.0,566.6 L708.0,583.1 L720.0,601.3 L732.0,620.7 L744.0,640.6 L756.0,660.0 L768.0,677.3 L780.0,690.6 L792.0,698.5 L804.0,699.6 L816.0,693.9 L828.0,682.3 L840.0,666.1 L852.0,647.2 L864.0,627.3 L876.0,607.6 L888.0,589.0 L900.0,571.9 L912.0,556.5 L924.0,542.8 L936.0,530.8 L948.0,520.2 L960.0,511.0 L972.0,502.9 L984.0,495.8 L996.0,489.6 L1008.0,484.1 L1020.0,479.2 L1032.0,475.0 L1044.0,471.2 L1056.0,467.8 L1068.0,464.8 L1080.0,462.1 L1092.0,459.7 L1104.0,457.5 L1116.0,455.5 L1128.0,453.7 L1140.0,452.1 L1152.0,450.6 L1164.0,449.3 L1176.0,448.0 L1188.0,446.9 L1200.0,445.8 L1212.0,444.9 L1224.0,444.0 L1236.0,443.2 L1248.0,442.4 L1260.0,441.7 L1272.0,441.1 L1284.0,440.4 L1296.0,439.9 L1308.0,439.3 L1320.0,438.9 L1332.0,438.4 L1344.0,437.9 L1356.0,437.5 L1368.0,437.2 L1380.0,436.8 L1392.0,436.4 L1404.0,436.1 L1416.0,435.8 L1428.0,435.5 L1440.0,435.3 L1452.0,435.0 L1464.0,434.8 L1476.0,434.5" fill="none" stroke="rgba(146,232,224,0.6)" stroke-width="2.5" />
+          <path d="M120.0,485.8 L132.0,486.0 L144.0,486.2 L156.0,486.4 L168.0,486.6 L180.0,486.9 L192.0,487.2 L204.0,487.4 L216.0,487.7 L228.0,488.1 L240.0,488.4 L252.0,488.8 L264.0,489.1 L276.0,489.6 L288.0,490.0 L300.0,490.5 L312.0,491.0 L324.0,491.5 L336.0,492.1 L348.0,492.7 L360.0,493.4 L372.0,494.1 L384.0,494.9 L396.0,495.7 L408.0,496.6 L420.0,497.6 L432.0,498.7 L444.0,499.9 L456.0,501.2 L468.0,502.6 L480.0,504.2 L492.0,505.9 L504.0,507.9 L516.0,510.0 L528.0,512.4 L540.0,515.1 L552.0,518.0 L564.0,521.4 L576.0,525.2 L588.0,529.5 L600.0,534.4 L612.0,540.0 L624.0,546.4 L636.0,553.7 L648.0,562.2 L660.0,571.9 L672.0,583.1 L684.0,596.0 L696.0,610.7 L708.0,627.3 L720.0,645.9 L732.0,666.0 L744.0,687.1 L756.0,707.9 L768.0,726.7 L780.0,741.5 L792.0,750.3 L804.0,751.6 L816.0,745.2 L828.0,732.2 L840.0,714.5 L852.0,694.1 L864.0,673.0 L876.0,652.4 L888.0,633.3 L900.0,616.0 L912.0,600.7 L924.0,587.2 L936.0,575.5 L948.0,565.3 L960.0,556.4 L972.0,548.7 L984.0,542.0 L996.0,536.2 L1008.0,531.1 L1020.0,526.6 L1032.0,522.6 L1044.0,519.1 L1056.0,516.0 L1068.0,513.2 L1080.0,510.8 L1092.0,508.6 L1104.0,506.6 L1116.0,504.8 L1128.0,503.1 L1140.0,501.7 L1152.0,500.3 L1164.0,499.1 L1176.0,498.0 L1188.0,496.9 L1200.0,496.0 L1212.0,495.1 L1224.0,494.3 L1236.0,493.6 L1248.0,492.9 L1260.0,492.3 L1272.0,491.7 L1284.0,491.1 L1296.0,490.6 L1308.0,490.1 L1320.0,489.7 L1332.0,489.3 L1344.0,488.9 L1356.0,488.5 L1368.0,488.2 L1380.0,487.9 L1392.0,487.5 L1404.0,487.3 L1416.0,487.0 L1428.0,486.7 L1440.0,486.5 L1452.0,486.3 L1464.0,486.0 L1476.0,485.8" fill="none" stroke="rgba(126,214,222,0.22)" stroke-width="2" />
+          <circle cx="800" cy="738" r="20" fill="#d7fff6" opacity="0.9" />
+          <g transform="translate(755,658)">
+            <circle r="34" fill="rgba(4,10,14,0.65)" stroke="#c2fff4" stroke-width="2.4" />
+            <line x1="0" y1="0" x2="0" y2="-24" stroke="#eafffa" stroke-width="3" stroke-linecap="round">
+              <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="4.9s" repeatCount="indefinite" />
+            </line>
+          </g>
+          <g transform="translate(1005,485)">
+            <circle r="34" fill="rgba(4,10,14,0.65)" stroke="rgba(194,255,244,0.75)" stroke-width="2.4" />
+            <line x1="0" y1="0" x2="0" y2="-24" stroke="#eafffa" stroke-width="3" stroke-linecap="round">
+              <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="2.02s" repeatCount="indefinite" />
+            </line>
+          </g>
+        </svg>
+      </span>
+      <div class="hub-card-meta"><span><b>04</b> · TIME</span><span>time-dilation</span></div>
+      <h2>Time Dilation</h2>
+      <p>
+        A field of clock probes ticking at their own proper rates down a gravity
+        well. Drag them deeper, set them orbiting, then run ten years of far
+        time and compare how much each one aged.
+      </p>
+      <div class="hub-card-sig"><b>Signature moment</b> — the proper-time ledger: aging bars race apart, and Miller's planet turns one hour into seven years.</div>
+      <span class="hub-card-cta">Open the mock <em aria-hidden="true">→</em></span>
+    </a>
+
+    <a class="hub-card" href="geodesics.html" style="--c: 124, 231, 169">
+      <span class="hub-card-art" aria-hidden="true">
+        <svg viewBox="470 250 680 500" preserveAspectRatio="xMidYMid slice">
+          <path d="M905.6,470.0 L905.5,464.5 L905.2,458.9 L904.7,453.4 L904.0,447.9 L903.1,442.4 L901.9,436.9 L900.6,431.4 L899.0,425.9 L897.3,420.4 L895.3,415.0 L893.0,409.6 L890.6,404.2 L887.9,398.8 L885.0,393.5 L881.8,388.2 L878.4,383.0 L874.7,377.8 L870.7,372.7 L866.5,367.6 L862.0,362.6 L857.2,357.8 L852.1,353.0 L846.7,348.3 L841.0,343.7 L835.0,339.3 L828.7,335.1 L822.0,331.0 L815.0,327.1 L807.7,323.4 L800.0,320.0 L792.0,316.8 L783.6,314.0 L774.9,311.4 L765.8,309.2 L756.4,307.4 L746.7,306.1 L736.7,305.2 L726.4,304.7 L715.9,304.9 L705.1,305.6 L694.1,306.9 L682.9,308.9 L671.7,311.5 L660.4,315.0 L649.1,319.1 L637.9,324.1 L626.9,329.9 L616.2,336.5 L605.8,343.9 L595.8,352.1 L586.4,361.2 L577.7,371.0 L569.6,381.6 L562.5,392.8 L556.2,404.7 L551.0,417.1 L546.8,429.9 L543.8,443.1 L542.0,456.5 L541.4,470.0 L542.0,483.5 L543.8,496.9 L546.8,510.1 L551.0,522.9 L556.2,535.3 L562.5,547.2 L569.6,558.4 L577.7,569.0 L586.4,578.8 L595.8,587.9 L605.8,596.1 L616.2,603.5 L626.9,610.1 L637.9,615.9 L649.1,620.9 L660.4,625.0 L671.7,628.5 L682.9,631.1 L694.1,633.1 L705.1,634.4 L715.9,635.1 L726.4,635.3 L736.7,634.8 L746.7,633.9 L756.4,632.6 L765.8,630.8 L774.9,628.6 L783.6,626.0 L792.0,623.2 L800.0,620.0 L807.7,616.6 L815.0,612.9 L822.0,609.0 L828.7,604.9 L835.0,600.7 L841.0,596.3 L846.7,591.7 L852.1,587.0 L857.2,582.2 L862.0,577.4 L866.5,572.4 L870.7,567.3 L874.7,562.2 L878.4,557.0 L881.8,551.8 L885.0,546.5 L887.9,541.2 L890.6,535.8 L893.0,530.4 L895.3,525.0 L897.3,519.6 L899.0,514.1 L900.6,508.6 L901.9,503.1 L903.1,497.6 L904.0,492.1 L904.7,486.6 L905.2,481.1 L905.5,475.5 L905.6,470.0 Z" fill="none" stroke="rgba(158,170,188,0.4)" stroke-width="1.6" stroke-dasharray="6 8" />
+          <path d="M905.6,470.0 L905.6,466.3 L905.4,462.6 L905.2,458.9 L904.8,455.3 L904.3,451.6 L903.7,448.0 L903.0,444.3 L902.2,440.7 L901.3,437.1 L900.3,433.5 L899.2,429.9 L898.0,426.4 L896.6,422.9 L895.2,419.4 L893.6,415.9 L892.0,412.5 L890.2,409.1 L888.4,405.8 L886.4,402.5 L884.4,399.2 L882.2,396.0 L879.9,392.8 L877.5,389.7 L875.0,386.7 L872.4,383.7 L869.8,380.7 L867.0,377.8 L864.1,375.0 L861.1,372.3 L858.0,369.6 L854.8,367.0 L851.5,364.5 L848.1,362.0 L844.6,359.7 L841.0,357.4 L837.3,355.2 L833.5,353.1 L829.6,351.1 L825.7,349.2 L821.6,347.4 L817.5,345.7 L813.2,344.1 L808.9,342.7 L804.5,341.3 L800.0,340.1 L795.4,339.0 L790.8,338.0 L786.0,337.2 L781.2,336.5 L776.4,335.9 L771.4,335.5 L766.4,335.2 L761.3,335.1 L756.2,335.1 L751.0,335.4 L745.7,335.7 L740.5,336.3 L735.1,337.0 L729.7,337.9 L724.3,338.9 L718.9,340.2 L713.4,341.7 L708.0,343.3 L702.5,345.2 L697.0,347.2 L691.5,349.5 L686.0,351.9 L680.5,354.6 L675.1,357.5 L669.6,360.6 L664.3,363.9 L658.9,367.5 L653.7,371.3 L648.5,375.3 L643.3,379.5 L638.3,384.0 L633.4,388.7 L628.5,393.7 L623.8,398.8 L619.3,404.2 L614.9,409.8 L610.6,415.7 L606.5,421.8 L602.6,428.0 L598.9,434.5 L595.4,441.2 L592.1,448.2 L589.1,455.3 L586.3,462.5 L583.8,470.0 L581.6,477.6 L579.6,485.4 L578.0,493.3 L576.7,501.4 L575.7,509.6 L575.0,517.8 L574.7,526.2 L574.8,534.6 L575.2,543.1 L576.0,551.5 L577.1,560.0 L578.7,568.5 L580.7,577.0 L583.0,585.4 L585.8,593.7 L588.9,601.9 L592.4,610.0 L596.4,617.9 L600.7,625.7 L605.4,633.3 L610.5,640.7 L615.9,647.8 L621.7,654.7 L627.8,661.2 L634.3,667.5 L641.0,673.5 L648.1,679.1 L655.4,684.4 L663.0,689.3 L670.8,693.8 L678.8,698.0 L687.0,701.7 L695.4,705.0 L703.9,707.9 L712.5,710.4 L721.2,712.4 L730.0,714.0 L738.9,715.2 L747.7,716.0 L756.6,716.3 L765.4,716.3 L774.2,715.8 L782.9,714.9 L791.5,713.6 L800.0,711.9 L808.4,709.9 L816.6,707.5 L824.7,704.8 L832.6,701.7 L840.3,698.3 L847.8,694.6 L855.0,690.7 L862.1,686.4 L868.9,682.0 L875.4,677.2 L881.7,672.3 L887.8,667.2 L893.6,661.8 L899.1,656.3 L904.3,650.7 L909.3,644.9 L914.0,639.0 L918.4,633.0 L922.5,626.8 L926.4,620.7 L930.0,614.4 L933.3,608.1 L936.4,601.7 L939.2,595.3 L941.7,588.9 L944.0,582.5 L946.1,576.1 L947.9,569.7 L949.4,563.4 L950.7,557.0 L951.8,550.7 L952.7,544.5 L953.3,538.3 L953.7,532.1 L954.0,526.0 L954.0,520.0 L953.8,514.1 L953.4,508.3 L952.9,502.5 L952.2,496.8 L951.3,491.3 L950.2,485.8 L949.0,480.4 L947.7,475.2 L946.1,470.0 L944.5,465.0 L942.7,460.0 L940.8,455.2 L938.7,450.5 L936.6,445.9 L934.3,441.5 L931.9,437.1 L929.4,432.9 L926.8,428.8 L924.1,424.8 L921.4,421.0 L918.5,417.2 L915.6,413.6 L912.6,410.2 L909.5,406.8 L906.3,403.6 L903.1,400.5 L899.8,397.5 L896.4,394.6 L893.1,391.9 L889.6,389.3 L886.1,386.8 L882.6,384.5 L879.0,382.3 L875.4,380.1 L871.8,378.2 L868.1,376.3 L864.4,374.6 L860.7,372.9 L856.9,371.4 L853.1,370.1 L849.4,368.8 L845.6,367.6 L841.8,366.6 L838.0,365.7 L834.1,364.9 L830.3,364.2 L826.5,363.7 L822.7,363.2 L818.9,362.9 L815.1,362.6 L811.3,362.5 L807.5,362.5 L803.8,362.6 L800.0,362.8 L796.3,363.1 L792.6,363.6 L788.9,364.1 L785.2,364.7 L781.6,365.5 L778.0,366.3 L774.4,367.3 L770.8,368.3 L767.3,369.5 L763.9,370.7 L760.4,372.1 L757.0,373.5 L753.7,375.0 L750.4,376.7 L747.1,378.4 L743.9,380.3 L740.8,382.2 L737.7,384.2 L734.6,386.3 L731.6,388.5 L728.7,390.8 L725.8,393.2 L723.0,395.7 L720.3,398.2 L717.6,400.9 L715.0,403.6 L712.5,406.4 L710.0,409.3 L707.6,412.3 L705.3,415.3 L703.1,418.5 L701.0,421.7 L698.9,425.0 L696.9,428.4 L695.1,431.8 L693.3,435.3 L691.6,438.9 L690.0,442.6 L688.5,446.3 L687.1,450.1 L685.8,453.9 L684.6,457.9 L683.5,461.9 L682.5,465.9 L681.7,470.0 L680.9,474.2 L680.3,478.4 L679.8,482.6 L679.4,486.9 L679.2,491.3 L679.0,495.7 L679.1,500.2 L679.2,504.6 L679.5,509.2 L679.9,513.7 L680.4,518.3 L681.1,522.9 L682.0,527.6 L683.0,532.2 L684.2,536.9 L685.5,541.6 L686.9,546.3 L688.6,551.0 L690.4,555.7 L692.3,560.4 L694.5,565.0 L696.8,569.7 L699.2,574.4 L701.9,579.0 L704.7,583.6 L707.7,588.1 L710.9,592.6 L714.3,597.1 L717.8,601.5 L721.6,605.9 L725.5,610.1 L729.6,614.3 L733.9,618.5 L738.4,622.5 L743.1,626.4 L747.9,630.2 L753.0,633.9 L758.2,637.5 L763.7,640.9 L769.3,644.2 L775.1,647.3 L781.1,650.3 L787.2,653.0 L793.5,655.6 L800.0,658.0 L806.6,660.2 L813.4,662.2 L820.4,664.0 L827.5,665.5 L834.7,666.8 L842.0,667.8 L849.5,668.5 L857.1,669.0 L864.7,669.1 L872.4,669.0 L880.2,668.6 L888.1,667.8 L896.0,666.8 L903.9,665.4 L911.8,663.6 L919.7,661.6 L927.6,659.1 L935.4,656.4 L943.2,653.2 L950.8,649.8 L958.4,645.9 L965.8,641.7 L973.1,637.2 L980.2,632.3 L987.2,627.0 L993.9,621.5 L1000.3,615.6 L1006.6,609.3 L1012.5,602.8 L1018.2,596.0 L1023.5,588.8 L1028.5,581.4 L1033.1,573.8 L1037.4,565.9 L1041.3,557.8 L1044.8,549.6 L1047.9,541.1 L1050.6,532.5 L1052.9,523.7 L1054.7,514.9 L1056.1,506.0 L1057.0,497.0 L1057.5,488.0 L1057.5,479.0 L1057.2,470.0 L1056.3,461.0 L1055.0,452.2 L1053.4,443.4 L1051.2,434.7 L1048.7,426.1 L1045.8,417.8 L1042.5,409.5 L1038.8,401.5 L1034.8,393.7 L1030.4,386.1 L1025.7,378.8 L1020.8,371.7 L1015.5,364.9 L1010.0,358.4 L1004.2,352.1 L998.2,346.2 L991.9,340.5 L985.5,335.2 L978.9,330.2 L972.2,325.5 L965.4,321.1 L958.4,317.1 L951.3,313.3 L944.2,309.9 L936.9,306.8 L929.7,304.0 L922.4,301.5 L915.1,299.3 L907.8,297.5 L900.5,295.9 L893.3,294.6 L886.0,293.6 L878.9,292.8 L871.8,292.4 L864.7,292.2 L857.8,292.2 L850.9,292.5 L844.1,293.0 L837.5,293.7 L830.9,294.7 L824.5,295.9 L818.2,297.2 L812.0,298.8 L805.9,300.6 L800.0,302.5 L794.2,304.6 L788.6,306.9 L783.1,309.3 L777.8,311.8 L772.6,314.5 L767.6,317.4 L762.7,320.3 L758.0,323.4 L753.4,326.6 L749.0,329.9 L744.7,333.2 L740.7,336.7 L736.7,340.3 L733.0,343.9 L729.3,347.6 L725.9,351.4 L722.6,355.2 L719.4,359.1 L716.4,363.0 L713.6,367.0 L710.9,371.0 L708.4,375.1 L706.0,379.2 L703.7,383.3 L701.6,387.5 L699.7,391.6 L697.9,395.8 L696.2,400.0 L694.7,404.2 L693.3,408.4 L692.1,412.6 L691.0,416.8 L690.0,421.0 L689.1,425.2 L688.4,429.4 L687.8,433.6 L687.4,437.7 L687.0,441.8 L686.8,445.9 L686.7,450.0 L686.8,454.1 L686.9,458.1 L687.2,462.1 L687.6,466.1 L688.0,470.0 L688.6,473.9 L689.4,477.7 L690.2,481.5 L691.1,485.3 L692.1,489.0 L693.3,492.7 L694.5,496.3 L695.8,499.9 L697.3,503.4 L698.8,506.8 L700.4,510.2 L702.1,513.6 L703.9,516.9 L705.8,520.1 L707.8,523.2 L709.9,526.3 L712.0,529.3 L714.3,532.3 L716.6,535.2 L719.0,538.0 L721.4,540.7 L724.0,543.4 L726.6,546.0 L729.3,548.5 L732.1,550.9 L734.9,553.3 L737.8,555.6 L740.8,557.7 L743.9,559.8 L747.0,561.9 L750.1,563.8 L753.4,565.6 L756.6,567.4 L760.0,569.0 L763.4,570.6 L766.8,572.1 L770.3,573.4 L773.9,574.7 L777.5,575.9 L781.1,576.9 L784.8,577.9 L788.6,578.8 L792.3,579.5 L796.2,580.2 L800.0,580.7 L803.9,581.2 L807.8,581.5 L811.7,581.7 L815.7,581.8 L819.7,581.8 L823.7,581.6 L827.8,581.4 L831.8,581.0 L835.9,580.5 L840.0,579.8 L844.1,579.1 L848.2,578.2 L852.3,577.2 L856.4,576.1 L860.5,574.8 L864.6,573.4 L868.7,571.8 L872.8,570.2 L876.8,568.4 L880.9,566.4 L884.9,564.3 L888.9,562.1 L892.9,559.7 L896.8,557.2 L900.7,554.5 L904.6,551.7 L908.4,548.7 L912.1,545.6 L915.8,542.4 L919.5,539.0 L923.0,535.4 L926.5,531.7 L930.0,527.9 L933.3,523.9 L936.6,519.7 L939.7,515.4 L942.8,510.9 L945.7,506.3 L948.6,501.6 L951.3,496.7 L953.9,491.6 L956.3,486.4 L958.6,481.1 L960.8,475.6 L962.8,470.0" fill="none" stroke="#8df0b8" stroke-width="2.2" />
+          <circle cx="800" cy="470" r="34" fill="#000" stroke="rgba(190,235,210,0.6)" stroke-width="1.5" />
+          <circle cx="800" cy="470" r="51" fill="none" stroke="rgba(210,255,227,0.3)" stroke-width="1.2" stroke-dasharray="3 6" />
+        </svg>
+      </span>
+      <div class="hub-card-meta"><span><b>05</b> · MOTION</span><span>geodesics</span></div>
+      <h2>Geodesics</h2>
+      <p>
+        A slingshot launcher for probes and photons around a compact mass.
+        Trails persist — rosettes, zoom-whirls, captures, escapes — while an
+        effective-potential inset explains every turn.
+      </p>
+      <div class="hub-card-sig"><b>Signature moment</b> — Newton's closed ellipse ghosted under the precessing GR rosette: one glance shows exactly where Einstein disagrees.</div>
+      <span class="hub-card-cta">Open the mock <em aria-hidden="true">→</em></span>
+    </a>
+
+    <a class="hub-card" href="gravitational-waves.html" style="--c: 255, 143, 168">
+      <span class="hub-card-art" aria-hidden="true">
+        <svg viewBox="300 30 1000 800" preserveAspectRatio="xMidYMid slice">
+          <g>
+            <animateTransform attributeName="transform" type="rotate" from="0 800 430" to="360 800 430" dur="8s" repeatCount="indefinite" />
+            <path d="M870.0,430.0 L872.4,423.7 L874.3,416.9 L875.5,409.8 L875.9,402.4 L875.7,394.7 L874.7,386.9 L872.9,379.0 L870.2,371.1 L866.7,363.3 L862.4,355.7 L857.2,348.3 L851.2,341.3 L844.4,334.7 L836.9,328.6 L828.6,323.2 L819.7,318.4 L810.1,314.5 L800.0,311.3 L789.4,309.1 L778.4,307.8 L767.2,307.5 L755.7,308.3 L744.1,310.2 L732.5,313.2 L721.1,317.3 L709.8,322.5 L698.9,328.9 L688.4,336.3 L678.4,344.9 L669.1,354.4 L660.6,365.0 L652.9,376.5 L646.2,388.8 L640.5,401.9 L635.9,415.6 L632.6,430.0 L630.6,444.8 L629.8,460.0 L630.5,475.4 L632.5,491.0 L636.0,506.5 L641.0,521.8 L647.4,536.9 L655.2,551.5 L664.4,565.6 L675.0,579.0 L686.9,591.5 L700.1,603.1 L714.4,613.6 L729.8,622.9 L746.2,630.9 L763.4,637.5 L781.4,642.6 L800.0,646.1 L819.1,648.0 L838.5,648.1 L858.0,646.6 L877.6,643.2 L897.0,638.1 L916.2,631.2 L934.8,622.5 L952.8,612.1 L970.0,600.0 L986.3,586.3 L1001.4,571.0 L1015.2,554.3 L1027.7,536.2 L1038.6,516.9 L1047.9,496.4 L1055.4,475.0 L1061.1,452.8 L1064.8,430.0" fill="none" stroke="rgba(255,143,168,0.55)" stroke-width="2.4" />
+            <path d="M1064.8,430.0 L1066.5,406.7 L1066.1,383.1 L1063.6,359.4 L1059.0,335.7 L1052.2,312.4 L1043.4,289.5 L1032.4,267.3 L1019.4,245.9 L1004.4,225.6 L987.6,206.4 L968.9,188.7 L948.6,172.6 L926.8,158.2 L903.5,145.6 L879.0,135.0 L853.5,126.6 L827.1,120.4 L800.0,116.5 L772.4,115.0 L744.6,116.0 L716.8,119.4 L689.1,125.3 L661.8,133.6 L635.1,144.5 L609.3,157.7 L584.6,173.3 L561.1,191.1 L539.1,211.1 L518.8,233.1 L500.4,257.0 L484.0,282.7 L469.8,309.8 L458.0,338.4 L448.7,368.0 L441.9,398.7 L437.8,430.0 L436.5,461.8 L438.0,493.8 L442.3,525.8 L449.5,557.6 L459.5,588.8 L472.3,619.2 L487.8,648.6 L506.0,676.7 L526.7,703.3 L549.8,728.2 L575.2,751.0 L602.7,771.8 L632.1,790.1 L663.2,805.9 L695.8,819.0 L729.6,829.3 L764.4,836.6 L800.0,840.9 L836.0,842.0 L872.3,839.9 L908.4,834.7 L944.2,826.3 L979.4,814.6 L1013.5,799.9 L1046.5,782.1 L1078.0,761.3 L1107.7,737.7 L1135.5,711.5 L1160.9,682.7 L1183.9,651.7 L1204.2,618.5 L1221.7,583.5 L1236.1,546.8 L1247.2,508.9 L1255.1,469.8 L1259.6,430.0" fill="none" stroke="rgba(255,143,168,0.3)" stroke-width="2.4" />
+            <path d="M730.0,430.0 L727.6,436.3 L725.7,443.1 L724.5,450.2 L724.1,457.6 L724.3,465.3 L725.3,473.1 L727.1,481.0 L729.8,488.9 L733.3,496.7 L737.6,504.3 L742.8,511.7 L748.8,518.7 L755.6,525.3 L763.1,531.4 L771.4,536.8 L780.3,541.6 L789.9,545.5 L800.0,548.7 L810.6,550.9 L821.6,552.2 L832.8,552.5 L844.3,551.7 L855.9,549.8 L867.5,546.8 L878.9,542.7 L890.2,537.5 L901.1,531.1 L911.6,523.7 L921.6,515.1 L930.9,505.6 L939.4,495.0 L947.1,483.5 L953.8,471.2 L959.5,458.1 L964.1,444.4 L967.4,430.0 L969.4,415.2 L970.2,400.0 L969.5,384.6 L967.5,369.0 L964.0,353.5 L959.0,338.2 L952.6,323.1 L944.8,308.5 L935.6,294.4 L925.0,281.0 L913.1,268.5 L899.9,256.9 L885.6,246.4 L870.2,237.1 L853.8,229.1 L836.6,222.5 L818.6,217.4 L800.0,213.9 L780.9,212.0 L761.5,211.9 L742.0,213.4 L722.4,216.8 L703.0,221.9 L683.8,228.8 L665.2,237.5 L647.2,247.9 L630.0,260.0 L613.7,273.7 L598.6,289.0 L584.8,305.7 L572.3,323.8 L561.4,343.1 L552.1,363.6 L544.6,385.0 L538.9,407.2 L535.2,430.0" fill="none" stroke="rgba(255,183,199,0.45)" stroke-width="2.4" />
+            <path d="M535.2,430.0 L533.5,453.3 L533.9,476.9 L536.4,500.6 L541.0,524.3 L547.8,547.6 L556.6,570.5 L567.6,592.7 L580.6,614.1 L595.6,634.4 L612.4,653.6 L631.1,671.3 L651.4,687.4 L673.2,701.8 L696.5,714.4 L721.0,725.0 L746.5,733.4 L772.9,739.6 L800.0,743.5 L827.6,745.0 L855.4,744.0 L883.2,740.6 L910.9,734.7 L938.2,726.4 L964.9,715.5 L990.7,702.3 L1015.4,686.7 L1038.9,668.9 L1060.9,648.9 L1081.2,626.9 L1099.6,603.0 L1116.0,577.3 L1130.2,550.2 L1142.0,521.6 L1151.3,492.0 L1158.1,461.3 L1162.2,430.0 L1163.5,398.2 L1162.0,366.2 L1157.7,334.2 L1150.5,302.4 L1140.5,271.2 L1127.7,240.8 L1112.2,211.4 L1094.0,183.3 L1073.3,156.7 L1050.2,131.8 L1024.8,109.0 L997.3,88.2 L967.9,69.9 L936.8,54.1 L904.2,41.0 L870.4,30.7 L835.6,23.4 L800.0,19.1 L764.0,18.0 L727.7,20.1 L691.6,25.3 L655.8,33.7 L620.6,45.4 L586.5,60.1 L553.5,77.9 L522.0,98.7 L492.3,122.3 L464.5,148.5 L439.1,177.3 L416.1,208.3 L395.8,241.5 L378.3,276.5 L363.9,313.2 L352.8,351.1 L344.9,390.2 L340.4,430.0" fill="none" stroke="rgba(255,183,199,0.26)" stroke-width="2.4" />
+            <circle cx="846" cy="430" r="15" fill="#07060d" stroke="#ffb7c7" stroke-width="2" />
+            <circle cx="754" cy="430" r="12" fill="#07060d" stroke="#ff8fa8" stroke-width="1.8" />
+          </g>
+        </svg>
+      </span>
+      <div class="hub-card-meta"><span><b>06</b> · WAVES</span><span>gravitational-waves</span></div>
+      <h2>Gravitational Waves</h2>
+      <p>
+        A binary sheds a rotating spiral of wave crests while a detector ring
+        stretches and squeezes and a LIGO-style strain trace chirps toward
+        merger — with the audio to match.
+      </p>
+      <div class="hub-card-sig"><b>Signature moment</b> — release the binary and hear the chirp climb 35→250 Hz into merger and ringdown. Spacetime, audibly ringing.</div>
+      <span class="hub-card-cta">Open the mock <em aria-hidden="true">→</em></span>
+    </a>
+  </div>
+
+  <section class="hub-section" style="margin-top: 44px">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;padding:18px 20px;border:1px solid rgba(240,196,108,0.4);background:rgba(240,196,108,0.06)">
+      <div>
+        <h2 style="font-size:17px;margin:0;color:#ffe3ae">Update — PR #15 implemented all three. The plan is now to iterate on it.</h2>
+        <p style="margin:7px 0 0;max-width:640px;color:#b9b09a;font-size:12.5px;line-height:1.55">
+          These pages remain as the original concept briefs. The engineering
+          handoff — flagged v2 mocks of the PR's actual screens plus a
+          ticket-ready spec — lives in the iteration set.
+        </p>
+      </div>
+      <a href="iterations/index.html" style="padding:11px 16px;border:1px solid rgba(240,196,108,0.65);background:rgba(240,196,108,0.12);color:#ffe9c2;font-size:12.5px;font-weight:560;text-decoration:none;white-space:nowrap">Open iteration briefs →</a>
+    </div>
+  </section>
+
+  <section class="hub-section">
+    <h2>Why these three, in this order</h2>
+    <div class="hub-why">
+      <div>
+        <h3>They finish the classical GR arc</h3>
+        <p>
+          The live trio answers "how does mass shape space and light?" The new
+          trio answers the remaining questions a curious visitor actually asks:
+          what happens to time, why do orbits look like that, and can gravity
+          itself move. Together the six cover a first course in general
+          relativity — and clear the runway for the cosmology wing.
+        </p>
+      </div>
+      <div>
+        <h3>They're already promised</h3>
+        <p>
+          The mission-select page ships with slots 04–06 marked "in
+          development" under the categories Time, Motion, and Waves, with
+          accent colors reserved (teal, emerald, rose). These designs slot
+          straight into the existing metadata in
+          src/constants/simulations.ts — no landing-page rework needed.
+        </p>
+      </div>
+      <div>
+        <h3>Each has a distinct verb and a distinct wow</h3>
+        <p>
+          Place clocks and compare aging. Launch probes and collect orbits.
+          Release a binary and listen to it die. No two missions share an
+          interaction pattern, and each one climaxes in a moment tied to a real
+          measurement: GPS clock corrections, Mercury's perihelion, GW150914.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="hub-section">
+    <h2>Considered and parked</h2>
+    <p>Strong candidates that lost on sequencing, not on merit.</p>
+    <div class="hub-parked">
+      <div>
+        <b>Kerr frame-dragging</b>
+        <span>Spinning black holes drag space around with them — but it's best built as an upgrade to Mission 02's ray tracer (spin slider, ergosphere), not a separate mission.</span>
+      </div>
+      <div>
+        <b>Cosmic expansion &amp; redshift</b>
+        <span>Opens the cosmology wing you have planned. Deserves its own visual language and a batch of siblings (CMB, distance ladder) rather than riding along here.</span>
+      </div>
+      <div>
+        <b>Relativistic flight · Terrell rotation</b>
+        <span>Special relativity's "ride a photon" tour is spectacular but tonally separate; strongest once Mission 04 has introduced clocks and speed.</span>
+      </div>
+      <div>
+        <b>Twin-paradox trip planner</b>
+        <span>A great companion feature for Mission 04 once its clock engine exists — plan a round trip, get your sibling's age gap — rather than a standalone scene.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="hub-section hub-build">
+    <h2>From mock to build</h2>
+    <ul>
+      <li>Each mock reuses the live console layout — topbar, brief panel, control rail, stage — so promotion means a new route plus a stylesheet like <code>src/app/styles/lensing.css</code>, not a redesign.</li>
+      <li>The SVG scene in each mock is the storyboard for the real render: an R3F <code>Canvas</code> with GLSL where it earns it (wavefield, well surface) and plain instanced meshes where it doesn't (probes, trails).</li>
+      <li>State follows the lensing pattern: one zustand store per mission (<code>time-dilation-store.ts</code>, …) with selector hooks.</li>
+      <li>All physics named in the mocks is closed-form or cheap ODE integration — no new heavy machinery. Formulas are listed per mission in the notes below each mock.</li>
+      <li>Every mock ends with open questions — answer those first, then build.</li>
+    </ul>
+  </section>
+
+  <footer class="hub-footer">
+    <span>Static HTML mocks — no build step; open any page directly.</span>
+    <span>mockups/ · time-dilation.html · geodesics.html · gravitational-waves.html</span>
+  </footer>
+</div>
+</body>
+</html>

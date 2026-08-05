@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Time Dilation — mission mock 04</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/shell.css" />
+<style>
+  .mk-shell {
+    --mk-accent: #6fe3d2;
+    --mk-accent-bright: #c2fff4;
+    --mk-accent-rgb: 111, 227, 210;
+    background:
+      radial-gradient(90% 70% at 50% 88%, rgba(20, 68, 66, 0.34), transparent 62%),
+      #02060a;
+  }
+
+  /* proper-time ledger */
+  .td-ledger {
+    position: absolute;
+    z-index: 15;
+    left: 24px;
+    bottom: 24px;
+    width: min(404px, calc(100vw - 470px));
+    padding: 13px 15px 15px;
+  }
+
+  .td-ledger-rows {
+    margin-top: 12px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .td-row {
+    display: grid;
+    grid-template-columns: 96px 1fr 56px;
+    gap: 11px;
+    align-items: center;
+  }
+
+  .td-row-name {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .td-row-name b {
+    color: #e8f5f1;
+    font-size: 11.5px;
+    font-weight: 580;
+  }
+
+  .td-row-name small {
+    color: #7e93a8;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 9.5px;
+    white-space: nowrap;
+  }
+
+  .td-bar {
+    position: relative;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.09);
+  }
+
+  .td-bar > span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--w);
+    background: linear-gradient(90deg, rgba(111, 227, 210, 0.35), rgba(111, 227, 210, 0.9));
+  }
+
+  .td-row.is-selected .td-bar > span {
+    background: linear-gradient(90deg, rgba(194, 255, 244, 0.5), #c2fff4);
+    box-shadow: 0 0 14px rgba(111, 227, 210, 0.45);
+  }
+
+  .td-row > b {
+    color: #f1fffb;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 560;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .td-observation {
+    top: 82px;
+  }
+
+  @media (max-width: 1120px) {
+    .td-ledger {
+      position: relative;
+      inset: auto;
+      width: auto;
+      max-width: 560px;
+      margin: 18px 24px 0;
+    }
+  }
+</style>
+</head>
+<body>
+<main class="mk-shell">
+  <svg class="mk-canvas" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-label="Cross-section of a gravity well with clock probes ticking at different rates">
+    <defs>
+      <radialGradient id="orb-glow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#d7fff6" stop-opacity="0.9" />
+        <stop offset="34%" stop-color="#6fe3d2" stop-opacity="0.34" />
+        <stop offset="100%" stop-color="#6fe3d2" stop-opacity="0" />
+      </radialGradient>
+      <filter id="soft" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="3.2" />
+      </filter>
+    </defs>
+
+    <!-- background starfield -->
+    <g><circle cx="1210" cy="589" r="0.8" fill="#cfe1ff" opacity="0.24"/><circle cx="753" cy="478" r="1.6" fill="#cfe1ff" opacity="0.18"/><circle cx="1053" cy="339" r="1.1" fill="#cfe1ff" opacity="0.20"/><circle cx="1046" cy="227" r="1.1" fill="#cfe1ff" opacity="0.15"/><circle cx="1502" cy="440" r="1.1" fill="#cfe1ff" opacity="0.34"/><circle cx="675" cy="768" r="0.7" fill="#cfe1ff" opacity="0.37"/><circle cx="753" cy="705" r="1.6" fill="#cfe1ff" opacity="0.42"/><circle cx="321" cy="613" r="0.8" fill="#cfe1ff" opacity="0.18"/><circle cx="197" cy="298" r="0.7" fill="#cfe1ff" opacity="0.38"/><circle cx="491" cy="680" r="1.2" fill="#cfe1ff" opacity="0.19"/><circle cx="492" cy="302" r="1.3" fill="#cfe1ff" opacity="0.20"/><circle cx="977" cy="774" r="1.5" fill="#cfe1ff" opacity="0.22"/><circle cx="738" cy="438" r="1.0" fill="#cfe1ff" opacity="0.23"/><circle cx="1517" cy="50" r="0.8" fill="#cfe1ff" opacity="0.32"/><circle cx="171" cy="280" r="1.4" fill="#cfe1ff" opacity="0.40"/><circle cx="608" cy="208" r="1.5" fill="#cfe1ff" opacity="0.32"/><circle cx="805" cy="311" r="1.0" fill="#cfe1ff" opacity="0.22"/><circle cx="1193" cy="432" r="0.9" fill="#cfe1ff" opacity="0.38"/><circle cx="1178" cy="751" r="1.5" fill="#cfe1ff" opacity="0.21"/><circle cx="1381" cy="668" r="1.1" fill="#cfe1ff" opacity="0.23"/><circle cx="891" cy="524" r="0.8" fill="#cfe1ff" opacity="0.28"/><circle cx="1465" cy="424" r="1.1" fill="#cfe1ff" opacity="0.40"/><circle cx="1519" cy="810" r="0.7" fill="#cfe1ff" opacity="0.38"/><circle cx="358" cy="322" r="1.5" fill="#cfe1ff" opacity="0.17"/><circle cx="257" cy="260" r="0.9" fill="#cfe1ff" opacity="0.24"/><circle cx="1135" cy="558" r="0.8" fill="#cfe1ff" opacity="0.35"/><circle cx="1427" cy="525" r="0.9" fill="#cfe1ff" opacity="0.28"/><circle cx="1123" cy="217" r="1.3" fill="#cfe1ff" opacity="0.31"/><circle cx="412" cy="158" r="1.4" fill="#cfe1ff" opacity="0.29"/><circle cx="709" cy="432" r="1.4" fill="#cfe1ff" opacity="0.37"/><circle cx="661" cy="675" r="0.7" fill="#cfe1ff" opacity="0.39"/><circle cx="107" cy="845" r="1.6" fill="#cfe1ff" opacity="0.31"/><circle cx="1376" cy="595" r="0.8" fill="#cfe1ff" opacity="0.34"/><circle cx="1539" cy="629" r="0.9" fill="#cfe1ff" opacity="0.26"/></g>
+
+    <!-- spacetime cross-section contours; the mid line is the sheet the probes sit on -->
+    <path d="M120.0,343.9 L132.0,344.2 L144.0,344.5 L156.0,344.8 L168.0,345.1 L180.0,345.4 L192.0,345.8 L204.0,346.2 L216.0,346.6 L228.0,347.0 L240.0,347.5 L252.0,347.9 L264.0,348.4 L276.0,349.0 L288.0,349.6 L300.0,350.2 L312.0,350.8 L324.0,351.5 L336.0,352.3 L348.0,353.1 L360.0,354.0 L372.0,354.9 L384.0,355.9 L396.0,357.0 L408.0,358.2 L420.0,359.5 L432.0,360.9 L444.0,362.4 L456.0,364.0 L468.0,365.8 L480.0,367.7 L492.0,369.9 L504.0,372.2 L516.0,374.8 L528.0,377.7 L540.0,380.8 L552.0,384.3 L564.0,388.1 L576.0,392.4 L588.0,397.2 L600.0,402.5 L612.0,408.5 L624.0,415.1 L636.0,422.4 L648.0,430.6 L660.0,439.7 L672.0,449.7 L684.0,460.7 L696.0,472.6 L708.0,485.3 L720.0,498.5 L732.0,511.9 L744.0,524.9 L756.0,537.0 L768.0,547.2 L780.0,554.8 L792.0,559.2 L804.0,559.8 L816.0,556.7 L828.0,550.1 L840.0,540.6 L852.0,529.1 L864.0,516.3 L876.0,502.9 L888.0,489.6 L900.0,476.7 L912.0,464.6 L924.0,453.3 L936.0,442.9 L948.0,433.6 L960.0,425.1 L972.0,417.4 L984.0,410.6 L996.0,404.4 L1008.0,398.9 L1020.0,394.0 L1032.0,389.5 L1044.0,385.5 L1056.0,381.9 L1068.0,378.7 L1080.0,375.7 L1092.0,373.1 L1104.0,370.6 L1116.0,368.4 L1128.0,366.4 L1140.0,364.6 L1152.0,362.9 L1164.0,361.3 L1176.0,359.9 L1188.0,358.6 L1200.0,357.4 L1212.0,356.3 L1224.0,355.2 L1236.0,354.3 L1248.0,353.4 L1260.0,352.6 L1272.0,351.8 L1284.0,351.1 L1296.0,350.4 L1308.0,349.8 L1320.0,349.2 L1332.0,348.6 L1344.0,348.1 L1356.0,347.6 L1368.0,347.1 L1380.0,346.7 L1392.0,346.3 L1404.0,345.9 L1416.0,345.6 L1428.0,345.2 L1440.0,344.9 L1452.0,344.6 L1464.0,344.3 L1476.0,344.0" fill="none" stroke="rgba(126,214,222,0.14)" stroke-width="1" />
+    <path d="M120.0,387.6 L132.0,387.9 L144.0,388.1 L156.0,388.4 L168.0,388.8 L180.0,389.1 L192.0,389.4 L204.0,389.8 L216.0,390.2 L228.0,390.6 L240.0,391.1 L252.0,391.5 L264.0,392.0 L276.0,392.5 L288.0,393.1 L300.0,393.7 L312.0,394.4 L324.0,395.1 L336.0,395.8 L348.0,396.6 L360.0,397.4 L372.0,398.4 L384.0,399.4 L396.0,400.4 L408.0,401.6 L420.0,402.9 L432.0,404.2 L444.0,405.7 L456.0,407.4 L468.0,409.2 L480.0,411.1 L492.0,413.3 L504.0,415.7 L516.0,418.3 L528.0,421.2 L540.0,424.4 L552.0,428.0 L564.0,432.0 L576.0,436.5 L588.0,441.5 L600.0,447.1 L612.0,453.5 L624.0,460.6 L636.0,468.7 L648.0,477.8 L660.0,488.0 L672.0,499.4 L684.0,512.2 L696.0,526.3 L708.0,541.7 L720.0,558.1 L732.0,575.2 L744.0,592.2 L756.0,608.3 L768.0,622.2 L780.0,632.7 L792.0,638.8 L804.0,639.7 L816.0,635.3 L828.0,626.1 L840.0,613.2 L852.0,597.7 L864.0,580.9 L876.0,563.8 L888.0,547.1 L900.0,531.3 L912.0,516.8 L924.0,503.6 L936.0,491.7 L948.0,481.0 L960.0,471.6 L972.0,463.2 L984.0,455.8 L996.0,449.2 L1008.0,443.3 L1020.0,438.1 L1032.0,433.4 L1044.0,429.3 L1056.0,425.6 L1068.0,422.2 L1080.0,419.2 L1092.0,416.5 L1104.0,414.0 L1116.0,411.8 L1128.0,409.8 L1140.0,408.0 L1152.0,406.3 L1164.0,404.7 L1176.0,403.3 L1188.0,402.0 L1200.0,400.8 L1212.0,399.7 L1224.0,398.7 L1236.0,397.7 L1248.0,396.9 L1260.0,396.1 L1272.0,395.3 L1284.0,394.6 L1296.0,393.9 L1308.0,393.3 L1320.0,392.7 L1332.0,392.2 L1344.0,391.7 L1356.0,391.2 L1368.0,390.8 L1380.0,390.3 L1392.0,389.9 L1404.0,389.6 L1416.0,389.2 L1428.0,388.9 L1440.0,388.5 L1452.0,388.2 L1464.0,388.0 L1476.0,387.7" fill="none" stroke="rgba(126,214,222,0.2)" stroke-width="1" />
+    <path d="M120.0,434.5 L132.0,434.7 L144.0,434.9 L156.0,435.2 L168.0,435.4 L180.0,435.7 L192.0,436.0 L204.0,436.3 L216.0,436.7 L228.0,437.0 L240.0,437.4 L252.0,437.8 L264.0,438.2 L276.0,438.7 L288.0,439.2 L300.0,439.7 L312.0,440.3 L324.0,440.9 L336.0,441.5 L348.0,442.2 L360.0,442.9 L372.0,443.7 L384.0,444.6 L396.0,445.5 L408.0,446.5 L420.0,447.6 L432.0,448.8 L444.0,450.2 L456.0,451.6 L468.0,453.2 L480.0,454.9 L492.0,456.8 L504.0,458.9 L516.0,461.3 L528.0,463.9 L540.0,466.8 L552.0,470.0 L564.0,473.7 L576.0,477.8 L588.0,482.4 L600.0,487.6 L612.0,493.6 L624.0,500.4 L636.0,508.1 L648.0,517.0 L660.0,527.1 L672.0,538.7 L684.0,551.8 L696.0,566.6 L708.0,583.1 L720.0,601.3 L732.0,620.7 L744.0,640.6 L756.0,660.0 L768.0,677.3 L780.0,690.6 L792.0,698.5 L804.0,699.6 L816.0,693.9 L828.0,682.3 L840.0,666.1 L852.0,647.2 L864.0,627.3 L876.0,607.6 L888.0,589.0 L900.0,571.9 L912.0,556.5 L924.0,542.8 L936.0,530.8 L948.0,520.2 L960.0,511.0 L972.0,502.9 L984.0,495.8 L996.0,489.6 L1008.0,484.1 L1020.0,479.2 L1032.0,475.0 L1044.0,471.2 L1056.0,467.8 L1068.0,464.8 L1080.0,462.1 L1092.0,459.7 L1104.0,457.5 L1116.0,455.5 L1128.0,453.7 L1140.0,452.1 L1152.0,450.6 L1164.0,449.3 L1176.0,448.0 L1188.0,446.9 L1200.0,445.8 L1212.0,444.9 L1224.0,444.0 L1236.0,443.2 L1248.0,442.4 L1260.0,441.7 L1272.0,441.1 L1284.0,440.4 L1296.0,439.9 L1308.0,439.3 L1320.0,438.9 L1332.0,438.4 L1344.0,437.9 L1356.0,437.5 L1368.0,437.2 L1380.0,436.8 L1392.0,436.4 L1404.0,436.1 L1416.0,435.8 L1428.0,435.5 L1440.0,435.3 L1452.0,435.0 L1464.0,434.8 L1476.0,434.5" fill="none" stroke="rgba(146,232,224,0.52)" stroke-width="1.4" />
+    <path d="M120.0,485.8 L132.0,486.0 L144.0,486.2 L156.0,486.4 L168.0,486.6 L180.0,486.9 L192.0,487.2 L204.0,487.4 L216.0,487.7 L228.0,488.1 L240.0,488.4 L252.0,488.8 L264.0,489.1 L276.0,489.6 L288.0,490.0 L300.0,490.5 L312.0,491.0 L324.0,491.5 L336.0,492.1 L348.0,492.7 L360.0,493.4 L372.0,494.1 L384.0,494.9 L396.0,495.7 L408.0,496.6 L420.0,497.6 L432.0,498.7 L444.0,499.9 L456.0,501.2 L468.0,502.6 L480.0,504.2 L492.0,505.9 L504.0,507.9 L516.0,510.0 L528.0,512.4 L540.0,515.1 L552.0,518.0 L564.0,521.4 L576.0,525.2 L588.0,529.5 L600.0,534.4 L612.0,540.0 L624.0,546.4 L636.0,553.7 L648.0,562.2 L660.0,571.9 L672.0,583.1 L684.0,596.0 L696.0,610.7 L708.0,627.3 L720.0,645.9 L732.0,666.0 L744.0,687.1 L756.0,707.9 L768.0,726.7 L780.0,741.5 L792.0,750.3 L804.0,751.6 L816.0,745.2 L828.0,732.2 L840.0,714.5 L852.0,694.1 L864.0,673.0 L876.0,652.4 L888.0,633.3 L900.0,616.0 L912.0,600.7 L924.0,587.2 L936.0,575.5 L948.0,565.3 L960.0,556.4 L972.0,548.7 L984.0,542.0 L996.0,536.2 L1008.0,531.1 L1020.0,526.6 L1032.0,522.6 L1044.0,519.1 L1056.0,516.0 L1068.0,513.2 L1080.0,510.8 L1092.0,508.6 L1104.0,506.6 L1116.0,504.8 L1128.0,503.1 L1140.0,501.7 L1152.0,500.3 L1164.0,499.1 L1176.0,498.0 L1188.0,496.9 L1200.0,496.0 L1212.0,495.1 L1224.0,494.3 L1236.0,493.6 L1248.0,492.9 L1260.0,492.3 L1272.0,491.7 L1284.0,491.1 L1296.0,490.6 L1308.0,490.1 L1320.0,489.7 L1332.0,489.3 L1344.0,488.9 L1356.0,488.5 L1368.0,488.2 L1380.0,487.9 L1392.0,487.5 L1404.0,487.3 L1416.0,487.0 L1428.0,486.7 L1440.0,486.5 L1452.0,486.3 L1464.0,486.0 L1476.0,485.8" fill="none" stroke="rgba(126,214,222,0.2)" stroke-width="1" />
+    <path d="M120.0,540.9 L132.0,541.0 L144.0,541.2 L156.0,541.4 L168.0,541.6 L180.0,541.8 L192.0,542.1 L204.0,542.3 L216.0,542.6 L228.0,542.8 L240.0,543.1 L252.0,543.4 L264.0,543.8 L276.0,544.1 L288.0,544.5 L300.0,544.9 L312.0,545.3 L324.0,545.8 L336.0,546.3 L348.0,546.8 L360.0,547.3 L372.0,548.0 L384.0,548.6 L396.0,549.4 L408.0,550.1 L420.0,551.0 L432.0,551.9 L444.0,552.9 L456.0,554.1 L468.0,555.3 L480.0,556.7 L492.0,558.2 L504.0,559.8 L516.0,561.7 L528.0,563.7 L540.0,566.1 L552.0,568.7 L564.0,571.6 L576.0,574.9 L588.0,578.7 L600.0,583.0 L612.0,588.0 L624.0,593.7 L636.0,600.3 L648.0,607.9 L660.0,616.8 L672.0,627.1 L684.0,639.1 L696.0,652.9 L708.0,668.8 L720.0,686.8 L732.0,706.7 L744.0,727.9 L756.0,749.3 L768.0,769.0 L780.0,784.7 L792.0,794.1 L804.0,795.5 L816.0,788.7 L828.0,774.8 L840.0,756.1 L852.0,735.1 L864.0,713.6 L876.0,693.2 L888.0,674.6 L900.0,658.0 L912.0,643.5 L924.0,630.9 L936.0,620.1 L948.0,610.7 L960.0,602.7 L972.0,595.8 L984.0,589.8 L996.0,584.6 L1008.0,580.1 L1020.0,576.1 L1032.0,572.7 L1044.0,569.6 L1056.0,566.9 L1068.0,564.5 L1080.0,562.3 L1092.0,560.4 L1104.0,558.7 L1116.0,557.1 L1128.0,555.7 L1140.0,554.5 L1152.0,553.3 L1164.0,552.3 L1176.0,551.3 L1188.0,550.4 L1200.0,549.6 L1212.0,548.9 L1224.0,548.2 L1236.0,547.5 L1248.0,547.0 L1260.0,546.4 L1272.0,545.9 L1284.0,545.5 L1296.0,545.0 L1308.0,544.6 L1320.0,544.2 L1332.0,543.9 L1344.0,543.5 L1356.0,543.2 L1368.0,542.9 L1380.0,542.7 L1392.0,542.4 L1404.0,542.1 L1416.0,541.9 L1428.0,541.7 L1440.0,541.5 L1452.0,541.3 L1464.0,541.1 L1476.0,540.9" fill="none" stroke="rgba(126,214,222,0.13)" stroke-width="1" />
+
+    <!-- the central compact star at the bottom of the well -->
+    <circle cx="800" cy="738" r="60" fill="url(#orb-glow)" />
+    <circle cx="800" cy="738" r="26" fill="none" stroke="rgba(194,255,244,0.35)" stroke-width="1" />
+    <circle cx="800" cy="738" r="16" fill="#eafffa" filter="url(#soft)" />
+    <text x="800" y="808" text-anchor="middle" class="mk-svg-tag" fill="#7e97a8">compact star · 4.3 M☉</text>
+
+    <!-- gravitational redshift beam from the deep probe -->
+    <line x1="755" y1="620" x2="755" y2="296" stroke="rgba(146,232,224,0.16)" stroke-dasharray="2 7" />
+    <circle cx="755" cy="602" r="3" fill="#b8fff4" opacity="0.9" />
+    <circle cx="755" cy="558" r="3" fill="#c8f2d8" opacity="0.85" />
+    <circle cx="755" cy="506" r="3" fill="#f2e3b0" opacity="0.8" />
+    <circle cx="755" cy="446" r="3" fill="#ffc290" opacity="0.8" />
+    <circle cx="755" cy="376" r="3" fill="#ff9d7a" opacity="0.8" />
+    <circle cx="755" cy="296" r="3" fill="#ff8266" opacity="0.8" />
+    <text x="772" y="290" class="mk-svg-tag" fill="#90a4bd">light climbing out is redshifted</text>
+
+    <!-- probe C: deep space reference -->
+    <g transform="translate(1005,485)">
+      <circle r="27" fill="none" stroke="rgba(194,255,244,0.6)" stroke-width="1.3">
+        <animate attributeName="r" values="27;44" dur="2.02s" repeatCount="indefinite" />
+        <animate attributeName="opacity" values="0.5;0" dur="2.02s" repeatCount="indefinite" />
+      </circle>
+      <circle r="27" fill="rgba(4,10,14,0.6)" stroke="rgba(194,255,244,0.75)" stroke-width="1.3" />
+      <circle r="21" fill="none" stroke="rgba(146,232,224,0.35)" stroke-width="4" stroke-dasharray="1 10" />
+      <line x1="0" y1="0" x2="0" y2="-18" stroke="#eafffa" stroke-width="2" stroke-linecap="round">
+        <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="2.02s" repeatCount="indefinite" />
+      </line>
+      <circle r="2.4" fill="#eafffa" />
+      <text y="46" text-anchor="middle" class="mk-svg-tag" fill="#c8d8e6">PROBE C · <tspan fill="#c2fff4">0.99×</tspan></text>
+      <text y="61" text-anchor="middle" class="mk-svg-tag" fill="#7e93a8" font-size="9.5">deep space · r = 50 rs</text>
+    </g>
+
+    <!-- probe B: circular orbit at the ISCO -->
+    <g transform="translate(905,565)">
+      <circle r="27" fill="none" stroke="rgba(194,255,244,0.6)" stroke-width="1.3">
+        <animate attributeName="r" values="27;44" dur="2.86s" repeatCount="indefinite" />
+        <animate attributeName="opacity" values="0.5;0" dur="2.86s" repeatCount="indefinite" />
+      </circle>
+      <circle r="27" fill="rgba(4,10,14,0.6)" stroke="rgba(194,255,244,0.75)" stroke-width="1.3" />
+      <circle r="21" fill="none" stroke="rgba(146,232,224,0.35)" stroke-width="4" stroke-dasharray="1 10" />
+      <line x1="0" y1="0" x2="0" y2="-18" stroke="#eafffa" stroke-width="2" stroke-linecap="round">
+        <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="2.86s" repeatCount="indefinite" />
+      </line>
+      <circle r="2.4" fill="#eafffa" />
+      <text y="46" text-anchor="middle" class="mk-svg-tag" fill="#c8d8e6">PROBE B · <tspan fill="#c2fff4">0.71×</tspan></text>
+      <text y="61" text-anchor="middle" class="mk-svg-tag" fill="#7e93a8" font-size="9.5">ISCO orbit · r = 3 rs</text>
+    </g>
+
+    <!-- probe A: hovering deep in the well (selected) -->
+    <g transform="translate(755,658)">
+      <circle r="27" fill="none" stroke="rgba(194,255,244,0.6)" stroke-width="1.3">
+        <animate attributeName="r" values="27;44" dur="4.9s" repeatCount="indefinite" />
+        <animate attributeName="opacity" values="0.55;0" dur="4.9s" repeatCount="indefinite" />
+      </circle>
+      <circle r="27" fill="rgba(4,10,14,0.72)" stroke="#c2fff4" stroke-width="1.6" />
+      <circle r="21" fill="none" stroke="rgba(146,232,224,0.45)" stroke-width="4" stroke-dasharray="1 10" />
+      <line x1="0" y1="0" x2="0" y2="-18" stroke="#f4fffc" stroke-width="2.2" stroke-linecap="round">
+        <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="4.9s" repeatCount="indefinite" />
+      </line>
+      <circle r="2.4" fill="#f4fffc" />
+      <!-- selection corners -->
+      <path d="M-38,-26 L-38,-38 L-26,-38 M26,-38 L38,-38 L38,-26 M38,26 L38,38 L26,38 M-26,38 L-38,38 L-38,26" fill="none" stroke="#c2fff4" stroke-width="1.4" />
+      <text y="58" text-anchor="middle" class="mk-svg-tag" fill="#eafff8">PROBE A · <tspan fill="#c2fff4">0.41×</tspan></text>
+      <text y="73" text-anchor="middle" class="mk-svg-tag" fill="#8ba0b5" font-size="9.5">hover · r = 1.2 rs · selected</text>
+    </g>
+
+    <!-- formula callout for the selected probe -->
+    <line x1="726" y1="644" x2="668" y2="608" stroke="rgba(146,232,224,0.3)" stroke-dasharray="3 5" />
+    <text x="488" y="602" class="mk-svg-tag" fill="#9fb4c6">dτ/dt = √(1 − rs/r) = <tspan fill="#c2fff4">0.41</tspan></text>
+  </svg>
+
+  <nav class="mk-topbar" aria-label="Simulation navigation">
+    <a href="index.html" class="mk-back"><span aria-hidden="true">←</span><span>Mission briefs</span></a>
+    <div class="mk-mission-id"><span>04</span><b>Time</b></div>
+    <div class="mk-status"><span aria-hidden="true"></span>Design mock</div>
+  </nav>
+
+  <section class="mk-brief" aria-label="Simulation brief">
+    <p class="mk-eyebrow">Interactive simulation — concept</p>
+    <h1>Time Dilation</h1>
+    <p class="mk-copy">
+      Place clock probes around a massive star and compare how much time each
+      one actually experiences.
+    </p>
+    <div class="mk-readout">
+      <span><b>0.41×</b>deepest clock rate</span>
+      <span><b>10.0 yr</b>far time elapsed</span>
+    </div>
+    <div class="mk-steps">
+      <div><span>1</span><p><b>Drop a probe</b>Drag it deeper; its tick slows</p></div>
+      <div><span>2</span><p><b>Set it moving</b>Orbit speed adds its own dilation</p></div>
+      <div><span>3</span><p><b>Run the mission clock</b>Compare how much each probe aged</p></div>
+    </div>
+  </section>
+
+  <aside class="mk-controls" aria-label="Simulation controls (static mock)">
+    <div class="mk-controls-head">
+      <small>Mission console</small>
+      <strong>Clock field</strong>
+    </div>
+    <div class="mk-controls-body">
+      <div class="mk-group">
+        <div class="mk-group-head">
+          <span>01</span>
+          <div>
+            <h3>Central body</h3>
+            <p>Mass and compactness set the depth of the well.</p>
+          </div>
+        </div>
+        <div class="mk-range">
+          <div class="mk-range-label"><span>Mass</span><b>4.3 M☉</b></div>
+          <div class="mk-track" style="--fill: 43%"><span></span><i></i></div>
+          <small>Deeper wells slow clocks harder — the surface value follows √(1 − rs/r).</small>
+        </div>
+        <div class="mk-chiprow">
+          <span class="mk-chip">Earth</span>
+          <span class="mk-chip">White dwarf</span>
+          <span class="mk-chip is-active">Neutron star</span>
+          <span class="mk-chip">Black hole</span>
+        </div>
+      </div>
+
+      <div class="mk-group">
+        <div class="mk-group-head">
+          <span>02</span>
+          <div>
+            <h3>Selected probe — A</h3>
+            <p>Every probe carries its own clock and aging total.</p>
+          </div>
+        </div>
+        <div class="mk-range">
+          <div class="mk-range-label"><span>Altitude</span><b>r = 1.2 rs</b></div>
+          <div class="mk-track" style="--fill: 12%"><span></span><i></i></div>
+          <small>Hovering this deep takes serious thrust — the probe's engines scream so its clock can crawl.</small>
+        </div>
+        <div class="mk-switch">
+          <div><b>Circular orbit</b><small>Free-fall instead of hovering — adds the velocity term √(1 − 3rs/2r).</small></div>
+          <i></i>
+        </div>
+        <div class="mk-switch is-on">
+          <div><b>Redshift beam</b><small>Show the probe's light stretching as it climbs out.</small></div>
+          <i></i>
+        </div>
+      </div>
+
+      <div class="mk-group">
+        <div class="mk-group-head">
+          <span>03</span>
+          <div>
+            <h3>Mission clock</h3>
+            <p>Probes age by their own proper time; the ledger updates.</p>
+          </div>
+        </div>
+        <span class="mk-primary">Run 10 years of far time</span>
+      </div>
+
+      <div class="mk-group">
+        <div class="mk-group-head">
+          <span>04</span>
+          <div>
+            <h3>Reality checks</h3>
+            <p>Presets that jump to real measured configurations.</p>
+          </div>
+        </div>
+        <div class="mk-chiprow">
+          <span class="mk-chip">GPS · +38 μs/day</span>
+          <span class="mk-chip">ISS · −25 μs/day</span>
+          <span class="mk-chip">Miller's planet · 1 h = 7 yr</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="mk-observation td-observation" aria-live="polite">
+    <em aria-hidden="true"></em>
+    Strong-field regime — <b>probe A runs at 0.41× far time</b>
+  </div>
+
+  <section class="mk-inset td-ledger" aria-label="Proper time ledger">
+    <div class="mk-inset-head">
+      <strong>Proper-time ledger</strong>
+      <span>far time 10.00 yr</span>
+    </div>
+    <p class="mk-inset-sub">Aging totals while far time runs ten years.</p>
+    <div class="td-ledger-rows">
+      <div class="td-row">
+        <div class="td-row-name"><b>Probe C</b><small>deep space</small></div>
+        <div class="td-bar"><span style="--w: 99%"></span></div>
+        <b>9.90 yr</b>
+      </div>
+      <div class="td-row">
+        <div class="td-row-name"><b>Probe B</b><small>ISCO orbit</small></div>
+        <div class="td-bar"><span style="--w: 70.7%"></span></div>
+        <b>7.07 yr</b>
+      </div>
+      <div class="td-row is-selected">
+        <div class="td-row-name"><b>Probe A</b><small>hover · 1.2 rs</small></div>
+        <div class="td-bar"><span style="--w: 40.8%"></span></div>
+        <b>4.08 yr</b>
+      </div>
+    </div>
+  </section>
+
+  <div class="mk-vignette" aria-hidden="true"></div>
+</main>
+
+<section class="mk-notes" style="--mk-accent: #6fe3d2">
+  <div class="mk-notes-inner">
+    <p class="mk-notes-kicker">Design notes — mission 04</p>
+    <h2>A field of clocks, and a ledger that makes them comparable</h2>
+    <p class="mk-notes-intro">
+      The pedagogical core is not any single clock — it is the comparison. Every
+      probe visibly ticks at its own proper rate, and the ledger turns "time runs
+      slower" into a number of years you can feel.
+    </p>
+
+    <div class="mk-note-grid">
+      <div class="mk-note-card">
+        <h3>What the simulation is</h3>
+        <ul>
+          <li><b>Scene</b> — a cross-section of a star's gravity well; the mid contour is the sheet probes sit on.</li>
+          <li><b>Actors</b> — draggable clock probes whose faces pulse at their local dτ/dt, plus a far-away reference.</li>
+          <li><b>Payoff</b> — run 10 years of far time and watch the aging bars race apart.</li>
+        </ul>
+      </div>
+      <div class="mk-note-card">
+        <h3>You control / you observe</h3>
+        <ul>
+          <li>Drag any probe to a new altitude; its tick rate responds instantly.</li>
+          <li>Morph the central body: Earth → white dwarf → neutron star → black hole.</li>
+          <li>Toggle hover vs circular orbit per probe to add the velocity term.</li>
+          <li>Presets anchor the effect in reality: GPS, ISS, Miller's planet.</li>
+        </ul>
+      </div>
+      <div class="mk-note-card">
+        <h3>Physics under the hood</h3>
+        <ul>
+          <li>Static observer: <code>dτ/dt = √(1 − rs/r)</code></li>
+          <li>Circular orbit: <code>dτ/dt = √(1 − 3rs/2r)</code> → 0.707 at the ISCO</li>
+          <li>Hover + speed: <code>√(1 − rs/r − v²/c²)</code></li>
+          <li>GPS check: gravity +45.7 μs/day, speed −7.2 → net <code>+38.5 μs/day</code></li>
+          <li>As r → rs the rate → 0 — the natural cliffhanger into Mission 02.</li>
+        </ul>
+      </div>
+      <div class="mk-note-card">
+        <h3>Open questions to iterate on</h3>
+        <ul>
+          <li>Log-scale mass slider (Earth → Sgr A*) or curated presets only?</li>
+          <li>2D cross-section as mocked, or reuse Mission 01's 3D sheet for continuity?</li>
+          <li>Should each probe emit an audible tick? The desynchronizing rhythm could be the signature.</li>
+          <li>Is the redshift beam a default overlay or an unlockable detail?</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mk-notes-footer">
+      <a href="index.html">← All mission briefs</a>
+      <span>Static mock — controls are props; animation is illustrative.</span>
+      <a href="geodesics.html">Next: Geodesics →</a>
+    </div>
+  </div>
+</section>
+</body>
+</html>

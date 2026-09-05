@@ -22,6 +22,9 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
+      - name: Descent physics and planet tracking
+        run: npm run test:descent
+
       - name: Lint and format check
         run: npm run lint
 

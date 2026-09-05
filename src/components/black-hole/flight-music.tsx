@@ -7,20 +7,14 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  scoreMedia,
-  scorePosition,
-  scoreProgress,
-  scoreTime,
-} from "@/utils/flight-score";
+import { scoreMedia, scorePosition, scoreProgress } from "@/utils/flight-score";
 
-type Playback = {
-  progress: number;
-  playing: boolean;
-  speed: number;
-  enabled: boolean;
-};
-type MusicProps = Playback & {
+import {
+  FlightAudioSync,
+  type FlightAudioState,
+} from "@/utils/flight-audio-sync";
+
+type MusicProps = FlightAudioState & {
   audioRef: RefObject<HTMLAudioElement | null>;
   onEnabledChange: (enabled: boolean) => void;
   onProgress: (progress: number) => void;
@@ -33,6 +27,7 @@ export function FlightMusic(props: MusicProps) {
     playing,
     speed,
     enabled,
+    seek,
     audioRef,
     onEnabledChange,
     onProgress,
@@ -40,8 +35,7 @@ export function FlightMusic(props: MusicProps) {
   } = props;
   const latest = useRef(props);
   latest.current = props;
-  const reported = useRef(Number.NaN);
-  const appliedSource = useRef("");
+  const [transport] = useState(() => new FlightAudioSync());
   const [status, setStatus] = useState("Loading music…");
   const media = scoreMedia(speed);
   const { cue } = scorePosition(progress);
@@ -52,36 +46,21 @@ export function FlightMusic(props: MusicProps) {
   }, []);
 
   const synchronize = useCallback(
-    (state: Playback) => {
+    (state: FlightAudioState) => {
       const audio = audioRef.current;
       if (!audio) return;
-      if (!state.enabled || !state.playing) audio.pause();
-      const config = scoreMedia(state.speed);
-      // A source change can briefly retain the previous file's metadata.
-      if (audio.readyState < 1 || !audio.currentSrc.endsWith(config.src))
-        return;
-      audio.volume = 0.45;
-      audio.playbackRate = config.rate;
-      audio.preservesPitch = true;
-      if (
-        state.progress !== reported.current ||
-        appliedSource.current !== config.src
-      ) {
-        audio.currentTime = scoreTime(state.progress, config.scale);
-        reported.current = state.progress;
-        appliedSource.current = config.src;
-      }
-      if (state.enabled && state.playing && state.progress < 1)
-        void audio.play().catch((reason: DOMException) => {
+      void transport
+        .synchronize(audio, state)
+        ?.catch((reason: DOMException) => {
           if (reason.name !== "AbortError" && latest.current.enabled) fail();
         });
     },
-    [audioRef, fail],
+    [audioRef, fail, transport],
   );
 
   useEffect(() => {
-    synchronize({ progress, playing, speed, enabled });
-  }, [progress, playing, speed, enabled, synchronize]);
+    synchronize({ ...latest.current, playing, speed, enabled, seek });
+  }, [playing, speed, enabled, seek, synchronize]);
 
   useEffect(() => {
     if (!enabled || !playing) return;
@@ -98,7 +77,6 @@ export function FlightMusic(props: MusicProps) {
       ) {
         // Audio is the clock: slow rendering or buffering cannot make it lap the flight.
         const next = scoreProgress(audio.currentTime, config.scale);
-        reported.current = next;
         onProgress(next);
       }
       frame = requestAnimationFrame(tick);
@@ -125,7 +103,6 @@ export function FlightMusic(props: MusicProps) {
         onError={fail}
         onEnded={() => {
           if (latest.current.enabled) {
-            reported.current = 1;
             onProgress(1);
             onPlayingChange(false);
           }
@@ -141,6 +118,7 @@ export function FlightMusic(props: MusicProps) {
       <button
         type="button"
         aria-pressed={enabled}
+        aria-busy={enabled && status === "Loading music…"}
         title={
           status ||
           `Far side of light · ${cue.mood}. Continuous music follows the flight timeline.`
@@ -158,11 +136,7 @@ export function FlightMusic(props: MusicProps) {
           }
         }}
       >
-        {enabled && status === "Loading music…"
-          ? status
-          : enabled
-            ? "Music on"
-            : "Music off"}
+        {enabled ? "Music on" : "Music off"}
       </button>
     </div>
   );

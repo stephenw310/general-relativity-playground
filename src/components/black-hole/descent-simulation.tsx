@@ -59,6 +59,11 @@ function clock(seconds: number) {
 
 export function DescentSimulation() {
   const [progress, setProgress] = useState(0);
+  const [seek, setSeek] = useState({ id: 0, progress: 0 });
+  const seekTo = useCallback((next: number) => {
+    setProgress(next);
+    setSeek((previous) => ({ id: previous.id + 1, progress: next }));
+  }, []);
   const [playing, setPlaying] = useState(false);
   const [music, setMusic] = useState(true);
   const musicAudio = useRef<HTMLAudioElement>(null);
@@ -99,7 +104,7 @@ export function DescentSimulation() {
   const stage = stageAt(radius);
   const togglePlaying = useCallback(() => {
     if (progress >= 1) {
-      setProgress(0);
+      seekTo(0);
       setShowEnding(true);
     }
     // Begin/Resume must call play within the user gesture, especially in Safari.
@@ -108,15 +113,15 @@ export function DescentSimulation() {
       void musicAudio.current.play().catch(() => {});
     }
     setPlaying((p) => !p);
-  }, [progress, playing, music]);
+  }, [progress, playing, music, seekTo]);
   const reset = useCallback(() => {
-    setProgress(0);
+    seekTo(0);
     setPlaying(false);
     setTrackingPlanet(false);
     setShowEnding(true);
     setYaw(0);
     setPitch(0);
-  }, []);
+  }, [seekTo]);
 
   useEffect(() => {
     const mobile = window.matchMedia("(max-width: 650px)");
@@ -524,7 +529,7 @@ export function DescentSimulation() {
                 value={progress}
                 aria-valuetext={`${radius.toFixed(3)} Schwarzschild radii. ${stage}`}
                 onChange={(e) => {
-                  setProgress(Number(e.target.value));
+                  seekTo(Number(e.target.value));
                   setPlaying(false);
                 }}
               />
@@ -541,7 +546,7 @@ export function DescentSimulation() {
                 type="button"
                 title="Jump to the event horizon: exactly 1 horizon radius"
                 onClick={() => {
-                  setProgress(progressAt(1));
+                  seekTo(progressAt(1));
                   setPlaying(false);
                 }}
               >
@@ -570,6 +575,7 @@ export function DescentSimulation() {
             progress={progress}
             speed={speed}
             enabled={music}
+            seek={seek}
             audioRef={musicAudio}
             onEnabledChange={setMusic}
             onProgress={setProgress}
@@ -603,7 +609,7 @@ export function DescentSimulation() {
             <button
               type="button"
               onClick={() => {
-                setProgress(progressAt(1));
+                seekTo(progressAt(1));
                 setSpeed(1);
                 setPlaying(true);
                 setTrackingPlanet(true);

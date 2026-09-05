@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { memo, useEffect, useMemo } from "react";
 import {
   BufferGeometry,
   CanvasTexture,
@@ -14,6 +14,15 @@ import {
 } from "three";
 import { EngineExhaust } from "@/components/black-hole/engine-exhaust";
 import { tidalStrain } from "@/utils/descent-physics";
+
+const STRAKE_EXTRUSION = {
+  depth: 0.16,
+  bevelEnabled: true,
+  bevelSize: 0.075,
+  bevelThickness: 0.045,
+  bevelSegments: 3,
+  steps: 1,
+};
 
 type Section = [number, number, number]; // z, half-width, half-height
 const HULL: Section[] = [
@@ -243,15 +252,10 @@ function EnginePod({ side, playing }: { side: number; playing: boolean }) {
   );
 }
 
-export function OdysseyShip({
-  radius,
-  playing,
-}: {
-  radius: number;
-  playing: boolean;
-}) {
+// Only the outer transform follows radius. Keep geometry and materials out of
+// the per-frame React updates; exhaust animation runs in useFrame.
+const ShipModel = memo(function ShipModel({ playing }: { playing: boolean }) {
   const skin = useSkin();
-  const strain = tidalStrain(radius);
   const geometry = useMemo(() => loft(HULL), []);
   const windshield = useMemo(() => {
     const curve = new CatmullRomCurve3(
@@ -284,7 +288,7 @@ export function OdysseyShip({
     [geometry, windshield],
   );
   return (
-    <group scale={[1 - strain * 0.18, 1 - strain * 0.18, 1 + strain * 1.1]}>
+    <group>
       <mesh geometry={geometry}>
         <meshStandardMaterial
           attach="material-0"
@@ -315,19 +319,7 @@ export function OdysseyShip({
         <group key={side}>
           <group scale={[side, 1, 1]}>
             <mesh position={[0, -0.3, 0]} rotation={[Math.PI / 2, 0, 0]}>
-              <extrudeGeometry
-                args={[
-                  strake,
-                  {
-                    depth: 0.16,
-                    bevelEnabled: true,
-                    bevelSize: 0.075,
-                    bevelThickness: 0.045,
-                    bevelSegments: 3,
-                    steps: 1,
-                  },
-                ]}
-              />
+              <extrudeGeometry args={[strake, STRAKE_EXTRUSION]} />
               <meshStandardMaterial
                 color="#73838f"
                 metalness={0.3}
@@ -384,6 +376,21 @@ export function OdysseyShip({
           />
         </mesh>
       ))}
+    </group>
+  );
+});
+
+export function OdysseyShip({
+  radius,
+  playing,
+}: {
+  radius: number;
+  playing: boolean;
+}) {
+  const strain = tidalStrain(radius);
+  return (
+    <group scale={[1 - strain * 0.18, 1 - strain * 0.18, 1 + strain * 1.1]}>
+      <ShipModel playing={playing} />
     </group>
   );
 }

@@ -2,7 +2,7 @@
 
 import { Environment, Lightformer, OrbitControls } from "@react-three/drei";
 import { Canvas, useThree } from "@react-three/fiber";
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { FlightView } from "@/components/black-hole/flight-view";
 import { OdysseyShip } from "@/components/black-hole/odyssey-ship";
@@ -43,6 +43,62 @@ function ChaseControls({ angle, reset }: { angle: Angle; reset: number }) {
     />
   );
 }
+
+// EnvironmentPortal captures six cube faces whenever its children change.
+// Keep the lighting tree stable while flight telemetry updates.
+const ShipLighting = memo(function ShipLighting() {
+  return (
+    <>
+      <Environment resolution={128} frames={1}>
+        <Lightformer
+          form="rect"
+          intensity={0.65}
+          color="#d8e8f5"
+          scale={[10, 8, 1]}
+          position={[0, 6, 1]}
+          rotation={[-Math.PI / 2, 0, 0]}
+        />
+        <Lightformer
+          form="rect"
+          intensity={1.2}
+          color="#fbd5ab"
+          scale={[8, 5, 1]}
+          position={[-6, 1, -4]}
+          rotation={[0, Math.PI / 2, 0]}
+        />
+        <Lightformer
+          form="rect"
+          intensity={0.7}
+          color="#b5d9ff"
+          scale={[5, 5, 1]}
+          position={[6, 2, 3]}
+          rotation={[0, -Math.PI / 2, 0]}
+        />
+      </Environment>
+      <ambientLight intensity={0.55} color="#afc5e0" />
+      <directionalLight
+        position={[-5, 4, -8]}
+        color="#ffd0a0"
+        intensity={2.2}
+      />
+      <directionalLight position={[5, 3, 6]} color="#adceff" intensity={1.3} />
+      <directionalLight
+        position={[-3, -4, 2]}
+        color="#6689ad"
+        intensity={0.65}
+      />
+    </>
+  );
+});
+
+const SHIP_CAMERA = {
+  position: [7, 4, 11] as [number, number, number],
+  fov: 46,
+  near: 0.1,
+  far: 100,
+};
+const SHIP_DPR: [number, number] = [1, 1.5];
+const SHIP_GL = { antialias: true };
 
 export function FlightOverview({
   radius,
@@ -107,54 +163,9 @@ export function FlightOverview({
             </div>
           }
         >
-          <Canvas
-            dpr={[1, 1.5]}
-            camera={{ position: [7, 4, 11], fov: 46, near: 0.1, far: 100 }}
-            gl={{ antialias: true }}
-          >
+          <Canvas dpr={SHIP_DPR} camera={SHIP_CAMERA} gl={SHIP_GL}>
             <FlightView radius={radius} time={time} disk={disk} sceneCamera />
-            <Environment resolution={128} frames={1}>
-              <Lightformer
-                form="rect"
-                intensity={0.65}
-                color="#d8e8f5"
-                scale={[10, 8, 1]}
-                position={[0, 6, 1]}
-                rotation={[-Math.PI / 2, 0, 0]}
-              />
-              <Lightformer
-                form="rect"
-                intensity={1.2}
-                color="#fbd5ab"
-                scale={[8, 5, 1]}
-                position={[-6, 1, -4]}
-                rotation={[0, Math.PI / 2, 0]}
-              />
-              <Lightformer
-                form="rect"
-                intensity={0.7}
-                color="#b5d9ff"
-                scale={[5, 5, 1]}
-                position={[6, 2, 3]}
-                rotation={[0, -Math.PI / 2, 0]}
-              />
-            </Environment>
-            <ambientLight intensity={0.55} color="#afc5e0" />
-            <directionalLight
-              position={[-5, 4, -8]}
-              color="#ffd0a0"
-              intensity={2.2}
-            />
-            <directionalLight
-              position={[5, 3, 6]}
-              color="#adceff"
-              intensity={1.3}
-            />
-            <directionalLight
-              position={[-3, -4, 2]}
-              color="#6689ad"
-              intensity={0.65}
-            />
+            <ShipLighting />
             <OdysseyShip radius={radius} playing={playing} />
             <ChaseControls angle={angle} reset={reset} />
           </Canvas>

@@ -14,6 +14,7 @@ try {
     "descent-planet-aims",
     "descent-planet-trace",
     "flight-score",
+    "flight-audio-sync",
   ]) {
     const source = readFileSync(
       new URL(`../src/utils/${name}.ts`, import.meta.url),
@@ -88,6 +89,112 @@ try {
 
   console.log(
     "PASS: score sections match generation plan, all six flight speeds, horizon/tidal transitions, seeks and reset.",
+  );
+
+  const { FlightAudioSync } = require(join(dir, "flight-audio-sync.js"));
+  const transport = new FlightAudioSync();
+  const seeks = [];
+  let time = 0,
+    playCalls = 0;
+  const audio = {
+    currentSrc: `http://localhost${scoreMedia(1).src}`,
+    readyState: 4,
+    paused: true,
+    volume: 1,
+    playbackRate: 1,
+    preservesPitch: false,
+    get currentTime() {
+      return time;
+    },
+    set currentTime(value) {
+      seeks.push(value);
+      time = value;
+    },
+    play() {
+      playCalls++;
+      this.paused = false;
+      return Promise.resolve();
+    },
+    pause() {
+      this.paused = true;
+    },
+  };
+  let playback = {
+    progress: 0,
+    playing: true,
+    enabled: true,
+    speed: 1,
+    seek: { id: 0, progress: 0 },
+  };
+  transport.synchronize(audio, playback);
+  assert.equal(playCalls, 1);
+  // Heavy 3D work can delay a React commit behind the media clock. Even a
+  // canplay event delivered with that stale snapshot must not rewind the music.
+  for (let frame = 1; frame <= 300; frame++) {
+    time = frame / 30;
+    playback = { ...playback, progress: Math.max(0, time - 0.2) / 190 };
+    transport.synchronize(audio, playback);
+  }
+  assert.equal(seeks.length, 0, "Delayed telemetry must never seek the audio");
+  assert.equal(
+    playCalls,
+    1,
+    "Playing media must not receive repeated play requests",
+  );
+  assert.equal(time, 10);
+  transport.synchronize(audio, { ...playback, playing: false });
+  assert.equal(audio.paused, true);
+  transport.synchronize(audio, playback);
+  assert.equal(
+    seeks.length,
+    0,
+    "Resume must preserve the actual paused media position",
+  );
+  assert.equal(playCalls, 2);
+  // An explicit jump applies exactly once despite repeated readiness events.
+  playback = {
+    ...playback,
+    playing: false,
+    progress: 100 / 190,
+    seek: { id: 1, progress: 100 / 190 },
+  };
+  transport.synchronize(audio, playback);
+  for (let i = 0; i < 20; i++) transport.synchronize(audio, playback);
+  assert.deepEqual(seeks, [100]);
+  // Retiming the same file changes rate, not position.
+  playback = { ...playback, speed: 2 };
+  transport.synchronize(audio, playback);
+  assert.equal(audio.playbackRate, 2);
+  assert.deepEqual(seeks, [100]);
+  // Keep a reset pending until the newly selected file has its own metadata.
+  playback = {
+    ...playback,
+    speed: 0.25,
+    progress: 0,
+    seek: { id: 2, progress: 0 },
+  };
+  transport.synchronize(audio, playback);
+  assert.deepEqual(seeks, [100]);
+  audio.currentSrc = `http://localhost${scoreMedia(0.25).src}`;
+  audio.readyState = 0;
+  transport.synchronize(audio, playback);
+  assert.deepEqual(seeks, [100]);
+  audio.readyState = 4;
+  transport.synchronize(audio, playback);
+  assert.deepEqual(seeks, [100, 0]);
+  assert.equal(audio.playbackRate, 1);
+  // While muted, the manual flight clock advances. Unmuting catches up once.
+  playback = { ...playback, enabled: false };
+  transport.synchronize(audio, playback);
+  playback = { ...playback, progress: 0.5 };
+  transport.synchronize(audio, playback);
+  assert.deepEqual(seeks, [100, 0]);
+  playback = { ...playback, enabled: true };
+  transport.synchronize(audio, playback);
+  transport.synchronize(audio, playback);
+  assert.deepEqual(seeks, [100, 0, 380]);
+  console.log(
+    "PASS: delayed renders and repeated canplay events never rewind audio; pause, resume, explicit seeks, source changes, and unmuting remain synchronized.",
   );
 
   const {

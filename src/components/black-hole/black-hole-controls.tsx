@@ -77,9 +77,6 @@ export function BlackHoleControls() {
       >
         <header className="spacetime-controls-header">
           <div>
-            <span className="spacetime-panel-kicker">
-              Change the conditions
-            </span>
             <h2>Observatory</h2>
           </div>
           <button

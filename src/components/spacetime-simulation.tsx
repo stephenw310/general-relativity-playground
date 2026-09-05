@@ -31,18 +31,8 @@ export function SpacetimeSimulation() {
         <nav className="spacetime-topbar" aria-label="Simulation navigation">
           <Link href="/" className="spacetime-back">
             <span aria-hidden="true">←</span>
-            <span>Mission select</span>
+            <span>Universe Lab</span>
           </Link>
-
-          <div className="spacetime-mission-id">
-            <span>01</span>
-            <b>Geometry</b>
-          </div>
-
-          <div className="spacetime-status">
-            <span aria-hidden="true" />
-            Online
-          </div>
         </nav>
 
         <Controls />
@@ -63,7 +53,6 @@ export function SpacetimeSimulation() {
           className={hudOpen ? "is-open spacetime-brief" : "spacetime-brief"}
           aria-label="Simulation instructions"
         >
-          <p className="spacetime-eyebrow">Interactive simulation</p>
           <h1>Spacetime Curvature</h1>
           <p className="spacetime-brief-copy">
             Move objects across the field, change their mass, and see how

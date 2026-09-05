@@ -243,15 +243,6 @@
   padding: 218px 0 230px 4vw;
 }
 
-.landing-context {
-  margin: 0 0 18px;
-  color: #b8c3d8;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.4;
-}
-
 .landing-stage-copy h1 {
   max-width: 670px;
   margin: 0;
@@ -271,7 +262,7 @@
   text-wrap: balance;
 }
 
-.landing-mission-select {
+.landing-simulation-select {
   position: relative;
   z-index: 5;
   width: min(1320px, 92vw);
@@ -279,38 +270,7 @@
   padding-bottom: 110px;
 }
 
-.landing-mission-bar {
-  min-height: 62px;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid var(--landing-line);
-  border-bottom: 0;
-  background: rgba(7, 10, 16, 0.86);
-  backdrop-filter: blur(18px);
-  font-size: 13px;
-}
-
-.landing-mission-count {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #b8c0ce;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 11px;
-}
-
-.landing-mission-count::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--landing-online);
-  box-shadow: 0 0 10px var(--landing-online);
-}
-
-.landing-mission-grid {
+.landing-simulation-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   border-top: 1px solid var(--landing-line);
@@ -318,7 +278,7 @@
   background: #070910;
 }
 
-.landing-mission {
+.landing-simulation {
   position: relative;
   min-height: 330px;
   padding: 22px;
@@ -335,24 +295,24 @@
     box-shadow 0.2s ease;
 }
 
-.landing-mission.is-live {
+.landing-simulation.is-live {
   cursor: pointer;
 }
 
-.landing-mission.is-live:hover,
-.landing-mission.is-live:focus-visible {
+.landing-simulation.is-live:hover,
+.landing-simulation.is-live:focus-visible {
   background: rgba(255, 255, 255, 0.065);
   outline: none;
 }
 
-.landing-mission.is-selected {
+.landing-simulation.is-selected {
   z-index: 2;
   box-shadow:
     inset 0 0 0 2px var(--landing-accent),
     0 0 32px rgba(120, 151, 255, 0.14);
 }
 
-.landing-mission > img {
+.landing-simulation > img {
   position: absolute;
   inset: 0;
   object-fit: cover;
@@ -363,88 +323,59 @@
     transform 0.4s ease;
 }
 
-.landing-mission[data-mission="spacetime"] > img {
+.landing-simulation[data-simulation="spacetime"] > img {
   opacity: 0.86;
   filter: saturate(1.08) brightness(1.16);
 }
 
-.landing-mission[data-mission="black-hole"] > img {
+.landing-simulation[data-simulation="black-hole"] > img {
   opacity: 0.76;
   filter: saturate(1.04) brightness(1.15);
 }
 
-.landing-mission.is-live:hover > img,
-.landing-mission.is-live:focus-visible > img {
+.landing-simulation.is-live:hover > img,
+.landing-simulation.is-live:focus-visible > img {
   opacity: 0.68;
   transform: scale(1.03);
 }
 
-.landing-mission[data-mission="spacetime"].is-live:hover > img,
-.landing-mission[data-mission="spacetime"].is-live:focus-visible > img {
+.landing-simulation[data-simulation="spacetime"].is-live:hover > img,
+.landing-simulation[data-simulation="spacetime"].is-live:focus-visible > img {
   opacity: 0.94;
 }
 
-.landing-mission[data-mission="black-hole"].is-live:hover > img,
-.landing-mission[data-mission="black-hole"].is-live:focus-visible > img {
+.landing-simulation[data-simulation="black-hole"].is-live:hover > img,
+.landing-simulation[data-simulation="black-hole"].is-live:focus-visible > img {
   opacity: 0.9;
 }
 
-.landing-mission.is-live::after {
+.landing-simulation.is-live::after {
   content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(0deg, rgba(3, 5, 10, 0.96), transparent 73%);
 }
 
-.landing-mission-top,
-.landing-mission-copy,
-.landing-mission-launch {
+.landing-simulation-copy,
+.landing-simulation-launch {
   position: relative;
   z-index: 2;
 }
 
-.landing-mission-top {
-  display: flex;
-  justify-content: space-between;
-  color: #c5cbd6;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 10px;
-}
-
-.landing-mission-number,
 .landing-availability {
-  display: flex;
-  align-items: center;
-  gap: 7px;
+  position: relative;
+  z-index: 2;
+  align-self: flex-end;
+  color: #9da6b6;
+  font-size: 11px;
 }
 
-.landing-mission-number b {
-  color: #fff;
-  font-weight: 500;
-}
-
-.landing-availability::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--landing-online);
-}
-
-.landing-availability.is-locked {
-  color: #747d8d;
-}
-
-.landing-availability.is-locked::before {
-  background: #68717e;
-}
-
-.landing-mission-copy {
+.landing-simulation-copy {
   margin-top: auto;
   transition: transform 0.2s ease;
 }
 
-.landing-mission-copy h2 {
+.landing-simulation-copy h2 {
   margin: 0 0 9px;
   font-size: 29px;
   font-weight: 570;
@@ -452,7 +383,7 @@
   line-height: 1.04;
 }
 
-.landing-mission-copy p {
+.landing-simulation-copy p {
   max-width: 360px;
   margin: 0;
   color: #9da6b6;
@@ -460,11 +391,11 @@
   line-height: 1.55;
 }
 
-.landing-mission.is-live .landing-mission-copy p {
+.landing-simulation.is-live .landing-simulation-copy p {
   color: #c4cad4;
 }
 
-.landing-mission-launch {
+.landing-simulation-launch {
   position: absolute;
   z-index: 4;
   right: 20px;
@@ -489,32 +420,32 @@
     transform 0.2s ease;
 }
 
-.landing-mission.is-live:hover .landing-mission-launch,
-.landing-mission.is-live:focus-visible .landing-mission-launch {
+.landing-simulation.is-live:hover .landing-simulation-launch,
+.landing-simulation.is-live:focus-visible .landing-simulation-launch {
   opacity: 1;
   transform: translateY(0);
 }
 
-.landing-mission.is-live .landing-mission-launch:hover {
+.landing-simulation.is-live .landing-simulation-launch:hover {
   background: #dfe7ff;
   box-shadow: 0 9px 24px rgba(94, 125, 215, 0.28);
   transform: translateY(-2px);
 }
 
-.landing-mission-launch b {
+.landing-simulation-launch b {
   transition: transform 0.2s ease;
 }
 
-.landing-mission-launch:hover b {
+.landing-simulation-launch:hover b {
   transform: translateX(3px);
 }
 
-.landing-mission.is-live:hover .landing-mission-copy,
-.landing-mission.is-live:focus-visible .landing-mission-copy {
+.landing-simulation.is-live:hover .landing-simulation-copy,
+.landing-simulation.is-live:focus-visible .landing-simulation-copy {
   transform: translateY(-48px);
 }
 
-.landing-mission .landing-concept-art {
+.landing-simulation .landing-concept-art {
   background-color: #090c13;
 }
 
@@ -528,7 +459,7 @@
     padding-top: 205px;
   }
 
-  .landing-mission-grid {
+  .landing-simulation-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -560,30 +491,26 @@
     font-size: 16px;
   }
 
-  .landing-mission-select {
+  .landing-simulation-select {
     width: calc(100vw - 24px);
     margin-top: -90px;
     padding-bottom: 78px;
   }
 
-  .landing-mission-bar {
-    padding: 0 14px;
-  }
-
-  .landing-mission-grid {
+  .landing-simulation-grid {
     grid-template-columns: 1fr;
   }
 
-  .landing-mission {
+  .landing-simulation {
     min-height: 290px;
   }
 
-  .landing-mission.is-live .landing-mission-launch {
+  .landing-simulation.is-live .landing-simulation-launch {
     opacity: 1;
     transform: none;
   }
 
-  .landing-mission.is-live .landing-mission-copy {
+  .landing-simulation.is-live .landing-simulation-copy {
     padding-bottom: 58px;
   }
 }
@@ -592,10 +519,10 @@
   .landing-hero-slide,
   .landing-hero-slide > img,
   .landing-hero-slide .landing-concept-waves,
-  .landing-mission,
-  .landing-mission > img,
-  .landing-mission-copy,
-  .landing-mission-launch,
+  .landing-simulation,
+  .landing-simulation > img,
+  .landing-simulation-copy,
+  .landing-simulation-launch,
   .landing-github {
     animation: none;
     transition: none;

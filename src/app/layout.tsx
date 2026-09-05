@@ -14,11 +14,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Relativity Playground",
-    template: "%s | Relativity Playground",
+    default: "Universe Lab",
+    template: "%s | Universe Lab",
   },
   description:
-    "Play with spacetime through interactive simulations of gravity, light, time, motion, black holes, and gravitational waves.",
+    "Universe Lab offers interactive simulations of gravity, light, time, motion, black holes, and gravitational waves.",
 };
 
 export default function RootLayout({

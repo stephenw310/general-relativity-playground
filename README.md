@@ -1,8 +1,8 @@
-# General Relativity Playground
+# Universe Lab
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black) ![Three.js](https://img.shields.io/badge/Three.js-WebGL-red) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 
-A browser-based interactive visualization of various general relativity concepts.
+Universe Lab is a collection of interactive simulations of spacetime, black holes, and gravitational lensing.
 
 ## Simulations
 
@@ -48,8 +48,8 @@ A browser-based interactive visualization of various general relativity concepts
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/stephenw310/general-relativity-playground
-   cd general-relativity-playground
+   git clone https://github.com/stephenw310/general-relativity-playground universe-lab
+   cd universe-lab
    ```
 
 2. Install dependencies:

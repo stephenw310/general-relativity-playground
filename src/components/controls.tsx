@@ -99,9 +99,6 @@ export function Controls() {
       >
         <header className="spacetime-controls-header">
           <div>
-            <span className="spacetime-panel-kicker">
-              Change the conditions
-            </span>
             <h2>Objects</h2>
           </div>
           <button

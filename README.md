@@ -48,7 +48,7 @@ Universe Lab is a collection of interactive simulations of spacetime, black hole
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/stephenw310/relativity-playground universe-lab
+   git clone https://github.com/stephenw310/general-relativity-playground universe-lab
    cd universe-lab
    ```
 

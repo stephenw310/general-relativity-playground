@@ -6,6 +6,10 @@ Universe Lab is a collection of interactive simulations of spacetime, black hole
 
 ## Simulations
 
+- **Event Horizon** (`/descent`): Fall through a supermassive black hole with
+  a freely controlled cockpit camera, a live 3D ship view, flight-stage guidance,
+  and music that follows the descent at its original tempo.
+
 - **Spacetime Curvature** (`/spacetime`): Drag stellar objects across a rubber-sheet
   spacetime grid warped by the Schwarzschild metric.
 - **Black Holes** (`/black-hole`): Orbit a Schwarzschild black hole with an event
@@ -48,7 +52,7 @@ Universe Lab is a collection of interactive simulations of spacetime, black hole
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/stephenw310/general-relativity-playground universe-lab
+   git clone https://github.com/stephenw310/universe-lab universe-lab
    cd universe-lab
    ```
 
@@ -72,6 +76,7 @@ Universe Lab is a collection of interactive simulations of spacetime, black hole
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run typecheck` - Type check with `tsc --noEmit`
+- `npm run test:descent` - Check descent physics, planet tracking, and music timing
 - `npm run lint` - Lint and check formatting with Biome
 - `npm run lint:fix` - Apply Biome fixes, including Tailwind class sorting
 - `npm run format` - Format code with Biome

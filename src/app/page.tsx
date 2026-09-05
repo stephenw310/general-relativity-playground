@@ -197,7 +197,7 @@ export default function Home() {
 
         <a
           className="landing-github"
-          href="https://github.com/stephenw310/general-relativity-playground"
+          href="https://github.com/stephenw310/universe-lab"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="View Universe Lab on GitHub"

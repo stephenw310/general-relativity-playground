@@ -109,18 +109,8 @@ export function LensingSimulation() {
         >
           <Link href="/" className="spacetime-back">
             <span aria-hidden="true">←</span>
-            <span>Mission select</span>
+            <span>Universe Lab</span>
           </Link>
-
-          <div className="spacetime-mission-id">
-            <span>03</span>
-            <b>Light</b>
-          </div>
-
-          <div className="spacetime-status">
-            <span aria-hidden="true" />
-            Online
-          </div>
         </nav>
 
         <LensingControls />
@@ -145,7 +135,6 @@ export function LensingSimulation() {
           }
           aria-label="Simulation instructions"
         >
-          <p className="spacetime-eyebrow">Interactive simulation</p>
           <h1>Gravitational Lensing</h1>
           <p className="spacetime-brief-copy">
             Shoot light backward through an elliptical galaxy, its dark-matter
@@ -182,7 +171,6 @@ export function LensingSimulation() {
         </section>
 
         <div className="lensing-observation" aria-live="polite">
-          <span>Ray-traced configuration</span>
           <b>{regime}</b>
         </div>
 

@@ -48,18 +48,8 @@ export function BlackHoleSimulation() {
         >
           <Link href="/" className="spacetime-back">
             <span aria-hidden="true">←</span>
-            <span>Mission select</span>
+            <span>Universe Lab</span>
           </Link>
-
-          <div className="spacetime-mission-id">
-            <span>02</span>
-            <b>Extreme gravity</b>
-          </div>
-
-          <div className="spacetime-status">
-            <span aria-hidden="true" />
-            Online
-          </div>
         </nav>
 
         <BlackHoleControls />
@@ -84,7 +74,6 @@ export function BlackHoleSimulation() {
           }
           aria-label="Simulation instructions"
         >
-          <p className="spacetime-eyebrow">Interactive simulation</p>
           <h1>Black Hole</h1>
           <p className="spacetime-brief-copy">
             Orbit a Schwarzschild black hole and watch null geodesics form its

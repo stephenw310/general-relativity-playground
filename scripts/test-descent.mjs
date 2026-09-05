@@ -33,13 +33,9 @@ try {
   const require = createRequire(import.meta.url);
   const physics = require(join(dir, "descent-physics.js"));
   const { planetView } = require(join(dir, "descent-planet.js"));
-  const {
-    scorePosition,
-    SCORE_CUES,
-    scoreMedia,
-    scoreTime,
-    scoreProgress,
-  } = require(join(dir, "flight-score.js"));
+  const { scorePosition, SCORE_CUES, SCORE_SRC } = require(
+    join(dir, "flight-score.js"),
+  );
   const plan = JSON.parse(
     readFileSync(new URL("./descent-music-plan.json", import.meta.url), "utf8"),
   );
@@ -72,20 +68,6 @@ try {
   assert.equal(scorePosition(physics.progressAt(0.06)).phase, 3);
   assert.equal(scorePosition(0).offset, 0);
   assert.equal(scorePosition(1).phase, 3);
-  for (const speed of [0.1, 0.25, 0.5, 1, 2, 4]) {
-    const media = scoreMedia(speed);
-    assert.ok(media.rate >= 0.5 && media.rate <= 4);
-    for (const p of [0, 100 / 190, 135 / 190, 170 / 190, 0.999, 1]) {
-      assert.ok(
-        Math.abs(scoreProgress(scoreTime(p, media.scale), media.scale) - p) <
-          1e-9,
-      );
-    }
-    assert.ok(
-      Math.abs(scoreProgress(media.rate * 5, media.scale) - (speed * 5) / 190) <
-        1e-9,
-    );
-  }
 
   console.log(
     "PASS: score sections match generation plan, all six flight speeds, horizon/tidal transitions, seeks and reset.",
@@ -97,7 +79,7 @@ try {
   let time = 0,
     playCalls = 0;
   const audio = {
-    currentSrc: `http://localhost${scoreMedia(1).src}`,
+    currentSrc: `http://localhost${SCORE_SRC}`,
     readyState: 4,
     paused: true,
     volume: 1,
@@ -161,29 +143,27 @@ try {
   transport.synchronize(audio, playback);
   for (let i = 0; i < 20; i++) transport.synchronize(audio, playback);
   assert.deepEqual(seeks, [100]);
-  // Retiming the same file changes rate, not position.
-  playback = { ...playback, speed: 2 };
-  transport.synchronize(audio, playback);
-  assert.equal(audio.playbackRate, 2);
-  assert.deepEqual(seeks, [100]);
-  // Keep a reset pending until the newly selected file has its own metadata.
+  // Changing flight speed never changes music rate, file, or position.
+  for (const speed of [0.1, 0.25, 0.5, 1, 2, 4]) {
+    playback = { ...playback, speed };
+    transport.synchronize(audio, playback);
+    assert.equal(audio.playbackRate, 1);
+    assert.equal(audio.currentSrc, `http://localhost${SCORE_SRC}`);
+    assert.deepEqual(seeks, [100]);
+  }
+  // Keep a reset pending until metadata is available.
   playback = {
     ...playback,
-    speed: 0.25,
     progress: 0,
     seek: { id: 2, progress: 0 },
   };
-  transport.synchronize(audio, playback);
-  assert.deepEqual(seeks, [100]);
-  audio.currentSrc = `http://localhost${scoreMedia(0.25).src}`;
   audio.readyState = 0;
   transport.synchronize(audio, playback);
   assert.deepEqual(seeks, [100]);
   audio.readyState = 4;
   transport.synchronize(audio, playback);
   assert.deepEqual(seeks, [100, 0]);
-  assert.equal(audio.playbackRate, 1);
-  // While muted, the manual flight clock advances. Unmuting catches up once.
+  // Muting does not stop the flight. Unmuting catches up exactly once.
   playback = { ...playback, enabled: false };
   transport.synchronize(audio, playback);
   playback = { ...playback, progress: 0.5 };
@@ -192,9 +172,91 @@ try {
   playback = { ...playback, enabled: true };
   transport.synchronize(audio, playback);
   transport.synchronize(audio, playback);
-  assert.deepEqual(seeks, [100, 0, 380]);
+  assert.deepEqual(seeks, [100, 0, 95]);
+
+  // Run entire flights at every speed. Music advances one second per real
+  // second, stays in the current mood, and never controls flight completion.
+  for (const speed of [0.1, 0.25, 0.5, 1, 2, 4]) {
+    const music = new FlightAudioSync();
+    let state = {
+      progress: 0,
+      playing: true,
+      enabled: true,
+      speed,
+      seek: { id: 0, progress: 0 },
+    };
+    time = 0;
+    audio.paused = true;
+    music.synchronize(audio, state);
+    let lastPhase = 0;
+    for (let elapsed = 0.25; elapsed < 190 / speed; elapsed += 0.25) {
+      time += 0.25;
+      state = { ...state, progress: (elapsed * speed) / 190 };
+      const { phase, cue } = scorePosition(state.progress);
+      const before = time;
+      music.synchronize(audio, state);
+      assert.equal(
+        audio.playbackRate,
+        1,
+        `${speed}× flight altered music tempo`,
+      );
+      if (phase === lastPhase && before < cue.end)
+        assert.equal(
+          time,
+          before,
+          "Within a stage, music must play continuously",
+        );
+      assert.ok(
+        time >= cue.start && time < cue.end,
+        `${speed}× left its musical stage`,
+      );
+      lastPhase = phase;
+    }
+    music.synchronize(audio, { ...state, progress: 1, playing: false });
+    assert.equal(
+      audio.paused,
+      true,
+      "Music must stop when the flight finishes",
+    );
+  }
+  const boundaryMusic = new FlightAudioSync();
+  const boundaryState = {
+    progress: 99.8 / 190,
+    playing: true,
+    enabled: true,
+    seek: { id: 0, progress: 99.8 / 190 },
+  };
+  boundaryMusic.synchronize(audio, boundaryState);
+  time = 100;
+  boundaryMusic.synchronize(audio, boundaryState);
+  assert.equal(
+    time,
+    100,
+    "A slightly delayed boundary frame must not repeat the chapter",
+  );
+  time = 100.2;
+  boundaryMusic.synchronize(audio, { ...boundaryState, progress: 100.1 / 190 });
+  assert.equal(
+    time,
+    100.2,
+    "Natural chapter transitions should remain uninterrupted",
+  );
+  const endingState = {
+    ...boundaryState,
+    progress: 189.8 / 190,
+    seek: { id: 1, progress: 189.8 / 190 },
+  };
+  boundaryMusic.synchronize(audio, endingState);
+  time = 190.06;
+  audio.paused = true;
+  boundaryMusic.synchronize(audio, endingState);
+  assert.equal(
+    audio.paused,
+    true,
+    "An ended recording must not restart just before flight completion",
+  );
   console.log(
-    "PASS: delayed renders and repeated canplay events never rewind audio; pause, resume, explicit seeks, source changes, and unmuting remain synchronized.",
+    "PASS: music stays at native tempo at all six flight speeds; delayed renders, pause/resume, seeks, stage transitions, slow-flight repeats, and unmuting remain stable.",
   );
 
   const {

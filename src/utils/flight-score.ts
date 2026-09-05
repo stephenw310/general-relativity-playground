@@ -25,21 +25,5 @@ export function scorePosition(progress: number) {
   };
 }
 
-// Browsers may mute media below 0.5x. Pre-stretched files preserve pitch there.
-export function scoreMedia(speed: number) {
-  const scale = speed === 0.1 || speed === 0.25 ? speed : 1;
-  const suffix = speed === 0.1 ? "-tenth" : speed === 0.25 ? "-quarter" : "";
-  return {
-    src: `/audio/descent-score-native${suffix}.mp3`,
-    scale,
-    rate: speed / scale,
-  };
-}
-
-export function scoreTime(progress: number, scale: number) {
-  return (Math.max(0, Math.min(1, progress)) * PLAYBACK_DURATION) / scale;
-}
-
-export function scoreProgress(time: number, scale: number) {
-  return Math.max(0, Math.min(1, (time * scale) / PLAYBACK_DURATION));
-}
+// All flight speeds use the original recording at its native tempo.
+export const SCORE_SRC = "/audio/descent-score-native.mp3";

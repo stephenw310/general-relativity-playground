@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { scoreMedia, scorePosition, scoreProgress } from "@/utils/flight-score";
+import { SCORE_SRC, scorePosition } from "@/utils/flight-score";
 
 import {
   FlightAudioSync,
@@ -17,28 +17,15 @@ import {
 type MusicProps = FlightAudioState & {
   audioRef: RefObject<HTMLAudioElement | null>;
   onEnabledChange: (enabled: boolean) => void;
-  onProgress: (progress: number) => void;
-  onPlayingChange: (playing: boolean) => void;
 };
 
 export function FlightMusic(props: MusicProps) {
-  const {
-    progress,
-    playing,
-    speed,
-    enabled,
-    seek,
-    audioRef,
-    onEnabledChange,
-    onProgress,
-    onPlayingChange,
-  } = props;
+  const { progress, playing, enabled, seek, audioRef, onEnabledChange } = props;
   const latest = useRef(props);
   latest.current = props;
   const [transport] = useState(() => new FlightAudioSync());
   const [status, setStatus] = useState("Loading music…");
-  const media = scoreMedia(speed);
-  const { cue } = scorePosition(progress);
+  const { phase, cue } = scorePosition(progress);
 
   const fail = useCallback(() => {
     setStatus("Music could not play. Click to retry.");
@@ -58,38 +45,18 @@ export function FlightMusic(props: MusicProps) {
     [audioRef, fail, transport],
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Chapter changes trigger sync; progress is read from the ref to avoid per-frame seeks.
   useEffect(() => {
-    synchronize({ ...latest.current, playing, speed, enabled, seek });
-  }, [playing, speed, enabled, seek, synchronize]);
-
-  useEffect(() => {
-    if (!enabled || !playing) return;
-    let frame: number;
-    const tick = () => {
-      const audio = audioRef.current;
-      const config = scoreMedia(latest.current.speed);
-      if (
-        audio &&
-        !audio.paused &&
-        !audio.seeking &&
-        audio.readyState >= 2 &&
-        audio.currentSrc.endsWith(config.src)
-      ) {
-        // Audio is the clock: slow rendering or buffering cannot make it lap the flight.
-        const next = scoreProgress(audio.currentTime, config.scale);
-        onProgress(next);
-      }
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [audioRef, enabled, playing, onProgress]);
+    // Only user commands and chapter changes affect the transport. Flight
+    // telemetry never seeks the music frame by frame.
+    synchronize({ ...latest.current, playing, enabled, seek });
+  }, [playing, enabled, seek, phase, synchronize]);
 
   return (
     <div className="descent-music">
       <audio
         ref={audioRef}
-        src={media.src}
+        src={SCORE_SRC}
         preload="auto"
         onLoadedMetadata={() => synchronize(latest.current)}
         onCanPlay={() => {
@@ -101,12 +68,8 @@ export function FlightMusic(props: MusicProps) {
         }}
         onPlaying={() => setStatus("")}
         onError={fail}
-        onEnded={() => {
-          if (latest.current.enabled) {
-            onProgress(1);
-            onPlayingChange(false);
-          }
-        }}
+        onTimeUpdate={() => synchronize(latest.current)}
+        onEnded={() => synchronize(latest.current)}
       >
         <track
           kind="captions"
@@ -121,7 +84,7 @@ export function FlightMusic(props: MusicProps) {
         aria-busy={enabled && status === "Loading music…"}
         title={
           status ||
-          `Far side of light · ${cue.mood}. Continuous music follows the flight timeline.`
+          `Far side of light · ${cue.mood}. Music stays at its original tempo and follows each flight stage.`
         }
         onClick={() => {
           const next = !enabled;

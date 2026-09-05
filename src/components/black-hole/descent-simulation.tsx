@@ -132,18 +132,18 @@ export function DescentSimulation() {
   }, []);
 
   useEffect(() => {
-    if (!playing || music) return;
+    if (!playing) return;
     let frame: number;
     let previous = performance.now();
     const tick = (now: number) => {
-      const delta = Math.min((now - previous) / 1000, 0.1);
+      const delta = Math.max((now - previous) / 1000, 0);
       previous = now;
       setProgress((p) => Math.min(1, p + (delta * speed) / PLAYBACK_DURATION));
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [playing, speed, music]);
+  }, [playing, speed]);
   useEffect(() => {
     if (complete) setPlaying(false);
   }, [complete]);
@@ -573,13 +573,10 @@ export function DescentSimulation() {
           <FlightMusic
             playing={playing}
             progress={progress}
-            speed={speed}
             enabled={music}
             seek={seek}
             audioRef={musicAudio}
             onEnabledChange={setMusic}
-            onProgress={setProgress}
-            onPlayingChange={setPlaying}
           />
         </div>
       </section>

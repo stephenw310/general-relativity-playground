@@ -9,7 +9,6 @@ import { FlightOverview } from "@/components/black-hole/flight-overview";
 import { planetView } from "@/utils/descent-planet";
 import { WebGLErrorBoundary } from "@/components/webgl-error-boundary";
 import {
-  FLIGHT_CHAPTERS,
   PLAYBACK_DURATION,
   RS_KM,
   properTimeAt,
@@ -65,13 +64,14 @@ export function DescentSimulation() {
   const musicAudio = useRef<HTMLAudioElement>(null);
   const [details, setDetails] = useState(false);
   const [speed, setSpeed] = useState(1);
-  const [yaw, setYaw] = useState(-0.35);
+  const [yaw, setYaw] = useState(0);
   const [pitch, setPitch] = useState(0);
   const [disk, setDisk] = useState(true);
   const [trackingPlanet, setTrackingPlanet] = useState(false);
   const [showEnding, setShowEnding] = useState(true);
   const [help, setHelp] = useState(false);
   const [clean, setClean] = useState(false);
+  const [shipView, setShipView] = useState(false);
   const [dragging, setDragging] = useState(false);
   const pointer = useRef({ x: 0, y: 0 });
   const root = useRef<HTMLElement>(null);
@@ -114,8 +114,16 @@ export function DescentSimulation() {
     setPlaying(false);
     setTrackingPlanet(false);
     setShowEnding(true);
-    setYaw(-0.35);
+    setYaw(0);
     setPitch(0);
+  }, []);
+
+  useEffect(() => {
+    const mobile = window.matchMedia("(max-width: 650px)");
+    const adapt = () => setShipView(!mobile.matches);
+    adapt();
+    mobile.addEventListener("change", adapt);
+    return () => mobile.removeEventListener("change", adapt);
   }, []);
 
   useEffect(() => {
@@ -136,7 +144,10 @@ export function DescentSimulation() {
   }, [complete]);
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setHelp(false);
+      if (event.key === "Escape") {
+        setHelp(false);
+        setDetails(false);
+      }
       if (
         event.target instanceof HTMLElement &&
         (event.target.isContentEditable ||
@@ -190,10 +201,15 @@ export function DescentSimulation() {
         .join(" ")}
     >
       <header className="descent-header">
-        <Link href="/" className="descent-back">
+        <Link
+          href="/"
+          className="descent-back"
+          aria-label="Back to Universe Lab"
+        >
           <Icon kind="arrow" />
-          <span>Mission select</span>
+          <span>Universe Lab</span>
         </Link>
+        <h1 className="descent-header-title">Event horizon</h1>
         <button
           className="descent-help"
           type="button"
@@ -264,47 +280,15 @@ export function DescentSimulation() {
           style={{ cursor: dragging ? "grabbing" : "grab" }}
         />
 
-        <section className="descent-title descent-hud">
-          <h1>{inside ? "Beyond the horizon" : "Event horizon"}</h1>
-          <p className="descent-subtitle">
-            {inside
-              ? "Outside light still reaches you."
-              : "4.3 million solar masses. A non-rotating black hole."}
-          </p>
-          <button
-            type="button"
-            className="descent-planet-button"
-            aria-pressed={trackingPlanet}
-            onClick={() => {
-              if (trackingPlanet) releasePlanet();
-              else setTrackingPlanet(true);
-            }}
-          >
-            <span className="descent-planet-icon" aria-hidden="true" />
-            <span>
-              <b>{trackingPlanet ? "Stop tracking Aster" : "Track Aster ↗"}</b>
-              <small>Reference planet · enlarged</small>
-            </span>
-          </button>
-          {inside && (
-            <div className="descent-countdown">
-              <span>Time left to the singularity</span>
-              <strong>
-                {timeLeft.toFixed(timeLeft < 1 ? 3 : 1)}
-                <small> s aboard</small>
-              </strong>
-              <p>
-                Predicted onboard seconds to the center. Playback is slowed.
-              </p>
-            </div>
-          )}
-        </section>
-        <FlightOverview
-          radius={radius}
-          time={properTime}
-          disk={disk}
-          playing={playing}
-        />
+        {shipView && !clean && (
+          <FlightOverview
+            radius={radius}
+            time={properTime}
+            disk={disk}
+            playing={playing}
+            onClose={() => setShipView(false)}
+          />
+        )}
 
         <div className="descent-reticle descent-hud" aria-hidden="true">
           <i />
@@ -340,8 +324,26 @@ export function DescentSimulation() {
           >
             Look {lookingBehind ? "ahead" : "behind"}
           </button>
-          <button type="button" onClick={() => setClean((v) => !v)}>
-            {clean ? "Show" : "Hide"} panels
+          <button
+            type="button"
+            aria-pressed={trackingPlanet}
+            title="Keep Aster, the enlarged reference planet, in view"
+            onClick={() => {
+              if (trackingPlanet) releasePlanet();
+              else setTrackingPlanet(true);
+            }}
+          >
+            {trackingPlanet ? "Release planet" : "Track planet"}
+          </button>
+          <button
+            type="button"
+            aria-pressed={shipView && !clean}
+            onClick={() => {
+              setClean(false);
+              setShipView((v) => !v);
+            }}
+          >
+            Ship view
           </button>
           <button
             type="button"
@@ -371,6 +373,14 @@ export function DescentSimulation() {
           >
             {details ? "Less detail" : "Details"}
           </button>
+          {inside && (
+            <output
+              className="descent-live-countdown"
+              aria-label="Onboard time left to the singularity"
+            >
+              {timeLeft.toFixed(timeLeft < 1 ? 3 : 1)} s to center
+            </output>
+          )}
           <div className="descent-sky-credit">
             Sky:{" "}
             <a
@@ -400,6 +410,16 @@ export function DescentSimulation() {
           </span>
         </div>
         <div className="descent-instruments" id="flight-readings">
+          <div className="descent-readings-header">
+            <h2>Flight readings</h2>
+            <button
+              type="button"
+              aria-label="Close flight readings"
+              onClick={() => setDetails(false)}
+            >
+              ×
+            </button>
+          </div>
           <div className="descent-instrument descent-radius">
             <span>Distance to center</span>
             <strong>
@@ -429,7 +449,7 @@ export function DescentSimulation() {
               {Math.floor(properTime % 60)} seconds have passed for you. Your
               watch ticks normally, even across the horizon. We stretch the
               playback near the center, so screen time and onboard time differ.
-              The countdown in the sky shows time still left.
+              The countdown in the status bar shows time still left.
             </p>
           </div>
           <div className="descent-instrument descent-tidal">
@@ -461,7 +481,7 @@ export function DescentSimulation() {
                       ? "No flash. No wall. Your clock runs on, but no signal can escape."
                       : radius <= 1.5
                         ? "The horizon is ahead. Slow playback to watch the crossing."
-                        : "Engines off. Gravity carries you inward. The starfield bends around the shadow."}
+                        : "Gravity carries you inward. Watch the starfield bend around the shadow."}
             </p>
           </div>
         </div>
@@ -508,41 +528,26 @@ export function DescentSimulation() {
                   setPlaying(false);
                 }}
               />
-              {FLIGHT_CHAPTERS.slice(0, -1).map((chapter) => (
-                <i
-                  key={chapter.end}
-                  style={{ left: `${progressAt(chapter.end) * 100}%` }}
-                />
-              ))}
+              <i
+                className="descent-horizon-tick"
+                style={{ left: `${progressAt(1) * 100}%` }}
+              />
             </div>
             <div className="descent-timeline-labels">
-              <span>6 rₛ</span>
+              <span>Outside</span>
               <button
+                className="descent-horizon-marker"
+                style={{ left: `${progressAt(1) * 100}%` }}
                 type="button"
+                title="Jump to the event horizon: exactly 1 horizon radius"
                 onClick={() => {
-                  setProgress(progressAt(1.12));
-                  setSpeed(0.25);
+                  setProgress(progressAt(1));
                   setPlaying(false);
                 }}
               >
-                Horizon ↓
+                Event horizon
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setProgress(progressAt(0.35));
-                  setSpeed(1);
-                  setPlaying(false);
-                  setTrackingPlanet(true);
-                  setShowEnding(true);
-                  const view = planetView(0.35);
-                  setYaw(view.yaw);
-                  setPitch(view.pitch);
-                }}
-              >
-                Interior ↓
-              </button>
-              <span>0.015 rₛ</span>
+              <span>Inside</span>
             </div>
           </div>
           <label className="descent-speed">
@@ -631,94 +636,65 @@ export function DescentSimulation() {
           >
             ×
           </button>
-          <h2>A boundary in spacetime.</h2>
+          <h2>Your flight into a black hole</h2>
           <p>
-            You are in radial free fall toward a non-rotating black hole. One rₛ
-            is the horizon radius. The dark shadow you see is an optical effect,
-            not the surface of the horizon.
+            You are falling straight toward a non-rotating black hole with 4.3
+            million times the Sun's mass. Drag to look around as you fall. The
+            highlighted stage is where you are now.
           </p>
-          <p>
-            Press Begin descent, then drag the window or use the arrow keys to
-            look around, even while falling. This turns your view; the ship
-            continues along its free-fall path. Click Horizon on the timeline to
-            jump just outside it at 0.25× speed. Resume to cross slowly.
-          </p>
-          <h3>A planet and a view from outside</h3>
-          <p>
-            Aster is a fictional distant planet with exaggerated apparent size,
-            added as a recognizable reference. Its image is bent by the same ray
-            tracer as the stars. Use Track Aster to keep its lensed image
-            centered. Dragging or using arrow keys returns to manual looking. It
-            is not orbiting inside the accretion disk.
-          </p>
-          <p>
-            The inset renders Odyssey in real time from a virtual camera falling
-            alongside it. Drag to orbit the ship, scroll to zoom, or enlarge the
-            view. It shares your descent time and sky. This is a local chase
-            view, not a transmission to someone outside the black hole. An
-            outside observer cannot receive a signal sent from inside.
-          </p>
-          <p>
-            The Milky Way panorama is a photograph by ESO/S. Brunier, adapted
-            with exposure and gravitational lensing. Its orientation is chosen
-            to make the bending visible, not to reconstruct the sky at the
-            Galactic center. Individual distant stars are effectively points;
-            lensing changes their positions, brightness, and image count.
-            Extended objects such as the Milky Way and Aster show clearer arcs.
-            Thin streaks can also be texture sampling artifacts.
-          </p>
-          <h3>What does the countdown mean?</h3>
-          <p>
-            "Time left to the singularity" counts down the seconds you would
-            experience before reaching the black hole's center on this path.
-            Physicists write this center as r = 0. It is where this classical
-            model predicts a singularity and stops describing what happens next.
-            A reading of 6.2 seconds means 6.2 seconds left on your watch, even
-            if the slowed playback takes much longer. It is a model prediction,
-            not a timer for how long the ship would survive.
-          </p>
-          <h3>Whose clock stops?</h3>
-          <p>
-            Your clock keeps ticking normally as you cross. A distant observer
-            receives your signals increasingly spread out and redshifted. You
-            appear to slow and fade from view, rather than remain a visible
-            frozen ship forever. No signal sent at or inside the horizon can
-            reach them.
-          </p>
-          <p>
-            Crossing does not switch off the outside sky. Light can still reach
-            you from outside, with its direction, color, and brightness changed.
-            Turn the camera to look behind you. Inside this non-rotating black
-            hole, every future-directed path continues toward smaller radius.
-          </p>
-          <h3>How this differs from the JILA movie</h3>
-          <p>
-            Hamilton's main movie follows a path with sideways motion. Our ship
-            falls straight inward. Near the singularity, that difference changes
-            the apparent shape and concentration of the sky. See the radial
-            “Dive to the singularity” example on the JILA page for the closer
-            comparison. Our colors and brightness do not include the full
-            frequency shifts in that reference.
-          </p>
-          <p>
-            The blocky slivers in the last frames are rendering artifacts. The
-            sky has finite resolution, and the ray tracer stops after a limited
-            number of steps. A dark pixel can mean either no background light
-            was found or the numerical search ended. The final image is
-            illustrative, not a validated prediction of the exact view.
-          </p>
-          <h3>Music and display</h3>
-          <p>
-            "Far side of light" is an original instrumental generated with
-            ElevenLabs Music on fal.ai. It begins with spacious organ and piano,
-            turns dark at the horizon, then builds with the tidal forces. Music
-            is on by default when you begin. It follows pause, reset, and
-            chapter jumps. The 3 minute, 10 second score was generated at its
-            full length and plays at normal speed without stretching or looping.
-            Changing playback speed stretches the music while preserving its
-            pitch, so the horizon and tidal cues stay aligned. The flight waits
-            for audio when it buffers.
-          </p>
+          <ol className="descent-guide-stages">
+            <li aria-current={radius > 1.5 ? "step" : undefined}>
+              <h3>Approach: watch the sky bend</h3>
+              <p>
+                Follow the Milky Way as it curves around the dark shadow.
+                Gravity bends the light reaching your eyes. The bright arcs
+                above and below the hole are bent views of the gas disk.
+              </p>
+              <p>
+                Try Track planet to follow Aster's distorted image. Aster is a
+                fictional, enlarged reference planet. Turn off the disk below to
+                see the sky more clearly.
+              </p>
+            </li>
+            <li aria-current={radius <= 1.5 && radius > 1 ? "step" : undefined}>
+              <h3>The horizon: a point of no return</h3>
+              <p>
+                The marked line on the timeline is the crossing, at exactly one
+                horizon radius. The shadow's visible edge is not that boundary.
+                There is no solid surface or sudden flash to see.
+              </p>
+              <p>
+                Watch the onboard clock: it keeps ticking. A distant observer
+                would see your signals slow, redden, and fade as you approach.
+              </p>
+            </li>
+            <li aria-current={inside && radius > 0.35 ? "step" : undefined}>
+              <h3>Inside: look back at the universe</h3>
+              <p>
+                Choose Look behind. Light from outside can still reach you,
+                although your signals can no longer escape. Every possible
+                future path leads toward the center in this model.
+              </p>
+              <p>
+                The countdown shows seconds left on your own watch to the
+                singularity. Playback slows to let you explore. Ship view is a
+                nearby camera falling with you, not a broadcast from outside.
+              </p>
+            </li>
+            <li aria-current={radius <= 0.35 ? "step" : undefined}>
+              <h3>Final descent: feel the tidal stretch</h3>
+              <p>
+                Open Ship view and watch Odyssey lengthen. Gravity pulls more
+                strongly on the end nearer the center. The head-to-feet reading
+                measures that difference across a two-meter body.
+              </p>
+              <p>
+                The last onboard moments are greatly slowed. We stop before the
+                singularity, where this classical model cannot describe what
+                happens next.
+              </p>
+            </li>
+          </ol>
           <label className="descent-disk-toggle">
             <input
               type="checkbox"
@@ -727,40 +703,31 @@ export function DescentSimulation() {
             />
             Show accretion disk
           </label>
-          <h3>What this model calculates</h3>
-          <p>
-            The ship follows radial free fall from rest at infinity, already
-            moving inward when playback begins at 6 rₛ. The onboard clock and
-            tidal readout follow that Schwarzschild model. The playback controls
-            compress or stretch the presentation time; they do not make your
-            local clock stop.
-          </p>
-          <p>
-            Light paths are numerically approximated in coordinates that work
-            across the horizon. The renderer has a limited number of steps and
-            has not been validated against a reference ray tracer. Disk colors,
-            brightness, and motion are illustrative: they do not fully account
-            for the falling observer's frequency shifts or light travel times.
-            Spin, gas dynamics, and radiation damage are omitted. The flight
-            continues to 0.015 rₛ with progressively slower presentation time.
-            The rocket exhaust is decorative and does not change the free-fall
-            path. Cracks and rocket stretching illustrate tidal stress; the
-            exact failure of a spacecraft is not calculated. We do not depict
-            the singularity or anything beyond it.
-          </p>
+          <details className="descent-guide-limits">
+            <summary>About this model</summary>
+            <p>
+              The trajectory, onboard time, and tidal readings use radial
+              Schwarzschild free fall. Sky colors, disk brightness, exhaust, and
+              ship deformation are illustrative. Spin and radiation damage are
+              omitted. The renderer's limited resolution and ray steps can
+              produce streaks or dark patches near the end; those are not
+              predictions of a physical boundary.
+            </p>
+          </details>
+          <h3>Explore further</h3>
           <a
             href="https://science.nasa.gov/universe/black-holes/supermassive-black-holes/new-nasa-black-hole-visualization-takes-viewers-beyond-the-brink/"
             target="_blank"
             rel="noreferrer"
           >
-            Explore the science at NASA ↗
+            NASA: a guided journey beyond the horizon ↗
           </a>
           <a
             href="https://jila.colorado.edu/~ajsh/insidebh/schw.html"
             target="_blank"
             rel="noreferrer"
           >
-            See a physicist's inside view at JILA ↗
+            JILA: light, clocks, and the view inside ↗
           </a>
         </aside>
       )}

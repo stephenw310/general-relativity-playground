@@ -1294,3 +1294,241 @@
     height: auto;
   }
 }
+
+/* Keep the sky clear; secondary views and readings open on request. */
+.descent-header-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0;
+}
+.descent-readings-header {
+  display: none;
+}
+.descent-live-countdown {
+  color: var(--flight-accent);
+  font-size: 12px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.descent-timeline-labels {
+  position: relative;
+  height: 36px;
+  align-items: center;
+}
+.descent-shell .descent-horizon-marker {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  min-height: 36px;
+  padding: 4px 7px;
+  background: transparent;
+  border: 0;
+  color: #ffdaae;
+  white-space: nowrap;
+}
+.descent-horizon-marker::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  height: 14px;
+  width: 2px;
+  background: var(--flight-accent);
+}
+.descent-range-wrap .descent-horizon-tick {
+  top: 4px;
+  height: 16px;
+  width: 2px;
+  background: #ffe1bd;
+}
+.descent-range-wrap input {
+  margin: 0;
+  height: 24px;
+}
+.descent-guide-stages {
+  padding: 0;
+  list-style: none;
+}
+.descent-guide-stages li {
+  border-left: 2px solid #344657;
+  padding: 2px 0 2px 16px;
+  margin: 20px 0;
+}
+.descent-guide-stages li[aria-current="step"] {
+  border-color: var(--flight-accent);
+  background: linear-gradient(90deg, #f2c28d0d, transparent);
+}
+.descent-guide-stages h3 {
+  margin: 8px 0;
+}
+.descent-guide-stages p {
+  margin: 8px 0;
+}
+.descent-guide-limits summary {
+  cursor: pointer;
+  padding: 12px 0;
+  color: #e2eaf0;
+}
+.descent-guide {
+  position: fixed;
+}
+@media (max-width: 1050px) {
+  .descent-drag-hint,
+  .descent-view-angle {
+    display: none;
+  }
+}
+@media (max-width: 650px) {
+  .descent-shell {
+    height: 100svh;
+    min-height: 0;
+    grid-template-rows: 48px minmax(180px, 1fr) auto;
+    overflow: hidden;
+  }
+  .descent-header {
+    padding: 4px 10px;
+    gap: 8px;
+  }
+  .descent-back {
+    min-width: 36px;
+    min-height: 40px;
+  }
+  .descent-back span {
+    display: none;
+  }
+  .descent-header-title {
+    font-size: 16px;
+    margin-right: auto;
+  }
+  .descent-header .descent-help {
+    min-height: 40px;
+    font-size: 12px;
+    padding: 6px 9px;
+  }
+  .descent-help > span {
+    display: none;
+  }
+  .descent-view-tools {
+    bottom: 8px;
+    width: calc(100% - 16px);
+    max-width: 380px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 3px;
+    padding: 5px;
+  }
+  .descent-view-tools button {
+    min-height: 44px;
+    font-size: 12px;
+    padding: 4px;
+    white-space: normal;
+    line-height: 1.2;
+  }
+  .descent-view-tools button[aria-label="Toggle fullscreen"] {
+    display: none;
+  }
+  .descent-console {
+    position: relative;
+    padding: 6px 10px max(6px, env(safe-area-inset-bottom));
+  }
+  .descent-console-top {
+    padding-bottom: 2px;
+    gap: 2px 6px;
+    flex-wrap: wrap;
+  }
+  .descent-console-top > span:first-child {
+    font-size: 12px;
+  }
+  .descent-console .descent-details-toggle {
+    min-height: 36px;
+  }
+  .descent-live-countdown {
+    order: 2;
+    flex-basis: 100%;
+  }
+  .descent-console .descent-sky-credit {
+    order: 4;
+    font-size: 10px;
+    line-height: 14px;
+    gap: 3px;
+  }
+  .descent-console .descent-instruments {
+    display: none;
+  }
+  .descent-console.is-expanded .descent-instruments {
+    display: grid;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 8px;
+    right: 8px;
+    max-height: calc(100svh - 250px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 12px;
+    border: 1px solid var(--flight-border);
+    border-radius: 12px;
+    background: #0c151ffa;
+    box-shadow: 0 6px 30px #0008;
+  }
+  .descent-readings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .descent-readings-header h2 {
+    margin: 0;
+    font-size: 16px;
+  }
+  .descent-readings-header button {
+    min-height: 40px;
+    width: 40px;
+    font-size: 22px;
+    padding: 0;
+  }
+  .descent-instrument p,
+  .descent-instrument .descent-reading-hint {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .descent-transport {
+    padding: 4px 0 0;
+    gap: 6px;
+  }
+  .descent-timeline {
+    order: 5;
+    flex-basis: 100%;
+    margin: 0;
+  }
+  .descent-timeline-labels {
+    height: 32px;
+    font-size: 11px;
+  }
+  .descent-shell .descent-horizon-marker {
+    font-size: 11px;
+    min-height: 32px;
+  }
+  .descent-overview {
+    width: min(240px, calc(100% - 20px));
+  }
+  .descent-chase-canvas {
+    height: 130px;
+  }
+  .descent-overview header button,
+  .descent-chase-angles button {
+    min-height: 40px;
+  }
+  .descent-overview.is-expanded {
+    height: calc(100% - 84px);
+    width: calc(100% - 20px);
+  }
+  .descent-guide {
+    inset: 56px 8px 8px;
+    max-height: none;
+    padding: 18px;
+  }
+}
+@media (max-width: 360px) {
+  .descent-view-tools button {
+    font-size: 11px;
+  }
+}

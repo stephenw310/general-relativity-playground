@@ -8,7 +8,13 @@ import ts from "typescript";
 // Compile the actual browser physics helpers without a browser or test framework.
 const dir = mkdtempSync(join(tmpdir(), "descent-physics-"));
 try {
-  for (const name of ["descent-physics", "descent-planet", "flight-score"]) {
+  for (const name of [
+    "descent-physics",
+    "descent-planet",
+    "descent-planet-aims",
+    "descent-planet-trace",
+    "flight-score",
+  ]) {
     const source = readFileSync(
       new URL(`../src/utils/${name}.ts`, import.meta.url),
       "utf8",
@@ -130,6 +136,38 @@ try {
     assert.ok(Number.isFinite(view.yaw) && Number.isFinite(view.pitch));
     assert.ok(Math.abs(view.pitch) < Math.PI / 2);
   }
+  const { tracePlanetView } = require(join(dir, "descent-planet-trace.js"));
+  let maxAimError = 0;
+  // Sample between table entries, so this checks interpolation against actual rays.
+  for (let i = 0; i < 512; i++) {
+    const radius =
+      START_RADIUS * (END_RADIUS / START_RADIUS) ** ((i + 0.5) / 512);
+    const interpolated = planetView(radius);
+    const traced = tracePlanetView(radius);
+    const yawError = Math.atan2(
+      Math.sin(interpolated.yaw - traced.yaw),
+      Math.cos(interpolated.yaw - traced.yaw),
+    );
+    maxAimError = Math.max(
+      maxAimError,
+      Math.hypot(yawError, interpolated.pitch - traced.pitch),
+    );
+  }
+  assert.ok(
+    maxAimError < 0.001,
+    `Planet interpolation error: ${maxAimError} radians`,
+  );
+  console.log(
+    `PASS: 512 interpolated aims within ${((maxAimError * 180) / Math.PI).toFixed(4)} degrees of the ray solver.`,
+  );
+  const started = performance.now();
+  let checksum = 0;
+  for (let i = 0; i < 100000; i++)
+    checksum += planetView(radiusAt(i / 99999)).yaw;
+  assert.ok(Number.isFinite(checksum));
+  console.log(
+    `Planet tracking: 100,000 frame lookups in ${(performance.now() - started).toFixed(1)} ms.`,
+  );
   console.log(
     "PASS: 1,001 trajectory samples, continuous chapter boundaries, conserved proper time, tidal scaling, finite horizon crossing, endpoint and planet aiming.",
   );

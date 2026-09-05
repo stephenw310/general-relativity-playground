@@ -19,7 +19,7 @@ export const SIMULATIONS: SimulationMeta[] = [
       "Take the pilot's seat and fall into a supermassive black hole.",
     route: "/descent",
     status: "available",
-    thumbnail: "/black-hole-preview.jpg",
+    thumbnail: "/descent-preview.png",
     gradient: "from-amber-950 via-orange-950/60 to-black",
   },
   {

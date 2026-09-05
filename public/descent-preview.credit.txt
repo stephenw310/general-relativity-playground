@@ -1,0 +1,6 @@
+Event Horizon simulation thumbnail
+Captured from the live Odyssey ship renderer.
+Sky: ESO/S. Brunier, CC BY 4.0
+https://www.eso.org/public/images/eso0932a/
+https://creativecommons.org/licenses/by/4.0/
+Sky panorama lens-mapped by the simulation; screenshot cropped to remove controls.

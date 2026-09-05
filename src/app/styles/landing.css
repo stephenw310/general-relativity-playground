@@ -328,7 +328,8 @@
   filter: saturate(1.08) brightness(1.16);
 }
 
-.landing-simulation[data-simulation="black-hole"] > img {
+.landing-simulation[data-simulation="black-hole"] > img,
+.landing-simulation[data-simulation="descent"] > img {
   opacity: 0.76;
   filter: saturate(1.04) brightness(1.15);
 }
@@ -345,7 +346,9 @@
 }
 
 .landing-simulation[data-simulation="black-hole"].is-live:hover > img,
-.landing-simulation[data-simulation="black-hole"].is-live:focus-visible > img {
+.landing-simulation[data-simulation="black-hole"].is-live:focus-visible > img,
+.landing-simulation[data-simulation="descent"].is-live:hover > img,
+.landing-simulation[data-simulation="descent"].is-live:focus-visible > img {
   opacity: 0.9;
 }
 

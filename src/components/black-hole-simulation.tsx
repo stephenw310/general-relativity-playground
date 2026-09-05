@@ -50,6 +50,10 @@ export function BlackHoleSimulation() {
             <span aria-hidden="true">←</span>
             <span>Universe Lab</span>
           </Link>
+          <Link href="/descent" className="spacetime-back">
+            <span aria-hidden="true">→</span>
+            <span>Enter cockpit</span>
+          </Link>
         </nav>
 
         <BlackHoleControls />

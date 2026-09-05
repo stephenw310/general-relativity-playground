@@ -9,6 +9,7 @@ const SIMULATION_ORDER = [
   "spacetime",
   "black-hole",
   "lensing",
+  "descent",
   "time-dilation",
   "geodesics",
   "waves",
@@ -18,6 +19,11 @@ const SIMULATION_DETAILS: Record<
   (typeof SIMULATION_ORDER)[number],
   { shortDescription: string; artClass: string }
 > = {
+  descent: {
+    shortDescription:
+      "Pilot a spaceship through the event horizon, one moment at a time.",
+    artClass: "black-hole",
+  },
   spacetime: {
     shortDescription: "See how mass changes the shape of space.",
     artClass: "spacetime",

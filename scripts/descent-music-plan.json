@@ -1,0 +1,103 @@
+{
+  "composition_plan": {
+    "positive_global_styles": [
+      "Entirely instrumental cinematic deep-space film score, no human voices",
+      "Expressive real cathedral pipe organ, felt piano, resonant bass pedals, orchestral strings and restrained analog synthesizers",
+      "Original memorable melodic motif with spacious intervals and repeating arpeggios, intimate wonder growing into cosmic dread",
+      "D minor tonal center, wide stereo concert-hall reverberation, detailed professional orchestral recording",
+      "One coherent evolving composition with continuous transitions between four dramatic scenes",
+      "Audible instrumental performance from the very first second; full-band recording with no silent lead-in, no count-in and no extended fade-in",
+      "Natural acoustic instrumental timbres, crisp transients, no time-stretch warble, no granular effects"
+    ],
+    "negative_global_styles": [
+      "vocals",
+      "singing",
+      "choir",
+      "speech",
+      "lyrics",
+      "pop song",
+      "dance beat",
+      "rock guitars",
+      "trailer braams",
+      "harsh clipping",
+      "silent lead-in",
+      "time stretching",
+      "granular warbling",
+      "long fade-in"
+    ],
+    "sections": [
+      {
+        "section_name": "Approach: wonder and growing anticipation",
+        "duration_ms": 100000,
+        "positive_local_styles": [
+          "Start on an audible felt-piano and pipe-organ downbeat at time zero, with a clear original melodic motif immediately. No quiet prelude or silent introduction.",
+          "Measured 68 BPM, gentle ticking pulse underneath, spacious and searching rather than cheerful",
+          "Gradually introduce low strings and richer organ registers; restrained crescendo toward the end",
+          "Maintain a clearly memorable original motif and breathing room; unease grows in the last twenty seconds"
+        ],
+        "negative_local_styles": [
+          "vocals",
+          "explosive climax",
+          "silence",
+          "aggressive drums"
+        ],
+        "lines": []
+      },
+      {
+        "section_name": "Event horizon: dark and irreversible",
+        "duration_ms": 35000,
+        "positive_local_styles": [
+          "At the section boundary make an unmistakable shift to a darker, grave, serious mood",
+          "Heavy half-time feel around 52 BPM, deep organ pedals, low bowed strings, shadowed minor harmony with a flat-second tension",
+          "Withdraw the bright piano; state the same melodic idea slowly in a lower organ register",
+          "Quiet dread and immense weight, no triumphant resolution, sustained low resonance"
+        ],
+        "negative_local_styles": [
+          "vocals",
+          "uplifting major harmony",
+          "bright bells",
+          "jump scare",
+          "silence"
+        ],
+        "lines": []
+      },
+      {
+        "section_name": "Tidal forces: mounting pressure",
+        "duration_ms": 35000,
+        "positive_local_styles": [
+          "Build to 92 BPM with an urgent repeating organ ostinato and restless low string pulses",
+          "Darker variation of the original motif, increasingly dissonant suspensions and rising string lines",
+          "Growing mechanical inevitability, powerful organ layers and deep restrained orchestral percussion",
+          "Serious escalating tension, no heroic or victorious feeling"
+        ],
+        "negative_local_styles": [
+          "vocals",
+          "cheerful melody",
+          "dance beat",
+          "resolved ending",
+          "silence"
+        ],
+        "lines": []
+      },
+      {
+        "section_name": "Final moments: overwhelming gravity and release",
+        "duration_ms": 20000,
+        "positive_local_styles": [
+          "112 BPM, concentrated urgent pulses and towering low pipe organ, trembling strings, maximum harmonic tension",
+          "Brief powerful climax without clipping; sustain a dark unresolved chord",
+          "In the final four seconds let the rhythmic motion fall away into a long, haunting organ reverberation",
+          "Instrumental ending, solemn and unresolved"
+        ],
+        "negative_local_styles": [
+          "vocals",
+          "happy resolution",
+          "explosion",
+          "abrasive distortion"
+        ],
+        "lines": []
+      }
+    ]
+  },
+  "respect_sections_durations": true,
+  "output_format": "mp3_44100_128"
+}

@@ -5,13 +5,15 @@ import Link from "next/link";
 
 interface WebGLErrorBoundaryProps {
   children: ReactNode;
+  fallback?: ReactNode;
 }
 
 interface WebGLErrorBoundaryState {
   hasError: boolean;
+  supported: boolean | null;
 }
 
-// Probe once per page load. This runs from render(), and creating a WebGL
+// Probe once per page load after mounting. Creating a WebGL
 // context per render leaks contexts until the browser evicts the oldest one
 // — which is the running simulation's canvas ("Context Lost" flicker).
 let cachedSupport: boolean | null = null;
@@ -55,19 +57,28 @@ export class WebGLErrorBoundary extends Component<
   WebGLErrorBoundaryProps,
   WebGLErrorBoundaryState
 > {
-  state: WebGLErrorBoundaryState = { hasError: false };
+  state: WebGLErrorBoundaryState = { hasError: false, supported: null };
 
-  static getDerivedStateFromError(): WebGLErrorBoundaryState {
+  componentDidMount() {
+    this.setState({ supported: isWebGLAvailable() });
+  }
+
+  static getDerivedStateFromError(): Pick<WebGLErrorBoundaryState, "hasError"> {
     return { hasError: true };
   }
 
   render() {
+    // Keep the first client render identical to the server when WebGL is blocked.
+    if (this.state.supported === null) return null;
+    if ((this.state.hasError || !this.state.supported) && this.props.fallback) {
+      return this.props.fallback;
+    }
     if (this.state.hasError) {
       return (
         <FallbackPanel message="Something went wrong while rendering the 3D scene. Try reloading the page." />
       );
     }
-    if (!isWebGLAvailable()) {
+    if (!this.state.supported) {
       return (
         <FallbackPanel message="Your browser or device does not support WebGL, which this simulation needs. Try a recent version of Chrome, Firefox, or Safari." />
       );

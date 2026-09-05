@@ -13,6 +13,16 @@ export interface SimulationMeta {
 
 export const SIMULATIONS: SimulationMeta[] = [
   {
+    id: "descent",
+    title: "Event Horizon",
+    description:
+      "Take the pilot's seat and fall into a supermassive black hole.",
+    route: "/descent",
+    status: "available",
+    thumbnail: "/black-hole-preview.jpg",
+    gradient: "from-amber-950 via-orange-950/60 to-black",
+  },
+  {
     id: "spacetime",
     title: "Spacetime Curvature",
     description:

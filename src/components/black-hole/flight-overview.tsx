@@ -141,9 +141,28 @@ export function FlightOverview({
             type="button"
             onClick={() => setExpanded((v) => !v)}
             aria-label={expanded ? "Reduce ship view" : "Enlarge ship view"}
+            title={expanded ? "Reduce ship view" : "Enlarge ship view"}
             aria-pressed={expanded}
           >
-            {expanded ? "↑" : "↗"}
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d={
+                  expanded
+                    ? "M3 8h5V3m8 0v5h5M3 16h5v5m8 0v-5h5"
+                    : "M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"
+                }
+              />
+            </svg>
           </button>
           <button type="button" onClick={onClose} aria-label="Close ship view">
             ×
